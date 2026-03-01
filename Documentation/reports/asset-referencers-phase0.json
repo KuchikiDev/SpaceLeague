@@ -1,0 +1,87 @@
+{
+  "generated_at": "2026-02-22T10:57:16.043277Z",
+  "targets": {
+    "/Game/Instance/GI_SpaceLeague": {
+      "exists": true,
+      "referencers": [
+        "/Game/Instance/GI_Proxy",
+        "/Game/Legends/BP_Paradoxe",
+        "/Game/Levels/HUB/UW_MainMenu",
+        "/Game/Levels/SandboxMap/GM_Sandbox",
+        "/Game/Maps/BPPC_Paradoxe",
+        "/Game/UI/Tmp_HUD/UW_HUD"
+      ]
+    },
+    "/Game/Game/Core/GI_SpaceLeague": {
+      "exists": false,
+      "referencers": [
+        "/Game/Levels/SandboxMap/GM_Sandbox"
+      ]
+    },
+    "/Game/Legends/Blueprints/BP_ParadoxeJhin": {
+      "exists": false,
+      "referencers": []
+    },
+    "/Game/Legends/Blueprints/BP_ParadoxeSenna": {
+      "exists": false,
+      "referencers": []
+    }
+  },
+  "old_assets": {
+    "/Game/Game/Old/E_Legend": {
+      "exists": true,
+      "referencers": [
+        "/Game/Game/Editor/Admin/BP_EUW_AbilityItem",
+        "/Game/Game/Old/DataAsset/DA_Legend",
+        "/Game/Game/Old/S_Legends",
+        "/Game/Levels/HUB/Quest/S_QuestData",
+        "/Game/Levels/HUB/Rank/W_ActualPlayerTemplate",
+        "/Game/Levels/HUB/Rank/W_PlayerTemplate",
+        "/Game/Levels/HUB/S_PlayerInformations",
+        "/Game/Levels/HUB/Stats/S_MatchInformations",
+        "/Game/Levels/HUB/UW_MainMenu",
+        "/Game/Levels/SandboxMap/Blueprints/BP_ParadoxeTurnAround",
+        "/Game/UI/Tmp_HUD/UW_HUD"
+      ]
+    },
+    "/Game/Game/Old/S_Legends": {
+      "exists": true,
+      "referencers": [
+        "/Game/Game/Old/DT_LegendDB",
+        "/Game/Legends/Blueprints/BP_ParadoxeKeplar",
+        "/Game/Legends/Blueprints/BP_ParadoxeRaijin",
+        "/Game/Levels/SandboxMap/Blueprints/BP_ParadoxeTurnAround"
+      ]
+    },
+    "/Game/Game/Old/DT_LegendDB": {
+      "exists": true,
+      "referencers": [
+        "/Game/Levels/SandboxMap/Blueprints/BP_ParadoxeTurnAround"
+      ]
+    },
+    "/Game/Game/Old/DataAsset/DA_Legend": {
+      "exists": true,
+      "referencers": [
+        "/Game/Game/Old/DataAsset/Legend/DA_Jhin",
+        "/Game/Game/Old/DataAsset/Legend/DA_Senna",
+        "/Game/Instance/GI_SpaceLeague",
+        "/Game/Levels/HUB/UW_MainMenu",
+        "/Game/Levels/SandboxMap/GM_Sandbox",
+        "/Game/Maps/BPPC_Paradoxe",
+        "/Game/UI/Tmp_HUD/UW_HUD"
+      ]
+    },
+    "/Game/Game/Old/DataAsset/Legend/DA_Jhin": {
+      "exists": true,
+      "referencers": [
+        "/Game/Levels/HUB/UW_MainMenu"
+      ]
+    },
+    "/Game/Game/Old/DataAsset/Legend/DA_Senna": {
+      "exists": true,
+      "referencers": [
+        "/Game/Levels/HUB/UW_MainMenu"
+      ]
+    }
+  }
+}

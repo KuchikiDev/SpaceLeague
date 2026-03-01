@@ -1,0 +1,137 @@
+# ============================================================
+# SPACE LEAGUE — .gitignore
+# Git = Code source, documentation, configs, assets légers
+# Perforce = Content UE5, assets binaires volumineux
+# ============================================================
+
+# ============================================================
+# UNREAL ENGINE — Dossiers générés (jamais commités)
+# ============================================================
+
+# Binaires compilés
+Binaries/
+**/Binaries/
+
+# Fichiers intermédiaires de compilation
+Intermediate/
+**/Intermediate/
+
+# Cache de données dérivées (énorme, régénéré automatiquement)
+DerivedDataCache/
+**/DerivedDataCache/
+
+# Sauvegardes automatiques UE5
+Saved/
+**/Saved/
+
+# Fichiers de build Visual Studio générés par UE5
+*.sln
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
+
+# ============================================================
+# CONTENT UE5 — Sur Perforce (trop volumineux pour Git)
+# ============================================================
+
+# Assets binaires du projet principal (~17 GB)
+ProjetUE5/MovementParadoxe/Content/
+
+# Assets binaires du prototype Flame
+ProjetUE5/Flame/Content/
+
+# Assets binaires du prototype Ninja (~700 MB)
+Ninja/Content/
+
+# ============================================================
+# ASSETS SOURCES — Sur Perforce (trop volumineux pour Git)
+# ============================================================
+
+# Packs d'assets 3D sources (~9 GB)
+Assets/
+
+# Archive compressée de pack d'assets
+*.rar
+*.zip
+*.7z
+
+# ============================================================
+# PLUGINS — Dépendances externes (régénérables)
+# ============================================================
+
+# Plugins externes UE5 (LudusAI, UnrealMCP, VisualStudioTools...)
+ProjetUE5/MovementParadoxe/Plugins/
+
+# ============================================================
+# VISUAL STUDIO & OUTILS DE DEV
+# ============================================================
+
+# Dossier VS Code
+.vs/
+.vscode/
+
+# Fichiers workspace générés par UE5
+*.code-workspace
+
+# Fichiers de configuration shader tools (générés)
+shadertoolsconfig.json
+
+# ============================================================
+# SYSTEME D'EXPLOITATION
+# ============================================================
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# ============================================================
+# FICHIERS VOLUMINEUX — Tous contextes
+# ============================================================
+
+# Fichiers 3D lourds (Blender, FBX, etc.) — sur Perforce
+*.blend
+*.blend1
+*.fbx
+*.obj
+*.dae
+*.max
+*.ma
+*.mb
+
+# Fichiers vidéo
+*.mp4
+*.mov
+*.avi
+*.mkv
+
+# Fichiers audio lourds
+*.wav
+*.flac
+
+# Archives
+# (déjà couvertes plus haut)
+
+# ============================================================
+# CE QUI EST VERSIONNÉ SUR GIT
+# ============================================================
+# ✅ Documentation/            → Specs, architecture, roadmap
+# ✅ ProjetUE5/*/Source/       → Code C++ source
+# ✅ ProjetUE5/*/Config/       → Configurations UE5
+# ✅ ProjetUE5/*.uproject      → Fichiers de projet
+# ✅ Ninja/Source/             → Code C++ prototype
+# ✅ Ninja/Config/             → Config prototype
+# ✅ Ninja/*.uproject          → Fichier projet prototype
+# ✅ Logo/                     → Identité visuelle
+# ✅ HUD/                      → Maquettes interface
+# ✅ Model/                    → Modèles 3D (légers)
+# ✅ Map/                      → Concepts de niveaux
+# ✅ Brouillon/                → Esquisses, concepts
+# ✅ web-bundles/              → Assets web
+# ✅ README.md                 → Ce fichier

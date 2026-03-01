@@ -1,0 +1,102 @@
+{
+  "date": "2026-02-19",
+  "project": "MovementParadoxe",
+  "scope": [
+    "BP_Paradoxe",
+    "BP_Ball",
+    "BP_GameMode_SpaceLeague_or_BP_GM_Hub",
+    "BP_GameState_SpaceLeague",
+    "GI_SpaceLeague"
+  ],
+  "totals": {
+    "critical": 3,
+    "high": 4,
+    "medium": 1,
+    "low": 1
+  },
+  "overall_risk_score": 13,
+  "highest": {
+    "id": "DATA-001",
+    "score": 9,
+    "title": "Schema DataAsset casse (struct manquante + map invalide)"
+  },
+  "must_fix": [
+    "Restore/create ST_AbilityPresentationOverride and fix ST_SkinList usage",
+    "Repair BP_ParadoxeRaijin and BP_ParadoxeKeplar compile errors",
+    "Resolve duplicate GI_SpaceLeague and keep one runtime path"
+  ],
+  "risks": [
+    {
+      "id": "DATA-001",
+      "score": 9,
+      "priority": "critical",
+      "probability": 3,
+      "impact": 3,
+      "title": "Missing ST_AbilityPresentationOverride breaks DA_LegendSkin"
+    },
+    {
+      "id": "DATA-002",
+      "score": 9,
+      "priority": "critical",
+      "probability": 3,
+      "impact": 3,
+      "title": "Invalid ST_SkinList mapping in DA_LegendRegistry"
+    },
+    {
+      "id": "TECH-001",
+      "score": 9,
+      "priority": "critical",
+      "probability": 3,
+      "impact": 3,
+      "title": "BP_ParadoxeRaijin/Keplar compile errors (broken pins and missing vars)"
+    },
+    {
+      "id": "OPS-001",
+      "score": 6,
+      "priority": "high",
+      "probability": 3,
+      "impact": 2,
+      "title": "Duplicate GI_SpaceLeague assets"
+    },
+    {
+      "id": "TECH-002",
+      "score": 6,
+      "priority": "high",
+      "probability": 2,
+      "impact": 3,
+      "title": "Runtime architecture drift (BP_GM_Hub active, target GameMode missing)"
+    },
+    {
+      "id": "TECH-003",
+      "score": 6,
+      "priority": "high",
+      "probability": 2,
+      "impact": 3,
+      "title": "BP_GameState migration replication risk"
+    },
+    {
+      "id": "OPS-002",
+      "score": 6,
+      "priority": "high",
+      "probability": 3,
+      "impact": 2,
+      "title": "XGE build instability (license/infrastructure)"
+    },
+    {
+      "id": "TECH-004",
+      "score": 4,
+      "priority": "medium",
+      "probability": 2,
+      "impact": 2,
+      "title": "BP_Ball migration without dedicated automated tests"
+    },
+    {
+      "id": "OPS-003",
+      "score": 2,
+      "priority": "low",
+      "probability": 1,
+      "impact": 2,
+      "title": "No source test files detected"
+    }
+  ]
+}

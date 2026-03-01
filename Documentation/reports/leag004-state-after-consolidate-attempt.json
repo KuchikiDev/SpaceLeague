@@ -1,0 +1,26 @@
+{
+  "generated_at": "2026-02-21T10:09:18.370094Z",
+  "target": {
+    "exists": true,
+    "loaded_class": "Blueprint",
+    "asset_registry_class": "Blueprint",
+    "referencers": [
+      "/Game/Instance/GI_Proxy",
+      "/Game/Legends/BP_Paradoxe",
+      "/Game/Levels/HUB/UW_MainMenu",
+      "/Game/Levels/SandboxMap/GM_Sandbox",
+      "/Game/Maps/BPPC_Paradoxe",
+      "/Game/UI/Tmp_HUD/UW_HUD"
+    ],
+    "dependencies": [
+      "/Game/Game/Old/DataAsset/DA_Legend"
+    ]
+  },
+  "source": {
+    "exists": false,
+    "loaded_class": null,
+    "asset_registry_class": null,
+    "referencers": [],
+    "dependencies": []
+  }
+}

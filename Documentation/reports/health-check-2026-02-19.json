@@ -1,0 +1,70 @@
+{
+  "date": "2026-02-19",
+  "project": "MovementParadoxe",
+  "overall_status": "YELLOW",
+  "build": {
+    "xge_default": {
+      "status": "FAIL",
+      "reason": "XGE license/infrastructure error"
+    },
+    "local_no_xge": {
+      "status": "PASS",
+      "target": "MovementParadoxeEditor Win64 Development",
+      "execution_time_seconds": 62.97,
+      "warnings": [
+        "Visual Studio compiler version is not preferred",
+        "IncludeOrderVersion still Unreal5_3"
+      ]
+    }
+  },
+  "launch_smoke_test": {
+    "status": "INCONCLUSIVE",
+    "result": "timeout",
+    "timeout_seconds": 600,
+    "fatal_or_assert_detected": false
+  },
+  "content": {
+    "file_count": 9729,
+    "size_gb": 16.57,
+    "duplicate_critical_assets": [
+      "Content/Instance/GI_SpaceLeague.uasset",
+      "Content/Game/Core/GI_SpaceLeague.uasset"
+    ],
+    "legacy_state": {
+      "content_game_old_exists": true,
+      "dot_old_exists": true,
+      "bp_paradoxe_jhin_exists": true,
+      "bp_paradoxe_senna_exists": true
+    }
+  },
+  "blueprints": {
+    "errors": 13,
+    "warnings": 20,
+    "load_errors": 1,
+    "blocking_items": [
+      "DA_LegendRegistry invalid ST_SkinList map structure",
+      "DA_LegendSkin missing/unknown ST_AbilityPresentationOverride",
+      "BP_ParadoxeRaijin broken pins and missing variable",
+      "BP_ParadoxeKeplar broken pins and missing variable"
+    ]
+  },
+  "tests": {
+    "source_test_files_detected": 0,
+    "status": "NOT_AVAILABLE"
+  },
+  "phase0_criteria": {
+    "compile_cpp": true,
+    "launch_no_crash": false,
+    "movement_validated": false,
+    "ball_validated": false,
+    "score_validated": false,
+    "blueprint_data_clean": false
+  },
+  "recommended_actions": [
+    "Fix ST_AbilityPresentationOverride and ST_SkinList data issues",
+    "Repair BP_ParadoxeRaijin/BP_ParadoxeKeplar compile errors",
+    "Resolve duplicate GI_SpaceLeague",
+    "Execute LEAG-001 and LEAG-002 cleanup",
+    "Use -NoXGE or fix XGE license for default build path"
+  ]
+}

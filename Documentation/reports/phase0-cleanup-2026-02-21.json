@@ -1,0 +1,68 @@
+{
+  "type": "phase0_cleanup_report",
+  "date": "2026-02-21",
+  "archive_root": "ProjetUE5/MovementParadoxe/.old/phase0-cleanup-20260221-015522",
+  "tickets": {
+    "LEAG-001": {
+      "status": "done",
+      "action": "archived",
+      "asset": "Content/Legends/Blueprints/BP_ParadoxeJhin.uasset"
+    },
+    "LEAG-002": {
+      "status": "done",
+      "action": "archived",
+      "asset": "Content/Legends/Blueprints/BP_ParadoxeSenna.uasset"
+    },
+    "LEAG-003": {
+      "status": "partial",
+      "unreferenced_moved": [
+        "Content/Game/Old/DataAsset/ST_CharacterUI.uasset"
+      ],
+      "remaining_referenced_assets": [
+        "/Game/Game/Old/E_Legend",
+        "/Game/Game/Old/S_Legends",
+        "/Game/Game/Old/DT_LegendDB",
+        "/Game/Game/Old/DataAsset/DA_Legend",
+        "/Game/Game/Old/DataAsset/Legend/DA_Jhin",
+        "/Game/Game/Old/DataAsset/Legend/DA_Senna"
+      ]
+    },
+    "LEAG-004": {
+      "status": "done",
+      "action": "manual_fix_after_headless_attempts",
+      "pre_backup": "ProjetUE5/MovementParadoxe/.old/leag-004-preconsolidation-20260221-110714",
+      "recovery_backup": "ProjetUE5/MovementParadoxe/.old/leag-004-recovery-before-reverse-20260221-111418",
+      "rollback_safety_backup": "ProjetUE5/MovementParadoxe/.old/leag-004-rollback-safety-20260221-112020",
+      "instance_gi": {
+        "path": "/Game/Instance/GI_SpaceLeague",
+        "referencer_count": 6,
+        "dependencies": [
+          "/Game/Game/Old/DataAsset/DA_Legend"
+        ]
+      },
+      "core_gi": {
+        "path": "/Game/Game/Core/GI_SpaceLeague",
+        "exists_after": false,
+        "referencer_count": 0,
+        "residual_referencers": []
+      },
+      "post_state_report": "Documentation/reports/leag004-probe-2026-02-22-after-user-fix.json",
+      "notes": [
+        "Headless consolidation cannot safely reconcile divergent GI APIs",
+        "User repaired affected Blueprints in UE Editor on 2026-02-22",
+        "User reports GetSelectedLegendData reimplemented; runtime behavior validation still pending"
+      ],
+      "blockers_detected": []
+    }
+  },
+  "validation": {
+    "cpp_build": "success",
+    "ue_startup": "startup_ok_quit_command_issued_process_had_to_be_stopped",
+    "new_missing_references_from_cleanup": false
+  },
+  "artifacts": {
+    "referencers_report": "Documentation/reports/asset-referencers-phase0.json",
+    "incident_report": "Documentation/reports/leag004-consolidation-attempt-2026-02-21.md",
+    "archive_manifest": "ProjetUE5/MovementParadoxe/.old/phase0-cleanup-20260221-015522/manifest.json"
+  }
+}

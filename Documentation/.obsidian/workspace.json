@@ -1,0 +1,221 @@
+{
+  "main": {
+    "id": "3501a1eaa631282e",
+    "type": "split",
+    "children": [
+      {
+        "id": "ccae531f3d38970a",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "beee145f5997d538",
+            "type": "leaf",
+            "state": {
+              "type": "empty",
+              "state": {},
+              "icon": "lucide-file",
+              "title": "Nouvel onglet"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "43e6d0be87c5f91a",
+    "type": "split",
+    "children": [
+      {
+        "id": "a9562a0c79ffc422",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "260934738d1a68ac",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false
+              },
+              "icon": "lucide-folder-closed",
+              "title": "Explorateur de fichiers"
+            }
+          },
+          {
+            "id": "a4737b4ec40b2680",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "Rechercher"
+            }
+          },
+          {
+            "id": "2fceb01c7ddd684f",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {},
+              "icon": "lucide-bookmark",
+              "title": "Signets"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "7837661fa74e9890",
+    "type": "split",
+    "children": [
+      {
+        "id": "4c17a5fed229abc5",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "fc35a31174b15a71",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "README_SETUP_BMAD_UE5.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "Rétrolien pour README_SETUP_BMAD_UE5"
+            }
+          },
+          {
+            "id": "a6a0f0cd24881972",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "README_SETUP_BMAD_UE5.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "Liens sortants de README_SETUP_BMAD_UE5"
+            }
+          },
+          {
+            "id": "38155d119bec1eb3",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "Mots-clés"
+            }
+          },
+          {
+            "id": "57c4e1a46ee28a40",
+            "type": "leaf",
+            "state": {
+              "type": "all-properties",
+              "state": {
+                "sortOrder": "frequency",
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-archive",
+              "title": "Toutes les propriétés"
+            }
+          },
+          {
+            "id": "60ee1d5fc9176bc6",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "README_SETUP_BMAD_UE5.md",
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "Plan de README_SETUP_BMAD_UE5"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:Ouvrir le sélecteur rapide": false,
+      "graph:Ouvrir la vue graphique": false,
+      "canvas:Créer une nouvelle toile": false,
+      "daily-notes:Ouvrir la note quotidienne": false,
+      "templates:Insérer le modèle": false,
+      "command-palette:Ouvrir la palette de commandes": false,
+      "bases:Create new base": false
+    }
+  },
+  "active": "beee145f5997d538",
+  "lastOpenFiles": [
+    "legends/Raijin.md",
+    "Sans titre.md",
+    "reports/_tmp_da_legendskin_probe.py",
+    "reports/_tmp_struct_probe.py",
+    "reports/qa/assessments/0.0-test-design-20260219.md",
+    "reports/qa/phase0-test-plan.md",
+    "reports/brainstorming-session-results.md",
+    "reports/qa/assessments",
+    "reports/qa",
+    "_archive/_tmp_scripts/_tmp_leag004_probe_after_user_fix.py",
+    "reports/leag004-probe-2026-02-22-after-user-fix.json",
+    "reports/_tmp_leag004_probe_after_user_fix.py",
+    "_archive/_tmp_scripts/_tmp_leag004_probe.py",
+    "_archive/_tmp_scripts/_tmp_asset_refs_verify.py",
+    "reports/leag004-probe-2026-02-22.json",
+    "legends/_INDEX_LEGENDS.md",
+    "ARCHITECTURE.md",
+    "legends/Vaalbara.md",
+    "legends/Magnora.md",
+    "legends/Andaris.md",
+    "legends/Aurion.md",
+    "legends/Chronis.md",
+    "legends/Obsidia.md",
+    "legends/Pandore.md",
+    "legends/Keplar.md",
+    "_maps/MOC_Legends.md",
+    "README_SETUP_BMAD_UE5.md",
+    "reports/architecture-review-2026-02-19.md",
+    "reports/health-check-2026-02-19.md",
+    "PHASE0_COMMAND_ROUTER.md",
+    "01_Now.md",
+    "00_Home.md",
+    "WORKFLOW_PHASE0_BMAD.md",
+    "VAULT_CONVENTIONS.md",
+    "CHANGELOG_DOCS.md",
+    "IMPACT_MIGRATION.md"
+  ]
+}

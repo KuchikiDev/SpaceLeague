@@ -1,0 +1,202 @@
+{
+  "generated_at": "2026-02-22T11:33:51.589153Z",
+  "assets": {
+    "/Game/Game/Core/GI_SpaceLeague": {
+      "exists": false,
+      "loaded_class": null,
+      "referencers": [],
+      "dependencies": [],
+      "asset_registry_valid": false
+    },
+    "/Game/Instance/GI_SpaceLeague": {
+      "exists": true,
+      "loaded_class": "Blueprint",
+      "referencers": [
+        "/Game/Instance/GI_Proxy",
+        "/Game/Legends/BP_Paradoxe",
+        "/Game/Levels/HUB/UW_MainMenu",
+        "/Game/Levels/SandboxMap/GM_Sandbox",
+        "/Game/Maps/BPPC_Paradoxe",
+        "/Game/UI/Tmp_HUD/UW_HUD"
+      ],
+      "dependencies": [
+        "/Game/Game/Data/Enums/E_Legend",
+        "/Game/Game/Data/Legends/DA_LegendBase",
+        "/Game/Game/Data/Registry/DA_LegendRegistry",
+        "/Game/Game/Data/Skins/DA_LegendSkin",
+        "/Game/Game/Old/DataAsset/DA_Legend"
+      ],
+      "asset_registry_valid": true,
+      "asset_registry_class": "Blueprint"
+    },
+    "/Game/Levels/SandboxMap/GM_Sandbox": {
+      "exists": true,
+      "loaded_class": "Blueprint",
+      "referencers": [
+        "/Game/Levels/SandboxMap/ParadoxeSandbox",
+        "/Game/UI/Tmp_HUD/UW_HUD"
+      ],
+      "dependencies": [
+        "/Engine/EditorBlueprintResources/StandardMacros",
+        "/Game/Game/Data/Legends/DA_LegendBase",
+        "/Game/Game/Old/DataAsset/DA_Legend",
+        "/Game/Instance/GI_SpaceLeague",
+        "/Game/Legends/BP_Paradoxe",
+        "/Game/Maps/BPPC_Paradoxe",
+        "/Game/Terrain/Blueprints/BP_Ball",
+        "/Game/Terrain/Blueprints/BP_GoalCount",
+        "/Game/UI/Tmp_HUD/UW_HUD"
+      ],
+      "asset_registry_valid": true,
+      "asset_registry_class": "Blueprint"
+    },
+    "/Game/UI/Tmp_HUD/UW_HUD": {
+      "exists": true,
+      "loaded_class": "WidgetBlueprint",
+      "referencers": [
+        "/Game/Legends/BP_Paradoxe",
+        "/Game/Legends/Blueprints/BP_ParadoxeKeplar",
+        "/Game/Legends/Blueprints/BP_ParadoxeRaijin",
+        "/Game/Levels/SandboxMap/Blueprints/BP_ParadoxeTurnAround",
+        "/Game/Levels/SandboxMap/GM_Sandbox",
+        "/Game/Maps/BPPC_Paradoxe",
+        "/Game/Maps/GM_LevelParams"
+      ],
+      "dependencies": [
+        "/Game/Font/burbankbigcondensed_black_Font",
+        "/Game/Game/Old/DataAsset/DA_Legend",
+        "/Game/Game/Old/E_Legend",
+        "/Game/Instance/GI_SpaceLeague",
+        "/Game/Legends/TexturesUI/JHIN/StatJhin",
+        "/Game/Levels/SandboxMap/GM_Sandbox",
+        "/Game/Terrain/Blueprints/BP_Ball",
+        "/Game/UI/Tmp_HUD/T_Viseur",
+        "/Game/UI/Tmp_HUD/WB_RoundedProgress",
+        "/Script/SlateCore",
+        "/Script/UMG",
+        "/Script/UMGEditor"
+      ],
+      "asset_registry_valid": true,
+      "asset_registry_class": "WidgetBlueprint"
+    },
+    "/Game/Maps/BPPC_Paradoxe": {
+      "exists": true,
+      "loaded_class": "Blueprint",
+      "referencers": [
+        "/Game/Levels/SandboxMap/GM_Sandbox",
+        "/Game/Maps/GM_LevelParams"
+      ],
+      "dependencies": [
+        "/Game/Game/Old/DataAsset/DA_Legend",
+        "/Game/Instance/GI_SpaceLeague",
+        "/Game/Legends/BP_Paradoxe",
+        "/Game/Legends/Blueprints/BP_ParadoxeRaijin",
+        "/Game/UI/Tmp_HUD/UW_HUD",
+        "/Script/UMG",
+        "/Script/UMGEditor"
+      ],
+      "asset_registry_valid": true,
+      "asset_registry_class": "Blueprint"
+    },
+    "/Game/Instance/GI_Proxy": {
+      "exists": true,
+      "loaded_class": "Blueprint",
+      "referencers": [
+        "/Game/Levels/FloatingIsland/FloatingIslands"
+      ],
+      "dependencies": [
+        "/Game/Instance/GI_SpaceLeague",
+        "/Game/Legends/BP_Paradoxe"
+      ],
+      "asset_registry_valid": true,
+      "asset_registry_class": "Blueprint"
+    },
+    "/Game/Legends/BP_Paradoxe": {
+      "exists": true,
+      "loaded_class": "Blueprint",
+      "referencers": [
+        "/Game/DLAssets/LevelPrototyping/LevelButton",
+        "/Game/Game/Data/Legends/DA_LegendBase",
+        "/Game/Game/Old/DataAsset/DA_Legend",
+        "/Game/Instance/GI_Proxy",
+        "/Game/Legends/ABP_SandboxCharacter",
+        "/Game/Legends/Blueprints/BP_ParadoxeKeplar",
+        "/Game/Legends/Blueprints/BP_ParadoxeRaijin",
+        "/Game/Levels/HUB/BP_PC_Hub",
+        "/Game/Levels/HUB/UW_MainMenu",
+        "/Game/Levels/SandboxMap/Blueprints/BP_BallAround",
+        "/Game/Levels/SandboxMap/Blueprints/BP_BtnShoot",
+        "/Game/Levels/SandboxMap/Blueprints/BP_ParadoxeTurnAround",
+        "/Game/Levels/SandboxMap/Blueprints/BP_Paradoxe_ChildSandbox",
+        "/Game/Levels/SandboxMap/GM_Sandbox",
+        "/Game/Levels/SandboxMap/Obstacles/BP_BallSandbox",
+        "/Game/Levels/SandboxMap/ParadoxeSandbox",
+        "/Game/Maps/BPPC_Paradoxe",
+        "/Game/Maps/GM_LevelParams",
+        "/Game/Terrain/Blueprints/BP_Ball",
+        "/Game/Terrain/Blueprints/BP_Goal",
+        "/Game/Terrain/Blueprints/BP_Obstacle",
+        "/Game/Terrain/Blueprints/BP_SpawnZone"
+      ],
+      "dependencies": [
+        "/Engine/BasicShapes/BasicShapeMaterial",
+        "/Engine/EditorBlueprintResources/StandardMacros",
+        "/Engine/EditorLandscapeResources/SplineEditorMesh",
+        "/Game/Game/Data/Abilities/DA_Ability",
+        "/Game/Game/Data/Enums/E_AbilitySlot",
+        "/Game/Game/Data/Legends/DA_LegendBase",
+        "/Game/Game/Data/Structs/ST_AbilityBalanceRow",
+        "/Game/Game/Data/Structs/ST_KeyFloat",
+        "/Game/Game/Data/Structs/ST_Spell",
+        "/Game/Game/Gameplay/Gamemodes/BP_GameState_SpaceLeague",
+        "/Game/Input/IA_Dash",
+        "/Game/Input/IA_FirstSpell",
+        "/Game/Input/IA_Grapple",
+        "/Game/Input/IA_Jump",
+        "/Game/Input/IA_Look",
+        "/Game/Input/IA_Look_Gamepad",
+        "/Game/Input/IA_Move",
+        "/Game/Input/IA_Move_WorldSpace",
+        "/Game/Input/IA_Passe",
+        "/Game/Input/IA_SecondSpell",
+        "/Game/Input/IA_Shoot",
+        "/Game/Input/IA_ShootBottom",
+        "/Game/Input/IA_ShootLeft",
+        "/Game/Input/IA_ShootRight",
+        "/Game/Input/IA_ShootTop",
+        "/Game/Input/IA_Sprint",
+        "/Game/Input/IA_StopBall",
+        "/Game/Input/IA_Ult",
+        "/Game/Input/IMC_GDCMotionMatching",
+        "/Game/Instance/GI_SpaceLeague",
+        "/Game/Legends/Material/M_SplineShootPlayer",
+        "/Game/Legends/SM_Personnage",
+        "/Game/Levels/HUB/S_PlayerInformations",
+        "/Game/Levels/SandboxMap/Blueprints/BP_BtnShoot",
+        "/Game/Levels/SandboxMap/Blueprints/BP_BtnTurnAround",
+        "/Game/Levels/SandboxMap/Blueprints/BP_TerrainSandbox",
+        "/Game/Movment/Data/E_AnalogMovementBehavior",
+        "/Game/Movment/Data/E_Gait",
+        "/Game/Movment/Data/S_SimpleCameraParams",
+        "/Game/Terrain/Blueprints/BP_Ball",
+        "/Game/Terrain/Blueprints/BP_Obstacle",
+        "/Game/Terrain/Blueprints/BP_SpawnZone",
+        "/Game/Terrain/Materials/Obstacle/But/M_ButHighlight",
+        "/Game/Terrain/Materials/Obstacle/ObstacleJumpable/M_BordObstacle",
+        "/Game/UI/Tmp_HUD/UW_HUD",
+        "/Game/UI/Tmp_HUD/WB_RoundedProgress",
+        "/Script/CableComponent",
+        "/Script/EnhancedInput",
+        "/Script/GameplayTags",
+        "/Script/InputBlueprintNodes",
+        "/Script/InputCore",
+        "/Script/NavigationSystem",
+        "/Script/PhysicsCore",
+        "/Script/UMG",
+        "/Script/UMGEditor"
+      ],
+      "asset_registry_valid": true,
+      "asset_registry_class": "Blueprint"
+    }
+  }
+}

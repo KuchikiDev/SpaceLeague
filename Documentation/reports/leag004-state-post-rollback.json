@@ -1,0 +1,50 @@
+{
+  "generated_at": "2026-02-21T10:20:59.990297Z",
+  "assets": {
+    "/Game/Instance/GI_SpaceLeague": {
+      "exists": true,
+      "referencers": [
+        "/Game/Instance/GI_Proxy",
+        "/Game/Legends/BP_Paradoxe",
+        "/Game/Levels/HUB/UW_MainMenu",
+        "/Game/Levels/SandboxMap/GM_Sandbox",
+        "/Game/Maps/BPPC_Paradoxe",
+        "/Game/UI/Tmp_HUD/UW_HUD"
+      ],
+      "dependencies": [
+        "/Game/Game/Old/DataAsset/DA_Legend"
+      ]
+    },
+    "/Game/Game/Core/GI_SpaceLeague": {
+      "exists": true,
+      "referencers": [
+        "/Game/Levels/SandboxMap/GM_Sandbox"
+      ],
+      "dependencies": [
+        "/Game/Game/Data/Enums/E_Legend",
+        "/Game/Game/Data/Legends/DA_LegendBase",
+        "/Game/Game/Data/Registry/DA_LegendRegistry",
+        "/Game/Game/Data/Skins/DA_LegendSkin"
+      ]
+    },
+    "/Game/Levels/SandboxMap/GM_Sandbox": {
+      "exists": true,
+      "referencers": [
+        "/Game/Levels/SandboxMap/ParadoxeSandbox",
+        "/Game/UI/Tmp_HUD/UW_HUD"
+      ],
+      "dependencies": [
+        "/Engine/EditorBlueprintResources/StandardMacros",
+        "/Game/Game/Core/GI_SpaceLeague",
+        "/Game/Game/Data/Legends/DA_LegendBase",
+        "/Game/Game/Old/DataAsset/DA_Legend",
+        "/Game/Instance/GI_SpaceLeague",
+        "/Game/Legends/BP_Paradoxe",
+        "/Game/Maps/BPPC_Paradoxe",
+        "/Game/Terrain/Blueprints/BP_Ball",
+        "/Game/Terrain/Blueprints/BP_GoalCount",
+        "/Game/UI/Tmp_HUD/UW_HUD"
+      ]
+    }
+  }
+}
