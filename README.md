@@ -22,7 +22,7 @@
 
 > ### ⚠️ Dépôt de démonstration — projet incomplet par conception
 >
-> Ce dépôt a été créé **uniquement à des fins de présentation** (CV, portfolio, école) pour montrer le travail réalisé : architecture technique, code source, documentation, game design et outils.
+> Ce dépôt a été créé **uniquement à des fins de présentation** pour montrer le travail réalisé : architecture technique, code source, documentation, game design et outils.
 >
 > Le projet Unreal Engine 5 complet (assets, textures, meshes, animations, Content/) est **trop volumineux pour Git** (~27 GB). Il est versionné sur **Perforce**, le standard de l'industrie du jeu vidéo pour les fichiers binaires lourds (Epic Games, EA, Ubisoft).
 >
