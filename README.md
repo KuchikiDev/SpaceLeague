@@ -4,7 +4,7 @@
 
 **Jeu de sport compétitif futuriste — Unreal Engine 5**
 
-*Développé par Byakuya Corps*
+*Développé par Paradoxe*
 
 ---
 
@@ -100,8 +100,8 @@ Le projet utilise **Claude (Anthropic)** via le framework **BMAD** — une méth
 
 | Membre | Rôle | Domaines |
 |--------|------|----------|
-| **Byakuya** | Lead Developer | C++, Blueprint, architecture, Jira, Confluence, workflow IA |
-| **Neyru** | Game Designer & 3D Artist | Modélisation 3D, animations, game design, brainstorming, Blueprint → C++ |
+| [**Byakuya**](https://github.com/KuchikiDev) | Lead Developer | C++, Blueprint, architecture, Jira, Confluence, workflow IA |
+| [**Neyru**](https://github.com/Neyru1) | Game Designer & 3D Artist | Modélisation 3D, animations, game design, brainstorming, Blueprint → C++ |
 
 → [Profils complets sur le Wiki](https://github.com/KuchikiDev/SpaceLeague/wiki/Equipe)
 
@@ -234,13 +234,13 @@ La consultation est autorisée dans un cadre d'évaluation, de recrutement, de p
 
 ## ⚖️ Droits & Propriété intellectuelle
 
-**© 2025-2026 Byakuya Corps — Tous droits réservés.**
+**© 2025-2026 Paradoxe — Tous droits réservés.**
 
-Ce dépôt et son contenu sont la propriété exclusive de **Byakuya Corps** (Byakuya & Neyru).
+Ce dépôt et son contenu sont la propriété exclusive de **Paradoxe** (Byakuya & Neyru).
 
 **Autorisé :** consulter à des fins d'évaluation (recrutement, école, portfolio), partager le lien.
 
-**Interdit sans autorisation écrite :** copier ou réutiliser le code/assets, distribuer, utiliser le nom ou logo Space League / Byakuya Corps.
+**Interdit sans autorisation écrite :** copier ou réutiliser le code/assets, distribuer, utiliser le nom ou logo Space League / Paradoxe.
 
 **Assets tiers :** Unreal Engine 5 ([Epic Games EULA](https://www.unrealengine.com/en-US/eula/unreal)) · FeudalJapan Meshingun (Marketplace Epic Games)
 
@@ -250,7 +250,7 @@ Contact : [GitHub Issues](https://github.com/KuchikiDev/SpaceLeague/issues)
 
 <div align="center">
 
-*Space League — Byakuya Corps © 2025-2026*
+*Space League — Paradoxe © 2025-2026*
 
 *Développé avec Unreal Engine 5, C++, Blueprints, Jira, Confluence et Claude AI*
 
