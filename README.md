@@ -29,9 +29,6 @@
 > **Ce dépôt contient :** code source C++, documentation, configurations, maquettes, modèles 3D légers, identité visuelle et outils.
 > **Le reste (projet UE5 complet) est sur Perforce**, accessible sur demande.
 
-> **Description du dépôt GitHub :**
-> *Space League is a futuristic competitive 3v3 sports game built with Unreal Engine 5, combining C++, Blueprints, GitHub, and Perforce for a portfolio-ready showcase.*
-
 ---
 
 ## 📖 Wiki
