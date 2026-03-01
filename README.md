@@ -29,6 +29,9 @@
 > **Ce dépôt contient :** code source C++, documentation, configurations, maquettes, modèles 3D légers, identité visuelle et outils.
 > **Le reste (projet UE5 complet) est sur Perforce**, accessible sur demande.
 
+> **Description du dépôt GitHub :**
+> *Space League is a futuristic competitive 3v3 sports game built with Unreal Engine 5, combining C++, Blueprints, GitHub, and Perforce for a portfolio-ready showcase.*
+
 ---
 
 ## 📖 Wiki
@@ -151,6 +154,84 @@ cd ProjetUE5/MovementParadoxe
 ```
 
 > Sans les fichiers `Content/` (sur Perforce), le projet s'ouvrira dans UE5 mais sans assets visuels. Pour accéder au projet complet, contacter l'équipe.
+
+---
+
+## 🤝 Communauté & contribution
+
+Ce dépôt est avant tout un **dépôt vitrine** destiné à la présentation technique du projet. Il reste consultable publiquement pour permettre l'évaluation du code, de l'architecture et de la documentation.
+
+Fichiers de reference du depot :
+- [Code of Conduct](./CODE_OF_CONDUCT.md)
+- [Contributing Guide](./CONTRIBUTING.md)
+- [Security Policy](./SECURITY.md)
+- [License](./LICENSE)
+- [Issue Templates](./.github/ISSUE_TEMPLATE/)
+- [Pull Request Template](./.github/pull_request_template.md)
+
+### Description
+
+**Objectif du projet :** présenter un jeu de sport futuriste 3v3 développé sous Unreal Engine 5, avec une architecture C++/Blueprint, un workflow IA structuré, une documentation claire et une organisation de production proche d'un cadre studio.
+
+### Code of conduct
+
+Les échanges attendus sur ce dépôt doivent rester **respectueux, professionnels et constructifs**.
+
+Sont attendus :
+- des retours techniques argumentés ;
+- des questions claires et centrées sur le projet ;
+- une communication respectueuse envers tous les contributeurs.
+
+Ne sont pas acceptés :
+- harcèlement, insultes ou attaques personnelles ;
+- spam, trolling ou comportements perturbateurs ;
+- réutilisation abusive des espaces de discussion à des fins non liées au projet.
+
+### Contributing
+
+Les contributions externes ne sont **pas ouvertes par défaut** comme sur un projet open source classique, car il s'agit d'un projet propriétaire et d'un dépôt de démonstration.
+
+En revanche, les éléments suivants sont utiles :
+- signalement de bugs ou incohérences ;
+- retours techniques sur l'architecture ou la lisibilité ;
+- suggestions d'amélioration sur la documentation ou la présentation.
+
+Avant toute proposition importante :
+- ouvrir une issue pour décrire le besoin ;
+- expliquer le contexte, l'impact et le périmètre ;
+- attendre validation avant d'engager un changement structurant.
+
+### Security policy
+
+Si vous identifiez une faille, une fuite potentielle d'information ou un problème de sécurité :
+- ne publiez pas d'exploit ni de détail sensible en public ;
+- ouvrez une issue uniquement si le sujet peut être discuté sans risque ;
+- sinon, contactez l'équipe pour un traitement direct et confidentiel.
+
+### Issue templates
+
+Pour ouvrir une issue utile, merci d'inclure :
+- un titre clair ;
+- le contexte ;
+- les étapes de reproduction si applicable ;
+- le résultat attendu ;
+- le résultat observé ;
+- les fichiers ou sections concernés.
+
+### Pull request template
+
+Toute pull request devrait idéalement contenir :
+- un résumé court du changement ;
+- la raison du changement ;
+- les impacts techniques ;
+- les fichiers principaux modifiés ;
+- une méthode simple de vérification.
+
+### License
+
+Ce dépôt n'est **pas open source** et n'accorde **aucune licence de réutilisation implicite**.
+
+La consultation est autorisée dans un cadre d'évaluation, de recrutement, de portfolio ou de démonstration. Toute réutilisation du code, des assets, du nom, de l'identité visuelle ou de la documentation nécessite une autorisation écrite préalable.
 
 ---
 

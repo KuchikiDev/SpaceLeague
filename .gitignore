@@ -77,6 +77,36 @@ ProjetUE5/MovementParadoxe/Plugins/
 shadertoolsconfig.json
 
 # ============================================================
+# ============================================================
+# OUTILS & IDE — Config locale privée
+# ============================================================
+
+# Claude Code (config privée)
+.claude/
+**/.claude/
+
+# Cursor IDE
+.cursor/
+
+# Diversion (VCS alternatif)
+.diversion/
+.dvignore
+**/.dvignore
+
+# Fichiers old/legacy
+**/.old/
+
+# Logs de mise à jour UE5
+UpgradeLog.htm
+**/UpgradeLog.htm
+
+# Configs VS
+.vsconfig
+**/.vsconfig
+.editorconfig
+**/.editorconfig
+
+# ============================================================
 # SYSTEME D'EXPLOITATION
 # ============================================================
 
