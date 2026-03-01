@@ -288,19 +288,37 @@ La documentation de design et technique est maintenue sur **Confluence** :
 
 > 📚 [Confluence Space League](https://byakuyacorps.atlassian.net/wiki/spaces/SL/) *(accès privé)*
 
-### Intelligence Artificielle — Claude + BMAD Agents
+### Intelligence Artificielle — Claude AI + Méthode BMAD
 
-Le projet intègre une approche moderne de **développement assisté par IA** via le framework **BMAD (Blueprint Multi-Agent Design)**. Des agents spécialisés Claude sont utilisés pour :
+Space League intègre une approche de **développement assisté par IA** qui va bien au-delà de la simple génération de code. Le projet utilise **Claude (Anthropic)** via le framework **BMAD (Boilerplate Multi-Agent Design)** — une méthode structurée qui orchestre plusieurs agents IA spécialisés pour couvrir toutes les dimensions d'un projet.
 
-| Agent | Rôle |
-|-------|------|
-| **Analyst** | Analyse des besoins, spécifications fonctionnelles |
-| **Architect** | Décisions d'architecture C++/Blueprint |
-| **PM** | Gestion de backlog, estimation, priorisation |
-| **Dev** | Assistance à l'implémentation C++ |
-| **QA** | Revue de code, tests, validation d'architecture |
+#### Qu'est-ce que BMAD ?
 
-Cette approche permet de maintenir une **documentation vivante**, de générer du code boilerplate, et d'accélérer le brainstorming de mécaniques de gameplay.
+BMAD est un framework open-source qui transforme Claude en une **équipe virtuelle de professionnels du jeu vidéo**, chacun avec un rôle, des responsabilités et un contexte précis. Plutôt que d'utiliser l'IA comme un simple outil de recherche, BMAD permet de conduire de vraies sessions de travail structurées.
+
+#### Comment Claude a été utilisé sur ce projet
+
+| Usage | Détail |
+|-------|--------|
+| **Brainstorming gameplay** | Sessions structurées pour concevoir les mécaniques (système de balle, enroulés, prison, ultra-contrôle), explorer les alternatives, identifier les risques de game design |
+| **Game design** | Conception et équilibrage des classes (Pilier/Assaillant/Sentinelle), des personnages (Raijin, Keplar...), du système de capacités Passif/Sort/Ultimate |
+| **Architecture technique** | Décisions d'architecture C++/Blueprint, choix des patterns (Data Assets vs DataTable, réplication réseau), migration progressive Blueprint → C++ |
+| **Documentation vivante** | Génération et maintien automatique des specs fonctionnelles, specs techniques, roadmap, rapports de phase et fiches personnages |
+| **Revue de code et QA** | Analyse des Blueprints existants, identification des dépendances, plans de migration sécurisés, risk profiles |
+| **Gestion de projet** | Création et organisation des tickets Jira (LEAG-001 à LEAG-056), estimation des phases, critères de validation |
+
+#### Les agents impliqués
+
+| Agent | Rôle dans Space League |
+|-------|------------------------|
+| **Analyst** | Analyse des besoins, rédaction des specs fonctionnelles |
+| **Architect** | Conception de l'architecture C++/Blueprint, choix techniques |
+| **PM** | Backlog Jira, roadmap, priorisation des 4 phases |
+| **Dev** | Assistance à l'implémentation C++, headers, patterns |
+| **QA** | Revues d'architecture, plans de test, risk profiles |
+| **PO** | Validation des user stories, critères d'acceptation |
+
+> L'utilisation de Claude via BMAD a permis de produire en quelques sessions une documentation technique et fonctionnelle équivalente à plusieurs semaines de travail classique, tout en maintenant une cohérence entre toutes les couches du projet (design → technique → gestion).
 
 ### Knowledge Base — Obsidian
 
