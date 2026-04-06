@@ -1,7 +1,7 @@
 ---
 type: now
 status: active
-last_review: 2026-03-12
+last_review: 2026-02-24
 owner: dylan
 audience: humans-agents
 source_of_truth: code-and-config
@@ -9,41 +9,23 @@ source_of_truth: code-and-config
 
 # 01 Now
 
-Etat courant du projet au 2026-03-12.
+Etat courant du projet au 2026-02-22.
 
 ## Resume executif
 
 - Le projet Unreal actif s'appelle `MovementParadoxe`.
-- Le module C++ principal reste `MovementParadoxe`, avec un sous-domaine `SpaceLeague` actif dans `Source/MovementParadoxe/SpaceLeague`.
-- Le socle gameplay de `BP_Paradoxe` migre progressivement vers `ASpaceLeagueCharacterBase`.
-- Les briques actuellement stabilisees cote C++ couvrent:
-  - ability/cooldown
-  - dash/stamina
-  - jump/wall jump
-  - stop ball/orbit
-  - aim spline orbit
-  - look input
-- Le comportement runtime final depend encore du wiring Blueprint restant:
-  - events ability par slot
-  - VFX/SFX/camera du dash
-  - timers HUD
-  - inputs `IA_OrbitAimCurve`
+- Le module C++ present est `MovementParadoxe` (pas encore `SpaceLeague`).
+- Les specs techniques documentent une cible `SpaceLeague` a migrer.
+- La doc est riche mais en retard de synchronisation sur plusieurs points critiques.
 
 ## Point de reprise (session)
 
-- `BP_Paradoxe` doit maintenant etre traite comme une couche de presentation au-dessus de `ASpaceLeagueCharacterBase`.
-- La spline `OrbitAim` est geree en C++:
-  - depart capsule joueur
-  - fin line trace de vue
-  - point milieu d'arrondi
-  - clip sur obstacle
-- Le flux `IA_OrbitAimCurve` cible est:
-  - `Triggered -> AccumulateOrbitAimCurveInput`
-  - pas de reset sur `Completed` si on veut conserver l'arrondi atteint
-- Pour repartir proprement:
-  - `Ctrl+Alt+F11` dans UE si Live Coding est actif
-  - sinon fermer UE pour un build complet
-  - reouvrir UE, `Refresh All Nodes`, compiler `BP_Paradoxe`, `BPPC_Paradoxe`, `UW_HUD`
+- `LEAG-004` reste resolu structurellement.
+- `GetSelectedLegendData` est considere reimplemente (retour utilisateur).
+- Il reste uniquement une validation fonctionnelle runtime (pas de correction structurelle en attente sur LEAG-004).
+- Checks cibles a faire quand UE est ouvert:
+  - compiler `GI_SpaceLeague` + `GM_Sandbox`
+  - tester le flow menu/selection -> sandbox (appel `GetSelectedLegendData`)
 
 ## Faits verifies (code/config)
 
@@ -62,35 +44,6 @@ Etat courant du projet au 2026-03-12.
   - `ProjetUE5/MovementParadoxe/Source/MovementParadoxe/MovementParadoxe.Build.cs`
   - `ProjetUE5/MovementParadoxe/Source/MovementParadoxe/MovementParadoxe.cpp`
   - `ProjetUE5/MovementParadoxe/Source/MovementParadoxe/MovementParadoxe.h`
-  - `ProjetUE5/MovementParadoxe/Source/MovementParadoxe/SpaceLeague/` (domaine gameplay actif)
-
-### Faits verifies recents (ability + HUD)
-
-- `ASpaceLeagueCharacterBase`:
-  - `TryUseAbility` valide cooldown + data et lance le cooldown seulement en cas de succes.
-  - Routeur par slot disponible: `ExecutePassiveAbility`, `ExecuteSkillAbility`, `ExecuteUltimateAbility`.
-  - Raison d'echec exposee: `ESpaceLeagueAbilityUseFailReason` + `GetLastAbilityUseFailReason`.
-  - Dash expose via `TryStartDash`, `StopDash`, `CanDash`, `OnDashStarted`, `OnDashEnded`, `OnDashStaminaChanged`.
-  - Jump expose via `TryHandleJumpInput`, `SetCanWallJump`, `ExecuteWallJump`.
-  - Stop Ball expose via `TryStopBall`, `ReleaseOrbitBall`, `OnStopBallCaptured`, `OnStopBallReleased`.
-  - `OrbitAim` expose via:
-    - `SetOrbitAimCurveInput`
-    - `AddOrbitAimCurveInput`
-    - `AccumulateOrbitAimCurveInput`
-    - `ResetOrbitAimCurveInput`
-    - `SetOrbitAimVisible`
-  - Fichiers:  
-    - `ProjetUE5/MovementParadoxe/Source/MovementParadoxe/SpaceLeague/Characters/SpaceLeagueCharacterBase.h`  
-    - `ProjetUE5/MovementParadoxe/Source/MovementParadoxe/SpaceLeague/Characters/SpaceLeagueCharacterBase.cpp`
-
-- `ASpaceLeaguePlayerController`:
-  - `OnPossess` appelle `EnsureInGameWidget()` sur `ASpaceLeagueCharacterBase`.
-  - Creation/reutilisation propre du widget in-game local.
-  - Fichier: `ProjetUE5/MovementParadoxe/Source/MovementParadoxe/SpaceLeague/Core/SpaceLeaguePlayerController.cpp`
-
-- Build:
-  - Le build CLI est bloque si Live Coding est actif (`Unable to build while Live Coding is active`).
-  - Necessite fermeture editor pour validation compile fiable apres changement UCLASS/UFUNCTION/UPROPERTY.
 
 ### Assets importants detectes
 
@@ -104,32 +57,18 @@ Etat courant du projet au 2026-03-12.
 
 ## Ecarts docs vs reel
 
-1. Les docs haut niveau parlent encore de migration "a venir", alors que le dossier `Source/MovementParadoxe/SpaceLeague` est deja actif.
-2. Le flux Blueprint cooldown HUD n'est pas stabilise (timer/event wiring a finaliser pour skill + ultimate).
-3. `BP_Paradoxe` peut encore contenir des anciens graphes spline/stop ball/dash qui doublonnent le C++.
-4. Plusieurs checklists roadmap/migration non materialisees comme terminees.
-5. `RESUME_JEU.md` contient un marqueur de template non rendu sur la date de generation.
+1. Module C++ cible `SpaceLeague` non cree localement.
+2. Config projet des specs (`GlobalDefaultGameMode=/Script/SpaceLeague...`) non alignes avec la config reelle.
+3. Plusieurs checklists roadmap/migration non materialisees comme terminees.
+4. `RESUME_JEU.md` contient un marqueur de template non rendu sur la date de generation.
 
 ## Priorites recommandees (prochaines sessions)
 
-1. Stabiliser le wiring Blueprint ability:
-   - `ExecuteSkillAbility` et `ExecuteUltimateAbility` doivent retourner `true` en succes.
-   - `OnAbilityCooldownStarted` doit router vers `UW_HUD` (par slot).
-2. Nettoyer `BP_Paradoxe`:
-   - retirer les anciens graphes spline manuels
-   - retirer les timers anti spam stop ball en BP si encore presents
-   - ne garder cote BP que FX/SFX/camera/wiring
-3. Stabiliser timers HUD:
-   - timer looping avec `Time=0.05`
-   - event `Update...Cooldown` (pas `On...Finished`)
-   - handle stocke et nettoye.
-4. Revalider `OrbitAim` en runtime:
-   - courbe basse
-   - obstacle clipping
-   - largeur/epaisseur/material override
-5. Fermer UE pour build complet apres modifs C++ reflectees, puis `Refresh All Nodes` dans les BPs.
-6. Finaliser LEAG-003 en migrant les referents encore lies a `Content/Game/Old`.
-7. Passer `ROADMAP.md` en suivi d'execution reel (done/in-progress/blocked date).
+1. Clarifier la strategie: migrer vers module `SpaceLeague` ou consolider `MovementParadoxe`.
+2. Finaliser LEAG-003 en migrant les referents encore lies a `Content/Game/Old`.
+3. Valider le comportement runtime de `GetSelectedLegendData` (reimplementation utilisateur confirmee; checks cibles `GI_SpaceLeague` + `GM_Sandbox`, puis flow menu/selection -> sandbox).
+4. Passer `ROADMAP.md` en suivi d'execution reel (done/in-progress/blocked date).
+5. Mettre a jour `SPECS_TECHNIQUES.md` selon la decision architecture.
 
 ## Liens de travail
 
@@ -157,14 +96,4 @@ Etat courant du projet au 2026-03-12.
 - 2026-02-22: Reparation utilisateur en UE5: `Core GI` supprime et references nettoyees (`GI_Proxy`, `BPPC_Paradoxe`, `UW_HUD`, `BP_Paradoxe`, `GM_Sandbox`). LEAG-004 structurellement resolu.
 - 2026-02-22: LEAG-004 resolu structurellement en UE Editor (cleanup references vers `Core GI`).
 - 2026-02-24: `GetSelectedLegendData` indique comme reimplante par l'utilisateur; validation runtime restante uniquement.
-- 2026-03-08: Integration C++ ability/hud en cours sur `SpaceLeagueCharacterBase` + `SpaceLeaguePlayerController` (routeur par slot, fail reason, cache widget local).
-- 2026-03-08: Retour utilisateur: images HUD revenues, mais cooldown/ultimate encore instables cote Blueprint (timer/event wiring a finaliser).
-- 2026-03-08: Rapport de session ajoute: `Documentation/reports/ability-hud-session-2026-03-08.md`.
-- 2026-03-12: Refonte `BP_Paradoxe` poursuivie autour de `ASpaceLeagueCharacterBase` (dash, jump, stop ball, orbit aim spline, look input).
-- 2026-03-12: `OrbitAim` consolide en C++:
-  - point milieu d'arrondi
-  - courbure verticale descendante reelle
-  - clip de la courbe sur obstacle
-  - pool de `SplineMesh` runtime
-- 2026-03-12: Rapport de synthese ajoute: `Documentation/reports/bp-paradoxe-refactor-session-2026-03-12.md`.
 
