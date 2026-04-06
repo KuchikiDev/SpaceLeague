@@ -1,7 +1,7 @@
 ---
 type: changelog
 status: active
-last_review: 2026-02-24
+last_review: 2026-03-12
 owner: dylan
 audience: humans-agents
 ---
@@ -45,4 +45,31 @@ Historique des changements du vault documentaire.
 - Mise a jour `[[_ai/01_Now]]` avec point de reprise post `LEAG-004` (structure OK, validation runtime restante).
 - Mise a jour `[[_ai/PHASE0_COMMAND_ROUTER]]` avec section "Reprise actuelle (post LEAG-004)".
 - Correction des mentions obsoletes "placeholder vide" pour `GetSelectedLegendData` dans les rapports Phase 0 / LEAG-004.
+
+## 2026-03-08
+
+- Mise a jour de `[[_ai/01_Now]]` avec l'etat reel du socle `SpaceLeague` cote C++:
+  - routeur ability par slot
+  - fail reason exposee
+  - cache/reuse widget in-game local
+- Ajout du rapport de session:
+  - `Documentation/reports/ability-hud-session-2026-03-08.md`
+- Formalisation du point de reprise Blueprint:
+  - events `ExecuteSkillAbility` / `ExecuteUltimateAbility`
+  - wiring `OnAbilityCooldownStarted` vers `UW_HUD`
+  - timer HUD looping (`Time=0.05`) + handle stocke.
+
+## 2026-03-12
+
+- Mise a jour de `[[_ai/01_Now]]` avec l'etat reel de `BP_Paradoxe`:
+  - gameplay core consolide dans `ASpaceLeagueCharacterBase`
+  - `OrbitAim` migre et stabilise cote C++
+  - priorites Blueprint recadrees sur le wiring / presentation
+- Ajout du rapport de synthese:
+  - `Documentation/reports/bp-paradoxe-refactor-session-2026-03-12.md`
+- Documentation du systeme `Stop Ball` / `Orbit Aim`:
+  - courbure verticale
+  - clipping obstacle
+  - pool runtime de `SplineMesh`
+  - inputs `IA_OrbitAimCurve`
 

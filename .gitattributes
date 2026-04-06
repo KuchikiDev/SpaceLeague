@@ -2,34 +2,28 @@
 # .gitattributes — Space League
 # Normalisation des fins de ligne Cross-platform
 # ============================================================
-
 # Par défaut : LF pour tous les fichiers texte
 * text=auto eol=lf
-
 # Fichiers Windows spécifiques
 *.bat text eol=crlf
 *.cmd text eol=crlf
 *.ps1 text eol=crlf
-
 # Code source
 *.cpp text eol=lf
 *.h text eol=lf
 *.cs text eol=lf
 *.py text eol=lf
-
 # Configs UE5
 *.ini text eol=lf
 *.uproject text eol=lf
 *.target.cs text eol=lf
-
 # Documentation
 *.md text eol=lf
 *.txt text eol=lf
 *.json text eol=lf
-
 # Binaires — pas de conversion
-*.png binary
-*.jpg binary
+*.png filter=lfs diff=lfs merge=lfs -text
+*.jpg filter=lfs diff=lfs merge=lfs -text
 *.jpeg binary
 *.gif binary
 *.webp binary
@@ -39,3 +33,4 @@
 *.obj binary
 *.mtl text eol=lf
 *.svg text eol=lf
+HUD/* filter=lfs diff=lfs merge=lfs -text
