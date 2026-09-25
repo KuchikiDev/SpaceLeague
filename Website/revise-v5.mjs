@@ -1,0 +1,17 @@
+import fs from 'node:fs';
+const base='dist/';
+let a=fs.readFileSync(base+'ambient.js','utf8');
+a=a.replace("host.prepend(canvas);","const atlas=host.classList.contains('atlas-screen');const surface=atlas?host.querySelector('.map-surface'):host;surface.prepend(canvas);");
+a=a.replace('host.getBoundingClientRect()','surface.getBoundingClientRect()').replace('ro.observe(host)','ro.observe(surface)');
+a=a.replace('ctx.transform(1,.2,-.85,.49,0,0)','ctx.transform(.92,.16,-.68,.44,0,2)');
+a=a.replace('ctx.lineTo(0,74);ctx.ellipse','ctx.lineTo(0,74);ctx.stroke();ctx.beginPath();ctx.ellipse');
+a=a.replace('ctx.globalAlpha=.4;island(cx-225',`if(atlas){const positions=width<761?[[.27,.48],[.69,.35],[.7,.77]]:[[.40,.36],[.72,.27],[.74,.66]];positions.forEach(([px,py],i)=>{const x=width*px,y=height*py;island(x,y,Math.min(width/1100,height/850)*[.62,.72,.58][i],t,i===1);const node=host.querySelector('.node-'+i);node.style.left=x+'px';node.style.top=(y+Math.sin(t*.6+x)*7)+'px';});}else{ctx.globalAlpha=.4;island(cx-225`);
+a=a.replace('ctx.globalAlpha=1;\n for(let i=0;i<35','ctx.globalAlpha=1;}\n for(let i=0;i<35');
+fs.writeFileSync(base+'ambient.js',a);
+let app=fs.readFileSync(base+'app.js','utf8');
+app=app.replace('<span>0${i+1}</span>','<span aria-hidden="true">◇</span>');
+const icons={raijin:'M14 2 5 14h6l-1 8 9-13h-6z',keplar:'M3 12c0-7 18-7 18 0s-18 7-18 0M12 3c7 0 7 18 0 18s-7-18 0-18',andaris:'M12 2 3 12l9 10 9-10zM7 12h10M12 7v10',pandore:'M5 4c0 14 14 14 14 0M5 20c0-14 14-14 14 0'};
+app='const characterSymbols='+JSON.stringify(icons)+';\n'+app;
+app=app.replace('data-code="${characters[k].type.slice(0,1)}" aria-hidden="true"></span>','aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="${characterSymbols[k]}"/></svg></span>');
+fs.writeFileSync(base+'app.js',app);
+let html=fs.readFileSync(base+'index.html','utf8').replace('ÉDITION 04','ÉDITION 05');fs.writeFileSync(base+'index.html',html);

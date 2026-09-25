@@ -1,0 +1,12 @@
+import {readFile,writeFile} from 'node:fs/promises';
+let js=await readFile('dist/app.js','utf8');
+js="import {createAmbient} from './ambient.js';\n"+js;
+js=js.replace('function render(focus=false){','let stopAmbient=()=>{};\nfunction render(focus=false){stopAmbient();');
+js=js.replace('document.body.dataset.screen=kind;','stopAmbient=createAmbient(app.firstElementChild,()=>reduced);document.body.dataset.screen=kind;');
+js=js.replace('<div class="character-art" role="img" aria-label="Portrait exploratoire de ${c.name}"></div>','<div class="character-art" aria-hidden="true"><span>${c.type.slice(0,1)}</span><small>${c.type.toUpperCase()}</small></div>');
+js=js.replace('<span class="portrait-thumb" aria-hidden="true"></span>','<span class="portrait-thumb" data-code="${characters[k].type.slice(0,1)}" aria-hidden="true"></span>');
+js=js.replace('PORTRAIT EXPLORATOIRE','SIGNATURE / ${c.type.toUpperCase()}');
+await writeFile('dist/app.js',js);
+let html=await readFile('dist/index.html','utf8');
+html=html.replace('POC · ÉDITION 02','POC · ÉDITION 03').replace('Les illustrations, l’architecture et les formulations éditoriales sont des explorations.','Les signatures graphiques et les formulations éditoriales sont des explorations.');
+await writeFile('dist/index.html',html);

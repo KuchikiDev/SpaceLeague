@@ -1,0 +1,7 @@
+qa/
+*.tar.gz
+.sites-runtime/
+node_modules/
+dist/**/*.gz
+# The UE5 root rule "Assets/" also matches this folder on case-insensitive filesystems.
+!dist/assets/

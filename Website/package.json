@@ -1,0 +1,20 @@
+{
+  "name": "ora-universe-poc",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node serve.mjs",
+    "check": "node check.mjs",
+    "build": "node build-character-model.mjs && node build-routes.mjs && node compress.mjs && node verify-build.mjs",
+    "test": "npm run check && node verify-build.mjs",
+    "test:accessibility": "node verify-accessibility.mjs",
+    "test:local": "node verify-local.mjs"
+  },
+  "dependencies": {
+    "three": "0.186.0"
+  },
+  "devDependencies": {
+    "esbuild": "0.28.2"
+  }
+}

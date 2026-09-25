@@ -1,0 +1,3 @@
+import {createRequire} from 'node:module';
+const require=createRequire(import.meta.url);const {chromium}=require('C:/Users/dylan/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');const browser=await chromium.launch({executablePath:'C:/Program Files/Google/Chrome/Application/chrome.exe'});const page=await browser.newPage();for(const width of [1440,390]){await page.setViewportSize({width,height:950});await page.goto('http://127.0.0.1:4173/univers/');await page.waitForTimeout(700);await page.screenshot({path:'qa/atlas-title-'+width+'.png'});}await browser.close();
+
