@@ -101,7 +101,7 @@ Release `20260914-04` publiée. Les pictogrammes ont été retirés à côté de
 
 ## Édition 12 — Arène & archipel scellé
 
-Refonte visuelle et couche d'énigmes, préparée le 24 septembre 2026 sur une copie de l'édition 11 locale (non encore publiée ; le serveur sert toujours la release `20260914-05`). Les 25 destinations existantes, l'espace joueur Steam, les fiches 3D et les contenus éditoriaux sont conservés.
+Refonte visuelle et couche d'énigmes sur la base de l'édition 11 locale. **Publiée le 25 septembre 2026, release `20260925-02`** (la `-01` a été remplacée pour forcer le rafraîchissement du cache). Les 25 destinations existantes, l'espace joueur Steam, les fiches 3D et les contenus éditoriaux sont conservés.
 
 - **HUD d'arène.** Le header devient un tableau de score : deux camps (univers / jeu) séparés par la ligne médiane ; la balle d'ORA se pose sur la ligne au carrefour puis glisse vers la destination courante. Panneaux vitrés à coins de visée, grain, dégradé aura cuivre → cyan, onglets en capsules, aptitudes présentées comme des icônes de sort avec anneau de recharge, balle sur la frise des chroniques.
 - **Trajectoires.** Chaque navigation lance une balle qui rebondit sur les bords de l'écran (`dist/trajectory.js`) et la destination s'ouvre depuis le point choisi. Un curseur-balle suit le pointeur et s'ouvre en orbite sur les éléments interactifs. Sur l'accueil et l'atlas, une balle rebondit en continu dans l'arène de l'îlot (`ambient.js`). Tout s'efface avec le bouton de mouvement réduit.
@@ -109,3 +109,5 @@ Refonte visuelle et couche d'énigmes, préparée le 24 septembre 2026 sur une c
 - **Données.** Progression dans `localStorage` (`ora-archipel`) uniquement, jamais envoyée à l'API compte ; mention ajoutée au dialogue d'information.
 
 Contrôles : `node verify-enigmes.mjs` résout les neuf énigmes comme un joueur, éveille le sceau, vérifie le mode Aura, la persistance, la réinitialisation et le mobile. Il est ajouté à `npm run test:local` (11 contrôles). `verify-accessibility.mjs` couvre 30 adresses, dont l'archipel, deux énigmes et le sceau central. Tablette (761–1024 px) : la navigation passe dans le menu.
+
+**Cache.** Cloudflare impose aux navigateurs un cache de 4 h sur les fichiers statiques (`max-age=14400`), au-delà du `expires 5m` de Nginx. Les fichiers modifiés par une édition portent donc un paramètre de version : `/style.css?v=12` et `/app.js?v=12` dans `index.html`, `./ambient.js?v=12` et `./character-model.js?v=12` dans `app.js`. Il faut l'incrémenter à chaque édition qui les modifie. Les nouveaux modules n'en ont pas besoin. Ne pas versionner un module importé par plusieurs fichiers, pour ne pas le dupliquer. `nginx-poc.conf` est aligné sur la configuration active du VPS (cache 5 min pour JS/CSS, 30 jours pour `/assets/`).

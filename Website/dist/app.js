@@ -1,4 +1,4 @@
-import {createCharacterModel} from './character-model.js';
+import {createCharacterModel} from './character-model.js?v=12';
 import {tacticsPanel,counterReminder} from './tactics.js';
 import {accountRoutes,accountPage,wireAccount} from './account.js';
 import {guides,extraCharacters} from './content.js';
@@ -7,7 +7,7 @@ import {enigmesPage,wireEnigmes,enigmaMeta} from './enigmes.js';
 import {solvedCount} from './progress.js';
 import {createMotion} from './trajectory.js';
 const characterSymbols={"raijin":"M14 2 5 14h6l-1 8 9-13h-6z","keplar":"M3 12c0-7 18-7 18 0s-18 7-18 0M12 3c7 0 7 18 0 18s-7-18 0-18","andaris":"M12 2 3 12l9 10 9-10zM7 12h10M12 7v10","pandore":"M5 4c0 14 14 14 14 0M5 20c0-14 14-14 14 0"};
-import {createAmbient} from './ambient.js';
+import {createAmbient} from './ambient.js?v=12';
 import {characters,fragments,chapters} from './data.js';
 const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelectorAll(s)];
 Object.assign(characterSymbols,{obsidia:'M12 2v20M4 6l5 6-5 6M20 6l-5 6 5 6',aurion:'M12 2v4M12 18v4M2 12h4M18 12h4M5 5l3 3M16 16l3 3M19 5l-3 3M8 16l-3 3M12 8a4 4 0 1 0 0 8 4 4 0 1 0 0-8',vaalbara:'M12 3 3 20h18zM12 9v7M9 16h6',chronis:'M5 3h14M5 21h14M7 3c0 9 10 9 10 18M17 3c0 9-10 9-10 18',magnora:'M5 4v9a7 7 0 0 0 14 0V4h-4v9a3 3 0 0 1-6 0V4z'});
