@@ -4,6 +4,13 @@
 # Perforce = Content UE5, assets binaires volumineux
 # ============================================================
 
+# Identifiants Perforce locaux (jamais versionnés)
+Perforce/config.txt
+
+# Projet Unreal actif : versionné sur Perforce uniquement.
+# Git en garde une copie du code dans ProjetUE5/MovementORA/ (Tools/Sync-ShowcaseFromPerforce.ps1).
+ProjetUE5/MovementORA 5.8/
+
 # ============================================================
 # UNREAL ENGINE — Dossiers générés (jamais commités)
 # ============================================================
