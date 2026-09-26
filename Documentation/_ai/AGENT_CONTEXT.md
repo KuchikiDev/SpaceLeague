@@ -61,8 +61,8 @@ Frontmatter requis:
 
 ## Zones sensibles
 
-- Mismatch historique `SpaceLeague` vs `MovementParadoxe`.
-- Multiples emplacements potentiels de `GI_SpaceLeague`.
+- Mismatch historique `ORA` vs `MovementParadoxe`.
+- Multiples emplacements potentiels de `GI_ORA`.
 - Documents legacy dans `_archive` references depuis des docs actives.
 
 ## Liens utilitaires

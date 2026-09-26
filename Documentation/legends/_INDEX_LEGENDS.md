@@ -6,7 +6,7 @@ owner: dylan
 domain: legends
 ---
 
-# Index des Legends - Space League
+# Index des Legends - ORA
 
 **Navigation Vault:** [[_ai/00_Home|00_Home]] | [[_ai/01_Now|01_Now]] | [[_maps/MOC_Legends|MOC_Legends]]
 **Liens reliés:** [[SPECS_FONCTIONNELLES|SPECS_FONCTIONNELLES]] | [[RESUME_JEU|RESUME_JEU]] | [[_maps/MOC_Gameplay|MOC_Gameplay]]

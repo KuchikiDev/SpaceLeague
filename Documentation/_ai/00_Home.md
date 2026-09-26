@@ -8,7 +8,7 @@ audience: humans-agents
 
 # 00 Home
 
-Point d'entree unique du vault Obsidian pour Space League / MovementParadoxe.
+Point d'entree unique du vault Obsidian pour ORA / MovementParadoxe.
 
 ## Demarrage rapide
 
@@ -36,9 +36,9 @@ Point d'entree unique du vault Obsidian pour Space League / MovementParadoxe.
 
 ## Ecarts connus a traiter
 
-- [ ] Nom de module: specs ecrites pour `SpaceLeague`, code actuel en `MovementParadoxe`.
+- [ ] Nom de module: specs ecrites pour `ORA`, code actuel en `MovementParadoxe`.
 - [ ] GameMode cible dans specs vs GameMode reel dans `DefaultEngine.ini`.
-- [ ] Doubles assets `GI_SpaceLeague` detectes dans Content.
+- [ ] Doubles assets `GI_ORA` detectes dans Content.
 - [ ] Tickets roadmap en grande partie non traces comme "done".
 
 ## Navigation complementaire

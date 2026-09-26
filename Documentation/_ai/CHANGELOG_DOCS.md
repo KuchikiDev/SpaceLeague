@@ -40,9 +40,20 @@ Historique des changements du vault documentaire.
   - `docs/qa/assessments/0.0-test-design-20260219.md`
   - `docs/qa/phase0-test-plan.md`
 
-## 2026-02-24
+## 2026-05-10
 
-- Mise a jour `[[_ai/01_Now]]` avec point de reprise post `LEAG-004` (structure OK, validation runtime restante).
-- Mise a jour `[[_ai/PHASE0_COMMAND_ROUTER]]` avec section "Reprise actuelle (post LEAG-004)".
-- Correction des mentions obsoletes "placeholder vide" pour `GetSelectedLegendData` dans les rapports Phase 0 / LEAG-004.
+### Passe 1 — Renommage du nom du jeu dans la documentation
+- Renommage global du jeu "Space League" → "ORA" dans toute la documentation (tous les `.md` du vault).
 
+### Passe 2 — Renommage complet dans le projet (C++, assets, config)
+- **C++ Source :** Dossier `Source/MovementParadoxe/SpaceLeague/` renommé en `Source/MovementParadoxe/ORA/`.
+- **24 fichiers C++** renommés (`SpaceLeague*.h/.cpp` → `ORA*.h/.cpp`) avec classes internes mises à jour (`AORAGameMode`, `AORAGameState`, `AORACharacterBase`, `UORALegendData`, `UORAGameInstance`, `UORAHUD`, etc.).
+- **Blender :** `Ball_SpaceLeague.blend/.blend1` → `Ball_ORA.blend/.blend1`.
+- **Documentation** : deuxième passe complète — noms de classes C++, chemins de fichiers, noms d'assets cibles (`GI_ORA`, `BP_GameState_ORA`, `BP_GameMode_ORA`), module `ORA`, `ORATypes.h` — mis à jour dans tous les fichiers actifs.
+- **Rapports historiques** (`Documentation/reports/`) : conservés tels quels (archives).
+- **DefaultEngine.ini** : NON modifié — référence `GI_SpaceLeague` encore active. Mettre à jour vers `GI_ORA.GI_ORA_C` après renommage Blueprint dans UE5 Editor.
+
+### Actions manuelles restantes (dans UE5 Editor)
+1. Renommer `Content/Instance/GI_SpaceLeague` → `GI_ORA` (Right-click → Rename dans le Content Browser)
+2. Renommer `Content/Game/Gameplay/Gamemodes/BP_GameState_SpaceLeague` → `BP_GameState_ORA`
+3. Après ces deux renames, mettre à jour `DefaultEngine.ini` ligne `GameInstanceClass` → `/Game/Instance/GI_ORA.GI_ORA_C`

@@ -178,4 +178,4 @@ Pandore impose **2 (ou 3) marques** à chaque ennemi **instantanément**
 ---
 
 *Fiche créée : 2026-02-21*
-*Basé sur : Confluence Space League*
+*Basé sur : Confluence ORA*

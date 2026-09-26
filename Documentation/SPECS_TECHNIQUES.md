@@ -6,7 +6,7 @@ owner: dylan
 audience: humans-agents
 ---
 
-# Spécifications Techniques - Space League
+# Spécifications Techniques - ORA
 
 **Version:** 1.0
 **Date:** 2026-01-25
@@ -14,22 +14,22 @@ audience: humans-agents
 
 **Navigation Vault:** [[_ai/00_Home]] | [[_ai/01_Now]] | [[_ai/AGENT_CONTEXT]]
 **Liens relies:** [[ARCHITECTURE]] | [[IMPACT_MIGRATION]] | [[WORKFLOW_PHASE0_BMAD]] | [[_maps/MOC_Architecture]]
-**Note statut:** Spec cible `SpaceLeague`; verifier et synchroniser avec module reel `MovementParadoxe`.
+**Note statut:** Spec cible `ORA`; verifier et synchroniser avec module reel `MovementParadoxe`.
 
 ---
 
-## 1. Module C++ SpaceLeague
+## 1. Module C++ ORA
 
 ### 1.1 Configuration Build
 
-**Fichier:** `Source/SpaceLeague/SpaceLeague.Build.cs`
+**Fichier:** `Source/ORA/ORA.Build.cs`
 
 ```cpp
 using UnrealBuildTool;
 
-public class SpaceLeague : ModuleRules
+public class ORA : ModuleRules
 {
-    public SpaceLeague(ReadOnlyTargetRules Target) : base(Target)
+    public ORA(ReadOnlyTargetRules Target) : base(Target)
     {
         PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
@@ -53,13 +53,13 @@ public class SpaceLeague : ModuleRules
 
 ### 1.2 Types Communs
 
-**Fichier:** `Source/SpaceLeague/Data/SpaceLeagueTypes.h`
+**Fichier:** `Source/ORA/Data/ORATypes.h`
 
 ```cpp
 #pragma once
 
 #include "CoreMinimal.h"
-#include "SpaceLeagueTypes.generated.h"
+#include "ORATypes.generated.h"
 
 // État du match
 UENUM(BlueprintType)
@@ -154,28 +154,28 @@ struct FCharacterStats
 
 ---
 
-## 2. ASpaceLeagueGameMode
+## 2. AORAGameMode
 
-**Fichier:** `Source/SpaceLeague/Core/SpaceLeagueGameMode.h`
+**Fichier:** `Source/ORA/Core/ORAGameMode.h`
 
 ```cpp
 #pragma once
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
-#include "SpaceLeagueTypes.h"
-#include "SpaceLeagueGameMode.generated.h"
+#include "ORATypes.h"
+#include "ORAGameMode.generated.h"
 
-class ASpaceLeagueCharacterBase;
-class ASpaceLeagueGameState;
+class AORACharacterBase;
+class AORAGameState;
 
 UCLASS()
-class SPACELEAGUE_API ASpaceLeagueGameMode : public AGameModeBase
+class MOVEMENTPARADOXE_API AORAGameMode : public AGameModeBase
 {
     GENERATED_BODY()
 
 public:
-    ASpaceLeagueGameMode();
+    AORAGameMode();
 
     // Configuration match
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Match")
@@ -204,13 +204,13 @@ public:
     void EndMatch(ETeam WinningTeam);
 
     UFUNCTION(BlueprintCallable, Category = "Match")
-    void OnPlayerEliminated(ASpaceLeagueCharacterBase* EliminatedPlayer, ASpaceLeagueCharacterBase* Eliminator);
+    void OnPlayerEliminated(AORACharacterBase* EliminatedPlayer, AORACharacterBase* Eliminator);
 
     UFUNCTION(BlueprintCallable, Category = "Match")
     void OnGoalScored(ETeam ScoringTeam);
 
     UFUNCTION(BlueprintCallable, Category = "Match")
-    void ReleaseFromPrison(ASpaceLeagueCharacterBase* Player);
+    void ReleaseFromPrison(AORACharacterBase* Player);
 
     // Équipes
     UFUNCTION(BlueprintCallable, Category = "Teams")
@@ -233,31 +233,31 @@ protected:
 
 ---
 
-## 3. ASpaceLeagueGameState
+## 3. AORAGameState
 
-**Fichier:** `Source/SpaceLeague/Core/SpaceLeagueGameState.h`
+**Fichier:** `Source/ORA/Core/ORAGameState.h`
 
 ```cpp
 #pragma once
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameStateBase.h"
-#include "SpaceLeagueTypes.h"
-#include "SpaceLeagueGameState.generated.h"
+#include "ORATypes.h"
+#include "ORAGameState.generated.h"
 
-class ASpaceLeaguePlayerState;
+class AORAPlayerState;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnScoreChanged, ETeam, Team, int32, NewScore);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMatchStateChanged, EMatchState, NewState);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnTerrainEventStarted, ETerrainEventType, EventType);
 
 UCLASS()
-class SPACELEAGUE_API ASpaceLeagueGameState : public AGameStateBase
+class MOVEMENTPARADOXE_API AORAGameState : public AGameStateBase
 {
     GENERATED_BODY()
 
 public:
-    ASpaceLeagueGameState();
+    AORAGameState();
 
     virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
@@ -277,10 +277,10 @@ public:
 
     // Prison
     UPROPERTY(Replicated, BlueprintReadOnly, Category = "Prison")
-    TArray<ASpaceLeaguePlayerState*> PrisonedPlayersTeamA;
+    TArray<AORAPlayerState*> PrisonedPlayersTeamA;
 
     UPROPERTY(Replicated, BlueprintReadOnly, Category = "Prison")
-    TArray<ASpaceLeaguePlayerState*> PrisonedPlayersTeamB;
+    TArray<AORAPlayerState*> PrisonedPlayersTeamB;
 
     // Événement terrain
     UPROPERTY(ReplicatedUsing = OnRep_TerrainEvent, BlueprintReadOnly, Category = "Terrain")
@@ -301,10 +301,10 @@ public:
     void AddScore(ETeam Team, int32 Points);
 
     UFUNCTION(BlueprintCallable, Category = "Prison")
-    void AddToPrison(ASpaceLeaguePlayerState* Player);
+    void AddToPrison(AORAPlayerState* Player);
 
     UFUNCTION(BlueprintCallable, Category = "Prison")
-    void RemoveFromPrison(ASpaceLeaguePlayerState* Player);
+    void RemoveFromPrison(AORAPlayerState* Player);
 
     UFUNCTION(BlueprintPure, Category = "Prison")
     int32 GetPrisonCount(ETeam Team) const;
@@ -329,28 +329,28 @@ protected:
 
 ---
 
-## 4. ASpaceLeagueCharacterBase
+## 4. AORACharacterBase
 
-**Fichier:** `Source/SpaceLeague/Characters/SpaceLeagueCharacterBase.h`
+**Fichier:** `Source/ORA/Characters/ORACharacterBase.h`
 
 ```cpp
 #pragma once
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
-#include "SpaceLeagueTypes.h"
-#include "SpaceLeagueCharacterBase.generated.h"
+#include "ORATypes.h"
+#include "ORACharacterBase.generated.h"
 
 class UAbilityComponent;
 class ABall;
 
 UCLASS()
-class SPACELEAGUE_API ASpaceLeagueCharacterBase : public ACharacter
+class MOVEMENTPARADOXE_API AORACharacterBase : public ACharacter
 {
     GENERATED_BODY()
 
 public:
-    ASpaceLeagueCharacterBase();
+    AORACharacterBase();
 
     virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
     virtual void BeginPlay() override;
@@ -393,7 +393,7 @@ public:
     void ThrowBall(FVector Direction, float Power, float Curve);
 
     UFUNCTION(BlueprintCallable, Category = "Ball")
-    void PassBall(ASpaceLeagueCharacterBase* Target);
+    void PassBall(AORACharacterBase* Target);
 
     UFUNCTION(BlueprintCallable, Category = "Movement")
     void PerformDash(FVector Direction);
@@ -437,24 +437,24 @@ protected:
 
 ## 5. ABall
 
-**Fichier:** `Source/SpaceLeague/Gameplay/Ball.h`
+**Fichier:** `Source/ORA/Gameplay/Ball.h`
 
 ```cpp
 #pragma once
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "SpaceLeagueTypes.h"
+#include "ORATypes.h"
 #include "Ball.generated.h"
 
-class ASpaceLeagueCharacterBase;
+class AORACharacterBase;
 class USphereComponent;
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnBallHitPlayer, ABall*, Ball, ASpaceLeagueCharacterBase*, HitPlayer);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnBallHitPlayer, ABall*, Ball, AORACharacterBase*, HitPlayer);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnBallEnteredGoal, ABall*, Ball, ETeam, ScoringTeam);
 
 UCLASS()
-class SPACELEAGUE_API ABall : public AActor
+class MOVEMENTPARADOXE_API ABall : public AActor
 {
     GENERATED_BODY()
 
@@ -473,7 +473,7 @@ public:
 
     // État
     UPROPERTY(Replicated, BlueprintReadOnly, Category = "State")
-    ASpaceLeagueCharacterBase* CurrentHolder;
+    AORACharacterBase* CurrentHolder;
 
     UPROPERTY(ReplicatedUsing = OnRep_Velocity, BlueprintReadOnly, Category = "Physics")
     FVector ReplicatedVelocity;
@@ -507,7 +507,7 @@ public:
     void Launch(FVector Direction, float Power, float CurveIntensity);
 
     UFUNCTION(BlueprintCallable, Category = "Ball")
-    void AttachToPlayer(ASpaceLeagueCharacterBase* Player);
+    void AttachToPlayer(AORACharacterBase* Player);
 
     UFUNCTION(BlueprintCallable, Category = "Ball")
     void Detach();
@@ -544,19 +544,19 @@ protected:
 [/Script/EngineSettings.GameMapsSettings]
 GameDefaultMap=/Game/Levels/L_MainArena
 EditorStartupMap=/Game/Levels/L_MainArena
-GlobalDefaultGameMode=/Script/SpaceLeague.ASpaceLeagueGameMode
-GameInstanceClass=/Game/Game/Core/GI_SpaceLeague.GI_SpaceLeague_C
+GlobalDefaultGameMode=/Script/MovementParadoxe.AORAGameMode
+GameInstanceClass=/Game/Game/Core/GI_ORA.GI_ORA_C
 
 [/Script/Engine.Engine]
-+ActiveGameNameRedirects=(OldGameName="TP_BlankBP",NewGameName="/Script/SpaceLeague")
++ActiveGameNameRedirects=(OldGameName="TP_BlankBP",NewGameName="/Script/MovementParadoxe")
 ```
 
 ### 6.2 DefaultGame.ini
 
 ```ini
 [/Script/EngineSettings.GeneralProjectSettings]
-ProjectID=SpaceLeague
-ProjectName=Space League
+ProjectID=ORA
+ProjectName=ORA
 CompanyName=Byakuya
 ```
 
@@ -566,12 +566,12 @@ CompanyName=Byakuya
 
 | Classe | Fichiers | Priorité |
 |--------|----------|----------|
-| SpaceLeagueTypes | Data/SpaceLeagueTypes.h | Phase 0 |
-| ASpaceLeagueGameMode | Core/SpaceLeagueGameMode.h/cpp | Phase 0 |
-| ASpaceLeagueGameState | Core/SpaceLeagueGameState.h/cpp | Phase 0 |
-| ASpaceLeaguePlayerController | Core/SpaceLeaguePlayerController.h/cpp | Phase 0 |
-| ASpaceLeaguePlayerState | Core/SpaceLeaguePlayerState.h/cpp | Phase 0 |
-| ASpaceLeagueCharacterBase | Characters/SpaceLeagueCharacterBase.h/cpp | Phase 0 |
+| ORATypes | Data/ORATypes.h | Phase 0 |
+| AORAGameMode | Core/ORAGameMode.h/cpp | Phase 0 |
+| AORAGameState | Core/ORAGameState.h/cpp | Phase 0 |
+| AORAPlayerController | Core/ORAPlayerController.h/cpp | Phase 0 |
+| AORAPlayerState | Core/ORAPlayerState.h/cpp | Phase 0 |
+| AORACharacterBase | Characters/ORACharacterBase.h/cpp | Phase 0 |
 | UAbilityComponent | Characters/Components/AbilityComponent.h/cpp | Phase 3 |
 | ABall | Gameplay/Ball.h/cpp | Phase 0 |
 | AGoal | Gameplay/Goal.h/cpp | Phase 1 |

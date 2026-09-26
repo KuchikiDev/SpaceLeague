@@ -6,7 +6,7 @@ owner: dylan
 audience: humans-agents
 ---
 
-# Architecture Technique - Space League
+# Architecture Technique - ORA
 
 **Version:** 1.0
 **Date:** 2026-01-25
@@ -20,18 +20,18 @@ audience: humans-agents
 
 ## Vue d'Ensemble
 
-Space League utilise une **architecture hybride C++ / Blueprint** suivant les best practices Epic Games.
+ORA utilise une **architecture hybride C++ / Blueprint** suivant les best practices Epic Games.
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 │                        ARCHITECTURE                              │
 ├─────────────────────────────────────────────────────────────────┤
 │  C++ (Performance, Réplication, Maintenabilité)                 │
-│  ├── ASpaceLeagueGameMode                                       │
-│  ├── ASpaceLeagueGameState                                      │
-│  ├── ASpaceLeaguePlayerController                               │
-│  ├── ASpaceLeaguePlayerState                                    │
-│  ├── ASpaceLeagueCharacterBase                                  │
+│  ├── AORAGameMode                                       │
+│  ├── AORAGameState                                      │
+│  ├── AORAPlayerController                               │
+│  ├── AORAPlayerState                                    │
+│  ├── AORACharacterBase                                  │
 │  ├── UAbilitySystemComponent                                    │
 │  ├── ABall                                                       │
 │  ├── AGoal                                                       │
@@ -39,7 +39,7 @@ Space League utilise une **architecture hybride C++ / Blueprint** suivant les be
 │  └── ATerrainEventManager                                       │
 ├─────────────────────────────────────────────────────────────────┤
 │  Blueprint (Variations, Tuning, Polish)                         │
-│  ├── BP_Raijin (hérite ASpaceLeagueCharacterBase)              │
+│  ├── BP_Raijin (hérite AORACharacterBase)              │
 │  ├── BP_Keplar                                                  │
 │  ├── WBP_HUD                                                    │
 │  ├── WBP_Scoreboard                                             │
@@ -57,7 +57,7 @@ Space League utilise une **architecture hybride C++ / Blueprint** suivant les be
 /Content/
 ├── Game/
 │   ├── Core/
-│   │   └── GI_SpaceLeague.uasset          # GameInstance Blueprint
+│   │   └── GI_ORA.uasset          # GameInstance Blueprint
 │   ├── Data/
 │   │   ├── Abilities/
 │   │   │   ├── DA_Ability_Raijin_Passive.uasset
@@ -77,7 +77,7 @@ Space League utilise une **architecture hybride C++ / Blueprint** suivant les be
 │   │   └── Enums/                          # Supprimé après migration C++
 │   ├── Gameplay/
 │   │   ├── Gamemodes/
-│   │   │   └── BP_GameMode_SpaceLeague.uasset  # Hérite C++
+│   │   │   └── BP_GameMode_ORA.uasset  # Hérite C++
 │   │   ├── Components/
 │   │   └── Player/
 │   ├── UI/
@@ -103,22 +103,22 @@ Space League utilise une **architecture hybride C++ / Blueprint** suivant les be
     └── BPPC_Paradoxe.uasset               # Hérite C++
 
 /Source/
-└── SpaceLeague/
-    ├── SpaceLeague.Build.cs
-    ├── SpaceLeague.h
-    ├── SpaceLeague.cpp
+└── ORA/
+    ├── ORA.Build.cs
+    ├── ORA.h
+    ├── ORA.cpp
     ├── Core/
-    │   ├── SpaceLeagueGameMode.h
-    │   ├── SpaceLeagueGameMode.cpp
-    │   ├── SpaceLeagueGameState.h
-    │   ├── SpaceLeagueGameState.cpp
-    │   ├── SpaceLeaguePlayerController.h
-    │   ├── SpaceLeaguePlayerController.cpp
-    │   ├── SpaceLeaguePlayerState.h
-    │   └── SpaceLeaguePlayerState.cpp
+    │   ├── ORAGameMode.h
+    │   ├── ORAGameMode.cpp
+    │   ├── ORAGameState.h
+    │   ├── ORAGameState.cpp
+    │   ├── ORAPlayerController.h
+    │   ├── ORAPlayerController.cpp
+    │   ├── ORAPlayerState.h
+    │   └── ORAPlayerState.cpp
     ├── Characters/
-    │   ├── SpaceLeagueCharacterBase.h
-    │   ├── SpaceLeagueCharacterBase.cpp
+    │   ├── ORACharacterBase.h
+    │   ├── ORACharacterBase.cpp
     │   └── Components/
     │       ├── AbilityComponent.h
     │       └── AbilityComponent.cpp
@@ -132,7 +132,7 @@ Space League utilise une **architecture hybride C++ / Blueprint** suivant les be
     │   └── TerrainEventManager.h
     │   └── TerrainEventManager.cpp
     └── Data/
-        ├── SpaceLeagueTypes.h              # Enums, Structs
+        ├── ORATypes.h              # Enums, Structs
         ├── LegendData.h
         └── AbilityData.h
 ```
@@ -141,9 +141,9 @@ Space League utilise une **architecture hybride C++ / Blueprint** suivant les be
 
 ## Classes C++ - Responsabilités
 
-### ASpaceLeagueGameMode
+### AORAGameMode
 
-**Fichiers:** `SpaceLeagueGameMode.h/cpp`
+**Fichiers:** `ORAGameMode.h/cpp`
 
 **Responsabilités:**
 - Gestion du spawn des joueurs
@@ -172,14 +172,14 @@ virtual AActor* ChoosePlayerStart_Implementation(AController* Player) override;
 virtual APawn* SpawnDefaultPawnFor_Implementation(AController* NewPlayer, AActor* StartSpot) override;
 void StartMatch();
 void EndMatch();
-void OnPlayerEliminated(ASpaceLeagueCharacterBase* Player);
+void OnPlayerEliminated(AORACharacterBase* Player);
 ```
 
 ---
 
-### ASpaceLeagueGameState
+### AORAGameState
 
-**Fichiers:** `SpaceLeagueGameState.h/cpp`
+**Fichiers:** `ORAGameState.h/cpp`
 
 **Responsabilités:**
 - Score des équipes (répliqué)
@@ -196,7 +196,7 @@ UPROPERTY(Replicated)
 EMatchState MatchState;
 
 UPROPERTY(Replicated)
-TArray<ASpaceLeaguePlayerState*> PrisonedPlayers;
+TArray<AORAPlayerState*> PrisonedPlayers;
 
 UPROPERTY(ReplicatedUsing = OnRep_ActiveTerrainEvent)
 ETerrainEventType ActiveTerrainEvent;
@@ -204,9 +204,9 @@ ETerrainEventType ActiveTerrainEvent;
 
 ---
 
-### ASpaceLeagueCharacterBase
+### AORACharacterBase
 
-**Fichiers:** `SpaceLeagueCharacterBase.h/cpp`
+**Fichiers:** `ORACharacterBase.h/cpp`
 
 **Responsabilités:**
 - Mouvements de base (hérités, étendus)
@@ -247,7 +247,7 @@ float GrappleRange = 1500.0f;
 **Variables Clés:**
 ```cpp
 UPROPERTY(Replicated)
-ASpaceLeagueCharacterBase* CurrentHolder;
+AORACharacterBase* CurrentHolder;
 
 UPROPERTY(ReplicatedUsing = OnRep_Velocity)
 FVector ReplicatedVelocity;
@@ -269,19 +269,19 @@ float CurveIntensity = 0.5f;
 1. Menu Sélection
    │
    ▼
-2. GI_SpaceLeague::SetSelectedLegend(LegendId, Skin)
+2. GI_ORA::SetSelectedLegend(LegendId, Skin)
    │  Stocke: SelectedLegendId, SelectedSkin
    │
    ▼
 3. Transition vers Map de jeu
    │
    ▼
-4. ASpaceLeagueGameMode::SpawnDefaultPawnFor()
-   │  Récupère: GI_SpaceLeague::GetSelectedLegendData()
+4. AORAGameMode::SpawnDefaultPawnFor()
+   │  Récupère: GI_ORA::GetSelectedLegendData()
    │  Spawn: CharacterClass depuis LegendData
    │
    ▼
-5. ASpaceLeagueCharacterBase::InitializeFromLegendData()
+5. AORACharacterBase::InitializeFromLegendData()
    │  Configure: Stats, Abilities, Skin
    │
    ▼
@@ -294,12 +294,12 @@ float CurveIntensity = 0.5f;
 1. ABall::OnHit(Player)
    │
    ▼
-2. ASpaceLeagueGameMode::OnPlayerEliminated(Player)
+2. AORAGameMode::OnPlayerEliminated(Player)
    │  Player.PlayerGameState = InPrison
    │  GameState.AddToPrison(Player)
    │
    ▼
-3. ASpaceLeagueGameState::CheckPrisonScore()
+3. AORAGameState::CheckPrisonScore()
    │  Si 2 joueurs même équipe en prison:
    │    TeamScores[AutreEquipe] += 2
    │    LibérerPrisonniers()
@@ -317,8 +317,8 @@ float CurveIntensity = 0.5f;
 | Classe | Priorité | Fréquence |
 |--------|----------|-----------|
 | ABall | Très Haute | 60 Hz |
-| ASpaceLeagueCharacterBase | Haute | 30 Hz |
-| ASpaceLeagueGameState | Moyenne | Variable |
+| AORACharacterBase | Haute | 30 Hz |
+| AORAGameState | Moyenne | Variable |
 | AGoal | Basse | On Change |
 
 ### Variables Répliquées Critiques
@@ -337,7 +337,7 @@ UPROPERTY(ReplicatedUsing = OnRep_Velocity)
 FVector ReplicatedVelocity;
 
 UPROPERTY(Replicated)
-ASpaceLeagueCharacterBase* CurrentHolder;
+AORACharacterBase* CurrentHolder;
 ```
 
 ---
@@ -355,7 +355,7 @@ ASpaceLeagueCharacterBase* CurrentHolder;
 | Enum | E | EMatchState (C++) |
 | Interface | I | IInteractable |
 | Component | UC | UAbilityComponent |
-| GameMode | A...GameMode | ASpaceLeagueGameMode |
+| GameMode | A...GameMode | AORAGameMode |
 
 ### Variables
 
@@ -373,7 +373,7 @@ ASpaceLeagueCharacterBase* CurrentHolder;
 ### Modules UE5 Requis
 
 ```cpp
-// SpaceLeague.Build.cs
+// ORA.Build.cs
 PublicDependencyModuleNames.AddRange(new string[] {
     "Core",
     "CoreUObject",

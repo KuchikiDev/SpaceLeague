@@ -28,7 +28,7 @@ Migrer vers une architecture hybride C++ / Blueprint **SANS CASSER** le gameplay
 ```
 AVANT                           APRÈS
 ──────                          ─────
-BP_Paradoxe                     ASpaceLeagueCharacterBase (C++)
+BP_Paradoxe                     AORACharacterBase (C++)
   └── (Character)                   │
                                     ▼
                                 BP_Paradoxe (hérite C++)
@@ -55,8 +55,8 @@ BP_Ball                         ABall (C++)
 
 **Action requise:**
 ```
-1. Créer ASpaceLeagueCharacterBase en C++ (hérite ACharacter)
-2. Reparenter BP_Paradoxe → ASpaceLeagueCharacterBase
+1. Créer AORACharacterBase en C++ (hérite ACharacter)
+2. Reparenter BP_Paradoxe → AORACharacterBase
 ```
 
 **Risques:**
@@ -69,10 +69,10 @@ BP_Ball                         ABall (C++)
 **Procédure sécurisée:**
 ```
 1. BACKUP: Dupliquer BP_Paradoxe → BP_Paradoxe_Backup
-2. Créer ASpaceLeagueCharacterBase (C++) - VIDE au début
+2. Créer AORACharacterBase (C++) - VIDE au début
 3. Compiler C++
 4. Ouvrir BP_Paradoxe → Class Settings → Parent Class
-5. Changer vers ASpaceLeagueCharacterBase
+5. Changer vers AORACharacterBase
 6. Compiler Blueprint
 7. TESTER: Lancer le jeu, vérifier mouvements
 8. Si OK → Supprimer backup
@@ -137,15 +137,15 @@ BP_Ball                         ABall (C++)
 
 **Action requise:**
 ```
-1. Créer ASpaceLeaguePlayerController en C++
-2. Reparenter BPPC_Paradoxe → ASpaceLeaguePlayerController
+1. Créer AORAPlayerController en C++
+2. Reparenter BPPC_Paradoxe → AORAPlayerController
 ```
 
 **Risques minimaux** car les PlayerControllers ont généralement peu de logique custom en Blueprint.
 
 ---
 
-### 5. GI_SpaceLeague (GameInstance) (Risque: FAIBLE)
+### 5. GI_ORA (GameInstance) (Risque: FAIBLE)
 
 **Recommandation:** Garder en Blueprint
 
@@ -156,7 +156,7 @@ BP_Ball                         ABall (C++)
 
 ---
 
-### 6. BP_GameState_SpaceLeague (Risque: MOYEN-HAUT)
+### 6. BP_GameState_ORA (Risque: MOYEN-HAUT)
 
 **Situation actuelle:**
 - Parent: `GameStateBase`
@@ -164,8 +164,8 @@ BP_Ball                         ABall (C++)
 
 **Action requise:**
 ```
-1. Créer ASpaceLeagueGameState en C++ avec réplication
-2. Reparenter BP_GameState → ASpaceLeagueGameState
+1. Créer AORAGameState en C++ avec réplication
+2. Reparenter BP_GameState → AORAGameState
 ```
 
 **Risques:**
@@ -177,7 +177,7 @@ BP_Ball                         ABall (C++)
 **Procédure sécurisée:**
 ```
 1. BACKUP complet
-2. Créer ASpaceLeagueGameState avec variables répliquées
+2. Créer AORAGameState avec variables répliquées
 3. Exposer variables avec UPROPERTY(BlueprintReadWrite)
 4. Reparenter
 5. TESTER en multijoueur local
@@ -189,13 +189,13 @@ BP_Ball                         ABall (C++)
 
 ```
 Phase 1 - Fondations (Faible risque)
-├── 1.1 Créer module C++ SpaceLeague
-├── 1.2 Créer ASpaceLeagueGameMode (vide)
-├── 1.3 Créer ASpaceLeaguePlayerController (vide)
+├── 1.1 Créer module C++ ORA
+├── 1.2 Créer AORAGameMode (vide)
+├── 1.3 Créer AORAPlayerController (vide)
 └── 1.4 Tester compilation
 
 Phase 2 - Core Game (Risque moyen)
-├── 2.1 Créer ASpaceLeagueCharacterBase
+├── 2.1 Créer AORACharacterBase
 ├── 2.2 Reparenter BP_Paradoxe
 ├── 2.3 TESTER mouvements
 ├── 2.4 Créer ABall
@@ -203,8 +203,8 @@ Phase 2 - Core Game (Risque moyen)
 └── 2.6 TESTER physique balle
 
 Phase 3 - Réseau (Risque moyen-haut)
-├── 3.1 Créer ASpaceLeagueGameState avec réplication
-├── 3.2 Créer ASpaceLeaguePlayerState
+├── 3.1 Créer AORAGameState avec réplication
+├── 3.2 Créer AORAPlayerState
 ├── 3.3 Migrer variables score vers C++
 └── 3.4 TESTER multijoueur local
 

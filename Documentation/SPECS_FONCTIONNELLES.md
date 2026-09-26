@@ -7,12 +7,12 @@ audience: humans-agents
 ---
 
 
-# Spécifications Fonctionnelles - Space League
+# Spécifications Fonctionnelles - ORA
 
 **Version:** 1.0
 **Date:** 2026-01-25
 **Auteur:** Claude (BMAD)
-**Source:** Confluence Space League
+**Source:** Confluence ORA
 
 **Navigation Vault:** [[_ai/00_Home]] | [[_ai/01_Now]] | [[_ai/AGENT_CONTEXT]]
 **Liens relies:** [[RESUME_JEU]] | [[ROADMAP]] | [[_maps/MOC_Gameplay]]
@@ -23,7 +23,7 @@ audience: humans-agents
 
 ### 1.1 Concept
 
-Space League est un jeu de sport compétitif opposant deux équipes dans une arène spatiale. Les joueurs doivent marquer des points en envoyant la balle dans le but adverse ou en éliminant les adversaires pour les envoyer en prison.
+ORA est un jeu de sport compétitif opposant deux équipes dans une arène spatiale. Les joueurs doivent marquer des points en envoyant la balle dans le but adverse ou en éliminant les adversaires pour les envoyer en prison.
 
 ### 1.2 Format
 

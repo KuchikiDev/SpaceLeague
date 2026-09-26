@@ -6,7 +6,7 @@ owner: dylan
 audience: humans-agents
 ---
 
-# 🎮 RÉSUMÉ COMPLET - SPACE LEAGUE
+# 🎮 RÉSUMÉ COMPLET - ORA
 
 **Navigation Vault:** [[_ai/00_Home]] | [[_ai/01_Now]] | [[_ai/AGENT_CONTEXT]]
 **Liens relies:** [[SPECS_FONCTIONNELLES]] | [[ROADMAP]] | [[_maps/MOC_Gameplay]]
@@ -14,7 +14,7 @@ audience: humans-agents
 
 ## 📋 Vue d'ensemble
 
-**Space League** est un jeu de sport compétitif multijoueur développé sur **Unreal Engine 5**, opposant deux équipes dans un terrain divisé en deux camps séparés. Le jeu combine des mécaniques de tir de précision, de mobilité avancée et de stratégie d'équipe pour créer une expérience unique de sport futuriste.
+**ORA** est un jeu de sport compétitif multijoueur développé sur **Unreal Engine 5**, opposant deux équipes dans un terrain divisé en deux camps séparés. Le jeu combine des mécaniques de tir de précision, de mobilité avancée et de stratégie d'équipe pour créer une expérience unique de sport futuriste.
 
 ---
 
@@ -286,9 +286,9 @@ Modifie brièvement le sens de la gravité appliqué aux joueurs (sans affecter 
 1. **Système de Base Incomplet**
    - D'après `CORRECTIONS_PRIORITAIRES.md`, plusieurs éléments manquants :
      - Structs non créés (ST_KeyFloat, ST_CooldownOverrideEntry, ST_ParamOverrideEntry)
-     - GI_SpaceLeague incomplet (fonctions manquantes)
+     - GI_ORA incomplet (fonctions manquantes)
      - BP_Paradoxe utilise encore DataTable au lieu de DA_LegendBase
-     - BP_GameMode_SpaceLeague non créé
+     - BP_GameMode_ORA non créé
      - Map non configurée avec PlayerStarts
 
 2. **Architecture en Transition**
@@ -361,9 +361,9 @@ Modifie brièvement le sens de la gravité appliqué aux joueurs (sans affecter 
 
 1. **Corrections Prioritaires** (d'après `CORRECTIONS_PRIORITAIRES.md`)
    - Créer les structs manquantes
-   - Compléter GI_SpaceLeague
+   - Compléter GI_ORA
    - Corriger BP_Paradoxe
-   - Créer BP_GameMode_SpaceLeague
+   - Créer BP_GameMode_ORA
    - Configurer la map
 
 2. **Développement Gameplay**
@@ -412,7 +412,7 @@ Modifie brièvement le sens de la gravité appliqué aux joueurs (sans affecter 
 
 ## 📝 Conclusion
 
-**Space League** présente un **concept de gameplay original et prometteur** avec :
+**ORA** présente un **concept de gameplay original et prometteur** avec :
 - Une mécanique de score dual intéressante
 - Un système de contrôle technique récompensant la maîtrise
 - Une mobilité avancée créative
@@ -433,5 +433,5 @@ Le jeu a le potentiel d'être un **sport compétitif unique** s'il parvient à :
 ---
 
 *Document genere le : 2026-02-19 (date de revue documentaire)*
-*Basé sur : Confluence Space League + Codebase + Documentation projet*
+*Basé sur : Confluence ORA + Codebase + Documentation projet*
 

@@ -66,7 +66,7 @@ graph TD
 # Lui demander de:
 # 1. Analyser Documentation/ARCHITECTURE.md
 # 2. Vérifier la structure C++ proposée
-# 3. Valider les dépendances modules (SpaceLeague.Build.cs)
+# 3. Valider les dépendances modules (ORA.Build.cs)
 # 4. Confirmer la stratégie de réplication réseau
 ```
 
@@ -92,8 +92,8 @@ graph TD
 # Analyser:
 # - BP_Paradoxe (CRITIQUE - logique gameplay)
 # - BP_Ball (HAUTE - physique)
-# - BP_GameMode_SpaceLeague (CRITIQUE - architecture)
-# - GI_SpaceLeague (HAUTE - persistance)
+# - BP_GameMode_ORA (CRITIQUE - architecture)
+# - GI_ORA (HAUTE - persistance)
 ```
 
 **Livrables:**
@@ -140,7 +140,7 @@ graph TD
 | LEAG-001 | Supprimer BP_ParadoxeJhin | Haute |
 | LEAG-002 | Supprimer BP_ParadoxeSenna | Haute |
 | LEAG-003 | Supprimer dossier /Old/ | Moyenne |
-| LEAG-004 | Résoudre doublon GI_SpaceLeague | Haute |
+| LEAG-004 | Résoudre doublon GI_ORA | Haute |
 
 **Actions:**
 ```bash
@@ -159,7 +159,7 @@ graph TD
 # - Backup d'abord dans .old/
 # - Supprimer Content/Old/
 
-# 4. LEAG-004: Résoudre doublon GI_SpaceLeague
+# 4. LEAG-004: Résoudre doublon GI_ORA
 # - Identifier les 2 instances
 # - Fusionner ou supprimer
 # - Mettre à jour les références
@@ -179,7 +179,7 @@ graph TD
 - [ ] BP_ParadoxeJhin supprimé
 - [ ] BP_ParadoxeSenna supprimé
 - [ ] Dossier /Old/ supprimé
-- [ ] GI_SpaceLeague unique
+- [ ] GI_ORA unique
 - [ ] Tests de compilation OK
 
 ---
@@ -192,12 +192,12 @@ graph TD
 
 **Actions:**
 ```bash
-/ue5-create-module SpaceLeague
+/ue5-create-module ORA
 
 # Ou manuellement:
-# 1. Créer dossier Source/SpaceLeague/
-# 2. Créer SpaceLeague.Build.cs
-# 3. Créer SpaceLeague.h et SpaceLeague.cpp
+# 1. Créer dossier Source/ORA/
+# 2. Créer ORA.Build.cs
+# 3. Créer ORA.h et ORA.cpp
 # 4. Ajouter au .uproject
 ```
 
@@ -216,11 +216,11 @@ graph TD
 
 **Pour chaque classe:**
 
-#### LEAG-006: ASpaceLeagueGameMode
+#### LEAG-006: AORAGameMode
 ```bash
 /dev
 
-# 1. Créer SpaceLeagueGameMode.h/.cpp
+# 1. Créer ORAGameMode.h/.cpp
 # 2. Copier le code de SPECS_TECHNIQUES.md
 # 3. Compiler
 # 4. Tester
@@ -229,11 +229,11 @@ graph TD
 /qa
 ```
 
-#### LEAG-007: ASpaceLeagueGameState
+#### LEAG-007: AORAGameState
 ```bash
 /dev
 
-# 1. Créer SpaceLeagueGameState.h/.cpp
+# 1. Créer ORAGameState.h/.cpp
 # 2. Implémenter réplication (bNetLoadOnClient=true)
 # 3. Ajouter GetLifetimeReplicatedProps
 # 4. Compiler
@@ -242,22 +242,22 @@ graph TD
 /qa
 ```
 
-#### LEAG-008: ASpaceLeaguePlayerController
+#### LEAG-008: AORAPlayerController
 ```bash
 /dev
 
-# 1. Créer SpaceLeaguePlayerController.h/.cpp
+# 1. Créer ORAPlayerController.h/.cpp
 # 2. Implémenter Enhanced Input
 # 3. Compiler
 
 /ue5-compile
 ```
 
-#### LEAG-009: ASpaceLeagueCharacterBase
+#### LEAG-009: AORACharacterBase
 ```bash
 /dev
 
-# 1. Créer SpaceLeagueCharacterBase.h/.cpp
+# 1. Créer ORACharacterBase.h/.cpp
 # 2. Implémenter mouvements (Sprint, Dash, Jump, Grappin)
 # 3. Ajouter réplication
 # 4. Compiler
@@ -268,11 +268,11 @@ graph TD
 ```
 
 **Livrables:**
-- [ ] Module SpaceLeague créé
-- [ ] ASpaceLeagueGameMode implémenté
-- [ ] ASpaceLeagueGameState implémenté
-- [ ] ASpaceLeaguePlayerController implémenté
-- [ ] ASpaceLeagueCharacterBase implémenté
+- [ ] Module ORA créé
+- [ ] AORAGameMode implémenté
+- [ ] AORAGameState implémenté
+- [ ] AORAPlayerController implémenté
+- [ ] AORACharacterBase implémenté
 - [ ] Tous les tests passent
 
 ---
@@ -292,7 +292,7 @@ graph TD
 
 # 1. Ouvrir BP_Paradoxe dans l'éditeur
 # 2. File > Reparent Blueprint
-# 3. Choisir ASpaceLeagueCharacterBase
+# 3. Choisir AORACharacterBase
 # 4. Résoudre les conflits de variables
 # 5. Tester les mouvements
 # 6. Sauvegarder
@@ -374,7 +374,7 @@ graph TD
 
 ## Étape 5: Corrections Techniques (Jours 9-10)
 
-### 5.1 Implémenter GI_SpaceLeague (LEAG-015)
+### 5.1 Implémenter GI_ORA (LEAG-015)
 
 **Agent:** `/dev`
 
@@ -382,7 +382,7 @@ graph TD
 ```bash
 /dev
 
-# Ouvrir GI_SpaceLeague Blueprint
+# Ouvrir GI_ORA Blueprint
 # Implémenter fonctions manquantes:
 # - InitializeGameData()
 # - LoadLegendRegistry()
@@ -410,8 +410,8 @@ graph TD
 # 2. Ajouter PlayerStart pour Team 1 (2 spawns)
 # 3. Ajouter PlayerStart pour Team 2 (2 spawns)
 # 4. Configurer World Settings:
-#    - GameMode: BP_GameMode_SpaceLeague
-#    - PlayerController: BP_SpaceLeaguePlayerController
+#    - GameMode: BP_GameMode_ORA
+#    - PlayerController: BP_ORAPlayerController
 # 5. Placer BP_Ball
 # 6. Placer BP_Goal (Team 1 et 2)
 # 7. Placer BP_Prison (Team 1 et 2)
@@ -436,7 +436,7 @@ graph TD
 ```
 
 **Livrables:**
-- [ ] GI_SpaceLeague fonctionnel
+- [ ] GI_ORA fonctionnel
 - [ ] Map configurée avec spawns
 - [ ] DA_LegendRegistry validé
 
@@ -539,7 +539,7 @@ git add .
 git commit -m "Phase 0 Complete: Migration C++ et Fondations
 
 - Nettoyage projet (LEAG-001 à LEAG-004)
-- Module SpaceLeague créé (LEAG-005)
+- Module ORA créé (LEAG-005)
 - Classes framework C++ (LEAG-006 à LEAG-009)
 - Migration BP_Paradoxe, BP_Ball (LEAG-010 à LEAG-014)
 - Corrections techniques (LEAG-015 à LEAG-017)
@@ -635,7 +635,7 @@ git push origin main
 - [ROADMAP.md](./ROADMAP.md)
 
 ### Confluence
-- [ROADMAP Space League](https://byakuyacorps.atlassian.net/wiki/spaces/SL/pages/212795394)
+- [ROADMAP ORA](https://byakuyacorps.atlassian.net/wiki/spaces/SL/pages/212795394)
 - [ARCHITECTURE TECHNIQUE](https://byakuyacorps.atlassian.net/wiki/spaces/SL/pages/212828161)
 
 ### BMad Resources

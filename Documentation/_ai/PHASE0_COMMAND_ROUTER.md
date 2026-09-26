@@ -28,7 +28,7 @@ Selection fiable des agents/tasks/skills a utiliser pour la Phase 0, basee sur l
 - `LEAG-004`: resolu structurellement (GI duplique consolide cote references)
 - `GetSelectedLegendData`: considere reimplante (retour utilisateur)
 - Prochaine validation a executer en UE (runtime):
-  1. Compiler `GI_SpaceLeague` + `GM_Sandbox`
+  1. Compiler `GI_ORA` + `GM_Sandbox`
   2. Tester menu/selection -> sandbox (appel `GetSelectedLegendData`)
 
 ## Inventaire verifie (local)
@@ -104,7 +104,7 @@ Selection fiable des agents/tasks/skills a utiliser pour la Phase 0, basee sur l
 
 ### Jours 3-5 - Migration C++ phase 1
 
-1. `/ue5-create-module SpaceLeague` (si la decision est de migrer vers module `SpaceLeague`).
+1. `/ue5-create-module ORA` (si la decision est de migrer vers module `ORA`).
 2. `/dev` pour classes C++ prioritaires.
 3. `/ue5-compile`
 4. `/ue5-test --filter Phase0`
@@ -137,7 +137,7 @@ Pour chaque BP:
 
 ```text
 Analyse Documentation/ARCHITECTURE.md et Documentation/SPECS_TECHNIQUES.md.
-Objectif: lister les ecarts entre cible SpaceLeague et etat reel MovementParadoxe (code + DefaultEngine.ini), puis proposer une decision: migrer vers SpaceLeague ou consolider MovementParadoxe.
+Objectif: lister les ecarts entre cible ORA et etat reel MovementParadoxe (code + DefaultEngine.ini), puis proposer une decision: migrer vers ORA ou consolider MovementParadoxe.
 Sortie attendue: decision, impacts, risques, plan en 5 etapes max.
 ```
 
@@ -158,7 +158,7 @@ Retourne un statut GO/NO-GO avec liste de blocants.
 ### Prompt `/risk-profile`
 
 ```text
-Evalue les risques de migration BP_Paradoxe, BP_Ball, BP_GameState_SpaceLeague, GI_SpaceLeague.
+Evalue les risques de migration BP_Paradoxe, BP_Ball, BP_GameState_ORA, GI_ORA.
 Classe par probabilite x impact, avec mitigation concrete et ordre de migration.
 ```
 

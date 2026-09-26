@@ -174,4 +174,4 @@ Raijin entre dans un **état de foudre vivante** pendant 15 secondes
 ---
 
 *Fiche créée : 2026-02-21*
-*Basé sur : Confluence Space League*
+*Basé sur : Confluence ORA*

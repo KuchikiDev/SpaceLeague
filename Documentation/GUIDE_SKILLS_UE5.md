@@ -10,7 +10,7 @@ audience: humans-agents
 
 **Version:** 1.0
 **Date:** 2026-02-19
-**Projet:** Space League - MovementParadoxe
+**Projet:** ORA - MovementParadoxe
 
 **Navigation Vault:** [[_ai/00_Home]] | [[_ai/01_Now]] | [[_ai/AGENT_CONTEXT]]
 **Liens relies:** [[README_SETUP_BMAD_UE5]] | [[WORKFLOW_PHASE0_BMAD]] | [[ROADMAP]]
@@ -19,7 +19,7 @@ audience: humans-agents
 
 ## Vue d'Ensemble
 
-Ce guide documente tous les **skills custom UE5** créés pour faciliter le développement du projet Space League.
+Ce guide documente tous les **skills custom UE5** créés pour faciliter le développement du projet ORA.
 
 ### Skills Disponibles
 
@@ -39,8 +39,8 @@ Ce guide documente tous les **skills custom UE5** créés pour faciliter le dév
 ### Workflow Phase 0 - Setup Initial
 
 ```bash
-# 1. Créer le module SpaceLeague
-/ue5-create-module SpaceLeague --type Runtime
+# 1. Créer le module ORA
+/ue5-create-module ORA --type Runtime
 
 # 2. Compiler pour vérifier
 /ue5-compile
@@ -58,10 +58,10 @@ Ce guide documente tous les **skills custom UE5** créés pour faciliter le dév
 # ÉTAPE 2: Migration manuelle dans UE5
 # - Ouvrir BP_Paradoxe
 # - File > Reparent Blueprint
-# - Choisir ASpaceLeagueCharacterBase
+# - Choisir AORACharacterBase
 
 # ÉTAPE 3: Vérifier la migration
-/migration-check BP_Paradoxe --parent ASpaceLeagueCharacterBase
+/migration-check BP_Paradoxe --parent AORACharacterBase
 
 # ÉTAPE 4: Compiler
 /ue5-compile
@@ -74,7 +74,7 @@ Ce guide documente tous les **skills custom UE5** créés pour faciliter le dév
 
 # ÉTAPE 7: Commit si OK
 git add .
-git commit -m "Migré BP_Paradoxe vers ASpaceLeagueCharacterBase"
+git commit -m "Migré BP_Paradoxe vers AORACharacterBase"
 ```
 
 ### Workflow Quotidien
@@ -188,7 +188,7 @@ git commit -m "..."
 # Exemples Phase 0
 /ue5-backup-asset Content/Legends/BP_Paradoxe.uasset
 /ue5-backup-asset Content/Terrain/Blueprints/BP_Ball.uasset
-/ue5-backup-asset Content/Game/Gameplay/Gamemodes/BP_GameMode_SpaceLeague.uasset
+/ue5-backup-asset Content/Game/Gameplay/Gamemodes/BP_GameMode_ORA.uasset
 ```
 
 **Quand utiliser:**
@@ -229,7 +229,7 @@ git commit -m "..."
 /migration-check BP_Paradoxe
 
 # Avec parent spécifique
-/migration-check BP_Paradoxe --parent ASpaceLeagueCharacterBase
+/migration-check BP_Paradoxe --parent AORACharacterBase
 
 # Mode strict (zéro warning)
 /migration-check BP_Paradoxe --strict
@@ -262,7 +262,7 @@ Recommandation: ✅ OK pour commit
 **Migrations Phase 0:**
 ```bash
 # Vérifier toutes les migrations
-/migration-check BP_Paradoxe --parent ASpaceLeagueCharacterBase
+/migration-check BP_Paradoxe --parent AORACharacterBase
 /migration-check BP_Ball --parent ABall
 /migration-check BP_Goal --parent AGoal
 /migration-check BP_Prison --parent APrison
@@ -312,7 +312,7 @@ Score Santé: 82/100 (🟡 GOOD)
    - Tests: 70/100 🟡
 
 🔧 ACTIONS RECOMMANDÉES
-1. ❌ LEAG-004: Résoudre doublon GI_SpaceLeague
+1. ❌ LEAG-004: Résoudre doublon GI_ORA
 2. ⚠️  Nettoyer warnings compilation (12 warnings)
 3. ⚠️  Supprimer assets non utilisés (23 MB)
 ```
@@ -332,13 +332,13 @@ Score Santé: 82/100 (🟡 GOOD)
 
 ```bash
 # Module Runtime (gameplay)
-/ue5-create-module SpaceLeague --type Runtime
+/ue5-create-module ORA --type Runtime
 
 # Module Editor (outils custom)
-/ue5-create-module SpaceLeagueEditor --type Editor
+/ue5-create-module ORAEditor --type Editor
 
 # Avec dépendances custom
-/ue5-create-module SpaceLeague --type Runtime --deps "GameplayTags,UMG,Slate"
+/ue5-create-module ORA --type Runtime --deps "GameplayTags,UMG,Slate"
 ```
 
 **Quand utiliser:**
@@ -348,12 +348,12 @@ Score Santé: 82/100 (🟡 GOOD)
 
 **Fichiers générés:**
 ```
-Source/SpaceLeague/
-├── SpaceLeague.Build.cs
+Source/ORA/
+├── ORA.Build.cs
 ├── Public/
-│   └── SpaceLeague.h
+│   └── ORA.h
 └── Private/
-    └── SpaceLeague.cpp
+    └── ORA.cpp
 ```
 
 **Après création:**
@@ -392,10 +392,10 @@ git commit -m "LEAG-001: Supprimé BP_ParadoxeJhin"
 
 ```bash
 # Créer module
-/ue5-create-module SpaceLeague --type Runtime
+/ue5-create-module ORA --type Runtime
 
 # Vérifier structure
-ls Source/SpaceLeague/
+ls Source/ORA/
 
 # Compiler
 /ue5-compile
@@ -404,7 +404,7 @@ ls Source/SpaceLeague/
 /ue5-health-check
 
 # Commit
-git commit -m "LEAG-005: Créé module C++ SpaceLeague"
+git commit -m "LEAG-005: Créé module C++ ORA"
 ```
 
 ### Workflow 3: Migration BP_Paradoxe (LEAG-010)
@@ -414,10 +414,10 @@ git commit -m "LEAG-005: Créé module C++ SpaceLeague"
 /ue5-backup-asset Content/Legends/BP_Paradoxe.uasset
 
 # 2. Migration dans UE5
-# File > Reparent Blueprint > ASpaceLeagueCharacterBase
+# File > Reparent Blueprint > AORACharacterBase
 
 # 3. Vérifier migration
-/migration-check BP_Paradoxe --parent ASpaceLeagueCharacterBase
+/migration-check BP_Paradoxe --parent AORACharacterBase
 
 # 4. Compiler
 /ue5-compile
@@ -429,7 +429,7 @@ git commit -m "LEAG-005: Créé module C++ SpaceLeague"
 /ue5-health-check
 
 # 7. Commit si tout OK
-git commit -m "LEAG-010: Migré BP_Paradoxe vers ASpaceLeagueCharacterBase"
+git commit -m "LEAG-010: Migré BP_Paradoxe vers AORACharacterBase"
 ```
 
 ### Workflow 4: Validation Phase 0 Complete
@@ -509,15 +509,15 @@ git tag v0.1.0-phase0-complete
 
 ## Troubleshooting
 
-### Problème: "Module SpaceLeague not found"
+### Problème: "Module ORA not found"
 
 **Solution:**
 ```bash
 # Vérifier existence
-ls Source/SpaceLeague/SpaceLeague.Build.cs
+ls Source/ORA/ORA.Build.cs
 
 # Régénérer .sln
-/ue5-create-module SpaceLeague --regenerate
+/ue5-create-module ORA --regenerate
 
 # Recompiler
 /ue5-compile --clean
@@ -597,18 +597,18 @@ ls Source/SpaceLeague/SpaceLeague.Build.cs
 - [ ] Supprimer BP_ParadoxeJhin (LEAG-001)
 - [ ] Supprimer BP_ParadoxeSenna (LEAG-002)
 - [ ] Supprimer dossier /Old/ (LEAG-003)
-- [ ] Résoudre doublon GI_SpaceLeague (LEAG-004)
+- [ ] Résoudre doublon GI_ORA (LEAG-004)
 - [ ] `/ue5-compile` - Vérifier compilation
 - [ ] `/ue5-health-check` - Vérifier amélioration
 
 ### 0.2 Migration C++ - Phase 1
 
-- [ ] `/ue5-create-module SpaceLeague` (LEAG-005)
+- [ ] `/ue5-create-module ORA` (LEAG-005)
 - [ ] `/ue5-compile` - Vérifier module
-- [ ] Créer ASpaceLeagueGameMode (LEAG-006)
-- [ ] Créer ASpaceLeagueGameState (LEAG-007)
-- [ ] Créer ASpaceLeaguePlayerController (LEAG-008)
-- [ ] Créer ASpaceLeagueCharacterBase (LEAG-009)
+- [ ] Créer AORAGameMode (LEAG-006)
+- [ ] Créer AORAGameState (LEAG-007)
+- [ ] Créer AORAPlayerController (LEAG-008)
+- [ ] Créer AORACharacterBase (LEAG-009)
 - [ ] `/ue5-compile` - Compiler toutes les classes
 - [ ] `/ue5-test --filter Core` - Tester classes
 - [ ] `/ue5-health-check` - Vérifier qualité

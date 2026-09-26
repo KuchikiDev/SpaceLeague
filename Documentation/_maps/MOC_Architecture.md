@@ -16,7 +16,7 @@ domain: architecture
 
 ## Ecarts critiques
 
-- Specs ciblees sur `SpaceLeague` vs code actuel `MovementParadoxe`.
+- Specs ciblees sur `ORA` vs code actuel `MovementParadoxe`.
 - Configuration projet documentee vs `DefaultEngine.ini` reel.
 
 ## Liens execution

@@ -6,10 +6,10 @@ owner: dylan
 audience: humans-agents
 ---
 
-# 🚀 Setup BMad + UE5 Skills - Space League
+# 🚀 Setup BMad + UE5 Skills - ORA
 
 **Date:** 2026-02-19
-**Projet:** Space League - MovementParadoxe
+**Projet:** ORA - MovementParadoxe
 **Phase:** Phase 0 - Fondations
 
 **Navigation Vault:** [[_ai/00_Home]] | [[_ai/01_Now]] | [[_ai/AGENT_CONTEXT]]
@@ -154,7 +154,7 @@ Documentation/
 **Jours 3-5: Classes Framework (LEAG-005 à 009)**
 ```bash
 # Créer module
-/ue5-create-module SpaceLeague --type Runtime
+/ue5-create-module ORA --type Runtime
 
 # Pour chaque classe:
 /dev
@@ -234,7 +234,7 @@ git commit -m "Phase 0 Complete"
 # 2. Migration manuelle (UE5 Editor)
 
 # 3. CHECK
-/migration-check BP_Paradoxe --parent ASpaceLeagueCharacterBase
+/migration-check BP_Paradoxe --parent AORACharacterBase
 
 # 4. COMPILE
 /ue5-compile
@@ -258,7 +258,7 @@ git commit -m "Migré BP_Paradoxe"
 ### Création Module
 
 ```bash
-/ue5-create-module SpaceLeague --type Runtime
+/ue5-create-module ORA --type Runtime
 ```
 
 ---
@@ -448,7 +448,7 @@ A: Lancer `/ue5-health-check --phase0` et `/qa-gate`. Si tous les critères sont
 
 ### Critères Migration
 
-- [ ] ✅ Module SpaceLeague créé
+- [ ] ✅ Module ORA créé
 - [ ] ✅ Classes C++ framework créées (5 classes)
 - [ ] ✅ BP_Paradoxe migré vers C++
 - [ ] ✅ BP_Ball migré vers C++
@@ -509,7 +509,7 @@ Une fois Phase 0 terminée:
 
 ### Confluence
 
-- [ROADMAP Space League](https://byakuyacorps.atlassian.net/wiki/spaces/SL/pages/212795394)
+- [ROADMAP ORA](https://byakuyacorps.atlassian.net/wiki/spaces/SL/pages/212795394)
 - [ARCHITECTURE TECHNIQUE](https://byakuyacorps.atlassian.net/wiki/spaces/SL/pages/212828161)
 
 ---

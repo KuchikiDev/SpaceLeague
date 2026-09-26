@@ -6,7 +6,7 @@ owner: dylan
 audience: humans-agents
 ---
 
-# Roadmap - Space League
+# Roadmap - ORA
 
 **Version:** 1.0
 **Date:** 2026-01-25
@@ -48,17 +48,17 @@ audience: humans-agents
 | Supprimer BP_ParadoxeJhin | Haute | LEAG-001 |
 | Supprimer BP_ParadoxeSenna | Haute | LEAG-002 |
 | Supprimer dossier /Old/ | Moyenne | LEAG-003 |
-| Résoudre doublon GI_SpaceLeague | Haute | LEAG-004 |
+| Résoudre doublon GI_ORA | Haute | LEAG-004 |
 
 ### 0.2 Migration C++ - Phase 1
 
 | Tâche | Priorité | Ticket |
 |-------|----------|--------|
-| Créer module C++ SpaceLeague | Critique | LEAG-005 |
-| Créer ASpaceLeagueGameMode | Critique | LEAG-006 |
-| Créer ASpaceLeagueGameState | Critique | LEAG-007 |
-| Créer ASpaceLeaguePlayerController | Haute | LEAG-008 |
-| Créer ASpaceLeagueCharacterBase | Critique | LEAG-009 |
+| Créer module C++ ORA | Critique | LEAG-005 |
+| Créer AORAGameMode | Critique | LEAG-006 |
+| Créer AORAGameState | Critique | LEAG-007 |
+| Créer AORAPlayerController | Haute | LEAG-008 |
+| Créer AORACharacterBase | Critique | LEAG-009 |
 
 ### 0.3 Migration C++ - Phase 2
 
@@ -74,7 +74,7 @@ audience: humans-agents
 
 | Tâche | Priorité | Ticket |
 |-------|----------|--------|
-| Implémenter GI_SpaceLeague fonctions | Haute | LEAG-015 |
+| Implémenter GI_ORA fonctions | Haute | LEAG-015 |
 | Configurer Map principale | Haute | LEAG-016 |
 | Vérifier DA_LegendRegistry | Moyenne | LEAG-017 |
 
@@ -155,8 +155,8 @@ audience: humans-agents
 | Tâche | Priorité | Ticket |
 |-------|----------|--------|
 | Répliquer ABall | Critique | LEAG-036 |
-| Répliquer ASpaceLeagueCharacterBase | Critique | LEAG-037 |
-| Répliquer ASpaceLeagueGameState | Critique | LEAG-038 |
+| Répliquer AORACharacterBase | Critique | LEAG-037 |
+| Répliquer AORAGameState | Critique | LEAG-038 |
 | Répliquer événements terrain | Haute | LEAG-039 |
 
 ### 2.3 Infrastructure Online

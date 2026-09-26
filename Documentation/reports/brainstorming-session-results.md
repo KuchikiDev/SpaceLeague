@@ -2,12 +2,12 @@
 type: brainstorming-session
 status: in-progress
 date: 2026-02-21
-session-topic: Space League - Capacités, Système de Balle, Mécaniques de Gameplay
+session-topic: ORA - Capacités, Système de Balle, Mécaniques de Gameplay
 participants: Dylan, Claude
 duration: En cours
 ---
 
-# Session de Brainstorming - Space League
+# Session de Brainstorming - ORA
 
 **Navigation Vault:** [[Documentation/_ai/00_Home|00_Home]] | [[Documentation/_ai/01_Now|01_Now]] | [[Documentation/RESUME_JEU|RESUME_JEU]]
 **Liens reliés:** [[Documentation/SPECS_FONCTIONNELLES|SPECS_FONCTIONNELLES]] | [[Documentation/ROADMAP|ROADMAP]] | [[Documentation/_maps/MOC_Gameplay|MOC_Gameplay]]
@@ -17,7 +17,7 @@ duration: En cours
 ## 📋 Executive Summary
 
 ### Session Topic
-Exploration et design de trois aspects fondamentaux du gameplay de Space League :
+Exploration et design de trois aspects fondamentaux du gameplay de ORA :
 1. **Capacités des personnages** (focus Keplar + futurs personnages)
 2. **Système de balle** (vitesse, contrôle, équilibrage)
 3. **Mécaniques de gameplay** (mouvement, événements terrain, innovation)

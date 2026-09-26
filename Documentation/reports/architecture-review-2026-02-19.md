@@ -39,7 +39,7 @@ Pourquoi:
   - `GlobalDefaultGameMode=/Game/Levels/HUB/BP_GM_Hub.BP_GM_Hub_C`: `ProjetUE5/MovementParadoxe/Config/DefaultEngine.ini:13`
   - `GameDefaultMap=/Game/Levels/FloatingIsland/FloatingIslands.FloatingIslands`: `ProjetUE5/MovementParadoxe/Config/DefaultEngine.ini:11`
 - Specs techniques:
-  - `GlobalDefaultGameMode=/Script/SpaceLeague.ASpaceLeagueGameMode`: `Documentation/SPECS_TECHNIQUES.md:547`
+  - `GlobalDefaultGameMode=/Script/SpaceLeague.AORAGameMode`: `Documentation/SPECS_TECHNIQUES.md:547`
   - `GameDefaultMap=/Game/Levels/L_MainArena`: `Documentation/SPECS_TECHNIQUES.md:545`
 
 ### 3. Etat assets gameplay

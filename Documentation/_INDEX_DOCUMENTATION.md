@@ -6,7 +6,7 @@ owner: dylan
 audience: humans-agents
 ---
 
-# INDEX - Documentation Space League
+# INDEX - Documentation ORA
 
 **Date:** 2026-01-25
 **Auteur:** Claude (BMAD)
@@ -82,15 +82,15 @@ Ces fichiers forment un ensemble cohérent pour la migration vers une architectu
 - Enums C++ complets (EMatchState, EPlayerGameState, etc.)
 - Structs C++ (FTeamData, FLegendData, etc.)
 - Headers de toutes les classes:
-  - ASpaceLeagueGameMode
-  - ASpaceLeagueGameState
-  - ASpaceLeagueCharacterBase
+  - AORAGameMode
+  - AORAGameState
+  - AORACharacterBase
   - ABall
   - AGoal
   - APrison
   - ATerrainEventManager
 - DataAssets (ULegendDataAsset, UAbilityDataAsset)
-- SpaceLeague.Build.cs complet
+- ORA.Build.cs complet
 
 **Utilité:** Ce document contient LE CODE à écrire. Tu peux copier-coller les headers directement.
 
@@ -142,7 +142,7 @@ Ces fichiers forment un ensemble cohérent pour la migration vers une architectu
 
 | Page | URL |
 |------|-----|
-| ROADMAP - Space League v1.0 | https://byakuyacorps.atlassian.net/wiki/spaces/SL/pages/212795394 |
+| ROADMAP - ORA v1.0 | https://byakuyacorps.atlassian.net/wiki/spaces/SL/pages/212795394 |
 | ARCHITECTURE TECHNIQUE | https://byakuyacorps.atlassian.net/wiki/spaces/SL/pages/212828161 |
 
 ---
