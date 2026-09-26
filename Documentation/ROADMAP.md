@@ -1,7 +1,7 @@
 ---
 type: roadmap
 status: active
-last_review: 2026-02-19
+last_review: 2026-09-26
 owner: dylan
 audience: humans-agents
 ---
@@ -15,6 +15,8 @@ audience: humans-agents
 **Navigation Vault:** [[_ai/00_Home]] | [[_ai/01_Now]] | [[_ai/AGENT_CONTEXT]]
 **Liens relies:** [[WORKFLOW_PHASE0_BMAD]] | [[IMPACT_MIGRATION]] | [[_maps/MOC_Execution]]
 **Note statut:** Plusieurs checklists sont encore ouvertes, suivre l'execution dans [[_ai/01_Now]].
+
+> **Etat reel au 2026-09-26** : la Phase 0 est terminee dans les faits (projet UE 5.8 `MovementORA`, module C++ ORA, GameMode/GameState/PlayerController/CharacterBase en C++). La Phase 1 est bien avancee : deroule complet du match, score but + prison complete, deplacement automatique des buts, obstacles temporises, bots. Restent en Phase 1 : capacites Raijin/Keplar (LEAG-051 a 056) et rotation du terrain (LEAG-023/024). Des elements de Phase 2 existent deja (reseau, serveur dedie, authentification). Detail : [[_ai/01_Now]].
 
 ---
 

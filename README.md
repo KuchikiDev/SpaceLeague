@@ -1,14 +1,16 @@
 <div align="center">
 
-# SPACE LEAGUE
+# ORA
 
-**Jeu de sport compétitif futuriste — Unreal Engine 5**
+**Jeu de sport compétitif futuriste — Unreal Engine 5.8**
+
+*(anciennement « Space League »)*
 
 *Développé par Paradoxe*
 
 ---
 
-[![Unreal Engine 5](https://img.shields.io/badge/Unreal_Engine-5-black?style=for-the-badge&logo=unrealengine)](https://www.unrealengine.com/)
+[![Unreal Engine 5](https://img.shields.io/badge/Unreal_Engine-5.8-black?style=for-the-badge&logo=unrealengine)](https://www.unrealengine.com/)
 [![C++](https://img.shields.io/badge/C++-17-00599C?style=for-the-badge&logo=cplusplus)](https://isocpp.org/)
 [![Blueprint](https://img.shields.io/badge/Blueprint-UE5-0071C5?style=for-the-badge)](https://docs.unrealengine.com/en-US/blueprints/)
 [![Jira](https://img.shields.io/badge/Jira-Project_Management-0052CC?style=for-the-badge&logo=jira)](https://byakuyacorps.atlassian.net/)
@@ -49,11 +51,11 @@ Toute la documentation détaillée est disponible sur le **[Wiki GitHub](https:/
 
 ## 🎮 Le jeu en bref
 
-**Space League** est un sport futuriste **3v3 compétitif** où deux équipes s'affrontent sans jamais franchir la ligne centrale. Tout se joue à distance : précision du tir, timing du contrôle de balle, coordination d'équipe.
+**ORA** est un sport futuriste compétitif en **2v2 et 3v3** où deux équipes s'affrontent sans jamais franchir la ligne centrale. Tout se joue à distance : précision du tir, timing du contrôle de balle, coordination d'équipe.
 
 | Méthode de score | Points | Comment |
 |------------------|--------|---------|
-| **Prison** | **2 pts** | Envoyer 2 adversaires simultanément en prison |
+| **Prison complète** | **2 pts** | Avoir 2 adversaires en prison en même temps (2v2 comme 3v3) |
 | **But flottant** | **1 pt** | Faire traverser la balle dans le but adverse |
 
 > Imaginez un mélange entre **Rocket League**, **Valorant** et **Quidditch** — avec gravité modifiable, grappins et ultimes capables de retourner un match.
@@ -110,11 +112,12 @@ Le projet utilise **Claude (Anthropic)** via le framework **BMAD** — une méth
 ## 📁 Structure des dossiers
 
 ```
-Leagues/
-├── 📂 ProjetUE5/MovementParadoxe/  → Projet UE5 principal (C++ + Blueprints)
-│   ├── Source/                     → Code C++ source [Git]
-│   ├── Config/                     → Configurations UE5 [Git]
-│   └── Content/                    → Assets binaires [Perforce, ~17 GB]
+ORA/
+├── 📂 ProjetUE5/MovementORA 5.8/   → Projet UE 5.8 actif (C++ + Blueprints + Content) [Perforce uniquement]
+├── 📂 ProjetUE5/MovementORA/       → Copie Git du code actif : Source, Config, plugin GameplayVariables [Git]
+├── 📂 ProjetUE5/MovementParadoxe/  → Ancien projet UE 5.3 (février-avril 2026), conservé pour l'historique
+├── 📂 Tools/                       → Sync-ShowcaseFromPerforce.ps1 (met à jour la copie Git depuis Perforce)
+├── 📂 Perforce/                    → Outils de clone / mise à jour Perforce
 ├── 📂 Documentation/               → Specs, architecture, roadmap, reports
 ├── 📂 Logo/                        → Identité visuelle (AI, PNG)
 ├── 📂 HUD/                         → Maquettes d'interface
@@ -130,7 +133,7 @@ Leagues/
 
 | Sur Git (ce dépôt) | Sur Perforce |
 |--------------------|--------------|
-| Code C++ source | Content UE5 (~17 GB) |
+| Copie du code C++ et de la config (`ProjetUE5/MovementORA/`) | Projet UE 5.8 complet, dont Content (~17 GB) |
 | Configurations UE5 | Assets 3D sources (~9 GB) |
 | Documentation | Plugins UE5 |
 | Logos, HUD, maquettes | Binaires compilés |
@@ -141,13 +144,13 @@ Leagues/
 
 ## 🚀 Lancer le projet
 
-**Prérequis :** Unreal Engine 5.3+, Visual Studio 2022 *(Game development with C++)*, Windows 10/11
+**Prérequis :** Unreal Engine 5.8, Visual Studio 2022 *(Game development with C++)*, Windows 10/11
 
 ```bash
 git clone https://github.com/KuchikiDev/SpaceLeague.git
-cd ProjetUE5/MovementParadoxe
-# Clic droit sur MovementParadoxe.uproject → "Generate Visual Studio project files"
-# Double-cliquer sur MovementParadoxe.uproject
+cd ProjetUE5/MovementORA
+# Clic droit sur MovementORA.uproject → "Generate Visual Studio project files"
+# Double-cliquer sur MovementORA.uproject
 ```
 
 > Sans les fichiers `Content/` (sur Perforce), le projet s'ouvrira dans UE5 mais sans assets visuels. Pour accéder au projet complet, contacter l'équipe.
@@ -168,7 +171,7 @@ Fichiers de reference du depot :
 
 ### Description
 
-**Objectif du projet :** présenter un jeu de sport futuriste 3v3 développé sous Unreal Engine 5, avec une architecture C++/Blueprint, un workflow IA structuré, une documentation claire et une organisation de production proche d'un cadre studio.
+**Objectif du projet :** présenter un jeu de sport futuriste 2v2/3v3 développé sous Unreal Engine 5.8, avec une architecture C++/Blueprint, un workflow IA structuré, une documentation claire et une organisation de production proche d'un cadre studio.
 
 ### Code of conduct
 
@@ -240,7 +243,7 @@ Ce dépôt et son contenu sont la propriété exclusive de **Paradoxe** (Byakuya
 
 **Autorisé :** consulter à des fins d'évaluation (recrutement, école, portfolio), partager le lien.
 
-**Interdit sans autorisation écrite :** copier ou réutiliser le code/assets, distribuer, utiliser le nom ou logo Space League / Paradoxe.
+**Interdit sans autorisation écrite :** copier ou réutiliser le code/assets, distribuer, utiliser le nom ou logo ORA (ex-Space League) / Paradoxe.
 
 **Assets tiers :** Unreal Engine 5 ([Epic Games EULA](https://www.unrealengine.com/en-US/eula/unreal)) · FeudalJapan Meshingun (Marketplace Epic Games)
 
@@ -250,7 +253,7 @@ Contact : [GitHub Issues](https://github.com/KuchikiDev/SpaceLeague/issues)
 
 <div align="center">
 
-*Space League — Paradoxe © 2025-2026*
+*ORA — Paradoxe © 2025-2026*
 
 *Développé avec Unreal Engine 5, C++, Blueprints, Jira, Confluence et Claude AI*
 

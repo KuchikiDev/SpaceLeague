@@ -57,3 +57,10 @@ Historique des changements du vault documentaire.
 1. Renommer `Content/Instance/GI_SpaceLeague` → `GI_ORA` (Right-click → Rename dans le Content Browser)
 2. Renommer `Content/Game/Gameplay/Gamemodes/BP_GameState_SpaceLeague` → `BP_GameState_ORA`
 3. Après ces deux renames, mettre à jour `DefaultEngine.ini` ligne `GameInstanceClass` → `/Game/Instance/GI_ORA.GI_ORA_C`
+## 2026-09-26
+
+- `[[_ai/01_Now]]` reecrit sur l'etat reel : projet `ProjetUE5/MovementORA 5.8` (UE 5.8, Perforce), gameplay en place,
+  statut de la revue P0/P1/P2 du 2026-09-25, dette restante.
+- Nouvelle copie Git du code ORA dans `ProjetUE5/MovementORA/` + script `Tools/Sync-ShowcaseFromPerforce.ps1`.
+- `ROADMAP.md` : encart d'etat reel en tete (la roadmap d'origine reste en dessous).
+- README : ORA, UE 5.8, formats 2v2/3v3, organisation Git/Perforce a jour.
