@@ -497,6 +497,7 @@ void AORACharacter::BeginPlay()
 		SprintFOVInterpSpeed = FMath::Max(0.1f, GameplayVariables->FOVInterpSpeed);
 		RunBobAmplitude = FMath::Max(0.0f, GameplayVariables->CameraBobAmplitude);
 		StrafeRollMaxAngle = FMath::Clamp(GameplayVariables->CameraRollDegrees, 0.0f, 15.0f);
+		ApplyPlayerMovementSettings();
 		SpeedEffectsStartSpeed = FMath::Max(0.0f, GameplayVariables->SpeedEffectsStartSpeed);
 		SpeedEffectsFullSpeed = FMath::Max(SpeedEffectsStartSpeed + 1.0f, GameplayVariables->SpeedEffectsFullSpeed);
 		SpeedEffectsInterpSpeed = FMath::Max(0.1f, GameplayVariables->SpeedEffectsInterpSpeed);
@@ -720,6 +721,7 @@ void AORACharacter::BeginPlay()
 void AORACharacter::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
+	UpdateGroundMomentum(DeltaSeconds);
 	if (bIsGrappling && IsWallSlideActive())
 	{
 		CancelWallSlide();

@@ -45,6 +45,13 @@ public:
 	virtual void Tick(float DeltaSeconds) override;
 	virtual void Landed(const FHitResult& Hit) override;
 
+	/** Player movement tuning from GameplayVariables (speeds, acceleration, dash, jump, momentum). Bots keep their own values. */
+	virtual bool UsesPlayerMovementTuning() const { return true; }
+
+	/** Speed lost per second while running above the max speed (landing, end of dash or grapple). 0 = cut by friction. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement|Momentum", meta = (ClampMin = "0.0"))
+	float GroundMomentumDecay = 3500.0f;
+
 	// -----------------------------------------------------------------------
 	// Components
 	// -----------------------------------------------------------------------
@@ -793,6 +800,12 @@ private:
 
 	// Speed feedback (0 = below SpeedEffectsStartSpeed, 1 = at SpeedEffectsFullSpeed)
 	float SpeedEffectsAlpha = 0.0f;
+
+	// Momentum carry on the ground (see UpdateGroundMomentum)
+	void ApplyPlayerMovementSettings();
+	void UpdateGroundMomentum(float DeltaSeconds);
+	float GetDesiredGroundSpeed() const;
+	bool bGroundMomentumActive = false;
 	// Over-speed (0 = at SpeedEffectsFullSpeed, 1 = at SpeedFOVOverSpeedMaxSpeed)
 	float OverSpeedAlpha = 0.0f;
 

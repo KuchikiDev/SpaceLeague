@@ -13,6 +13,7 @@ class MOVEMENTORA_API AORAGroundedBotCharacter : public AORACharacter
 public:
 	AORAGroundedBotCharacter();
 	virtual void Tick(float DeltaSeconds) override;
+	virtual bool UsesPlayerMovementTuning() const override { return false; }
 
 	bool TryCaptureBall(AActor* BallActor);
 	bool HasBall() const;

@@ -67,25 +67,31 @@ public:
 	float TimedObstacleScale = 3.0f;
 
 	UPROPERTY(Config, EditAnywhere, Category = "Deplacement", meta = (DisplayName = "Vitesse de marche", ClampMin = "0.0", UIMin = "0.0", ToolTip = "Vitesse de deplacement de base quand le joueur court normalement."))
-	float BaseWalkSpeed = 600.0f;
+	float BaseWalkSpeed = 2500.0f;
 
 	UPROPERTY(Config, EditAnywhere, Category = "Deplacement", meta = (DisplayName = "Acceleration max", ClampMin = "0.0", UIMin = "0.0", ToolTip = "Acceleration horizontale appliquee au personnage."))
-	float MaxAcceleration = 2048.0f;
+	float MaxAcceleration = 9000.0f;
 
 	UPROPERTY(Config, EditAnywhere, Category = "Deplacement", meta = (DisplayName = "Freinage", ClampMin = "0.0", UIMin = "0.0", ToolTip = "Freinage applique quand le joueur relache le deplacement."))
-	float BrakingDeceleration = 1400.0f;
+	float BrakingDeceleration = 2048.0f;
 
 	UPROPERTY(Config, EditAnywhere, Category = "Deplacement", meta = (DisplayName = "Controle aerien", ClampMin = "0.0", ClampMax = "1.0", UIMin = "0.0", UIMax = "1.0", ToolTip = "Part du controle du joueur conservee en l'air."))
-	float AirControl = 0.35f;
+	float AirControl = 1.3f;
+
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Deplacement|Elan", meta = (DisplayName = "Frottement en l'air", ClampMin = "0.0", ClampMax = "2.0", UIMin = "0.0", UIMax = "2.0", ToolTip = "Perte de vitesse horizontale en l'air. Bas = l'elan d'un dash, d'un grappin ou d'un saut se conserve longtemps."))
+	float AirMomentumFriction = 0.15f;
+
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Deplacement|Elan", meta = (DisplayName = "Perte d'elan au sol", ClampMin = "0.0", UIMin = "0.0", Units = "cm/s", ToolTip = "Vitesse perdue par seconde quand le joueur court au-dessus de sa vitesse max (apres un atterrissage, un dash ou un grappin). 0 = l'ancien comportement (vitesse coupee net par la friction)."))
+	float GroundMomentumDecay = 3500.0f;
 
 	UPROPERTY(Config, EditAnywhere, Category = "Dash", meta = (DisplayName = "Impulsion du dash", ClampMin = "0.0", UIMin = "0.0", ToolTip = "Force principale appliquee lors d'un dash."))
-	float DashImpulse = 1200.0f;
+	float DashImpulse = 8000.0f;
 
 	UPROPERTY(Config, EditAnywhere, Category = "Dash", meta = (DisplayName = "Duree du dash", ClampMin = "0.01", UIMin = "0.01", ToolTip = "Duree pendant laquelle le dash reste actif."))
-	float DashDurationSeconds = 0.18f;
+	float DashDurationSeconds = 0.2f;
 
 	UPROPERTY(Config, EditAnywhere, Category = "Dash", meta = (DisplayName = "Cooldown du dash", ClampMin = "0.0", UIMin = "0.0", ToolTip = "Temps necessaire avant de relancer un dash."))
-	float DashCooldownSeconds = 1.0f;
+	float DashCooldownSeconds = 0.2f;
 
 	UPROPERTY(Config, EditAnywhere, Category = "Dash", meta = (DisplayName = "Controle pendant dash", ClampMin = "0.0", ClampMax = "1.0", UIMin = "0.0", UIMax = "1.0", ToolTip = "Part du controle de direction conservee pendant le dash."))
 	float DashSteeringRatio = 0.2f;
@@ -94,7 +100,7 @@ public:
 	int32 MaxJumpCount = 2;
 
 	UPROPERTY(Config, EditAnywhere, Category = "Saut", meta = (DisplayName = "Vitesse de saut", ClampMin = "0.0", UIMin = "0.0", ToolTip = "Vitesse verticale donnee au joueur au moment du saut."))
-	float JumpVelocity = 700.0f;
+	float JumpVelocity = 3500.0f;
 
 	UPROPERTY(Config, EditAnywhere, Category = "Saut", meta = (DisplayName = "Coyote time", ClampMin = "0.0", UIMin = "0.0", ToolTip = "Fenetre de coyote time pour accepter un saut juste apres avoir quitte le sol."))
 	float CoyoteTimeSeconds = 0.12f;

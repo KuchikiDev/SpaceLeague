@@ -339,6 +339,22 @@ void AORACharacter::Landed(const FHitResult& Hit)
 	const float FallSpeed = FMath::Max(0.0f, -GetVelocity().Z);
 	Super::Landed(Hit);
 
+	// Keep the horizontal speed of the landing instead of letting ground friction cut it on the
+	// first grounded frame; UpdateGroundMomentum then lets it decay progressively.
+	if (UsesPlayerMovementTuning() && GroundMomentumDecay > KINDA_SMALL_NUMBER
+		&& GetLastMovementInputVector().SizeSquared() > KINDA_SMALL_NUMBER)
+	{
+		if (UCharacterMovementComponent* MoveComp = GetCharacterMovement())
+		{
+			const float LandingSpeed = static_cast<float>(MoveComp->Velocity.Size2D());
+			if (LandingSpeed > GetDesiredGroundSpeed())
+			{
+				MoveComp->MaxWalkSpeed = LandingSpeed;
+				bGroundMomentumActive = true;
+			}
+		}
+	}
+
 	if (!IsLocallyControlled() || LandingDipMaxDistance <= KINDA_SMALL_NUMBER)
 	{
 		return;
@@ -351,6 +367,69 @@ void AORACharacter::Landed(const FHitResult& Hit)
 	{
 		LandingDipAmplitude = LandingDipMaxDistance * Strength;
 		LandingDipElapsed = 0.0f;
+	}
+}
+
+void AORACharacter::ApplyPlayerMovementSettings()
+{
+	const UGameplayVariablesSettings* GameplayVariables = GetDefault<UGameplayVariablesSettings>();
+	if (!UsesPlayerMovementTuning() || GameplayVariables == nullptr)
+	{
+		return;
+	}
+
+	BaseMoveSpeed = FMath::Max(0.0f, GameplayVariables->BaseWalkSpeed);
+	DashGroundPower = FMath::Max(0.0f, GameplayVariables->DashImpulse);
+	DashAirPower = DashGroundPower;
+	DashDurationSeconds = FMath::Max(0.01f, GameplayVariables->DashDurationSeconds);
+	DashCooldownSeconds = FMath::Max(0.0f, GameplayVariables->DashCooldownSeconds);
+	MaxJumpCount = FMath::Max(1, GameplayVariables->MaxJumpCount);
+	JumpMaxCount = MaxJumpCount;
+	GroundMomentumDecay = FMath::Max(0.0f, GameplayVariables->GroundMomentumDecay);
+
+	if (UCharacterMovementComponent* MoveComp = GetCharacterMovement())
+	{
+		MoveComp->MaxAcceleration = FMath::Max(0.0f, GameplayVariables->MaxAcceleration);
+		MoveComp->BrakingDecelerationWalking = FMath::Max(0.0f, GameplayVariables->BrakingDeceleration);
+		MoveComp->AirControl = FMath::Max(0.0f, GameplayVariables->AirControl);
+		MoveComp->JumpZVelocity = FMath::Max(0.0f, GameplayVariables->JumpVelocity);
+		MoveComp->FallingLateralFriction = FMath::Max(0.0f, GameplayVariables->AirMomentumFriction);
+	}
+	SetCharacterMoveSpeed(GetDesiredGroundSpeed());
+}
+
+float AORACharacter::GetDesiredGroundSpeed() const
+{
+	return IsSprintInputActive() ? SprintMoveSpeed : BaseMoveSpeed;
+}
+
+void AORACharacter::UpdateGroundMomentum(const float DeltaSeconds)
+{
+	UCharacterMovementComponent* MoveComp = GetCharacterMovement();
+	if (!UsesPlayerMovementTuning() || !IsValid(MoveComp) || GroundMomentumDecay <= KINDA_SMALL_NUMBER)
+	{
+		return;
+	}
+
+	const float DesiredSpeed = GetDesiredGroundSpeed();
+	const bool bCanCarry = MoveComp->IsMovingOnGround()
+		&& !bDashActive
+		&& !IsGroundSlideActive()
+		&& !IsWallSlideActive()
+		&& GetLastMovementInputVector().SizeSquared() > KINDA_SMALL_NUMBER;
+	const float HorizontalSpeed = static_cast<float>(MoveComp->Velocity.Size2D());
+
+	if (bCanCarry && HorizontalSpeed > DesiredSpeed + 1.0f)
+	{
+		// Excess speed decays at a fixed rate instead of being removed by ground friction in a few
+		// frames. Raising the cap keeps the movement component from braking while turning stays free.
+		MoveComp->MaxWalkSpeed = FMath::Max(DesiredSpeed, HorizontalSpeed - GroundMomentumDecay * FMath::Max(0.0f, DeltaSeconds));
+		bGroundMomentumActive = true;
+	}
+	else if (bGroundMomentumActive)
+	{
+		bGroundMomentumActive = false;
+		SetCharacterMoveSpeed(DesiredSpeed);
 	}
 }
 
