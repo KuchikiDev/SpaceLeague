@@ -263,7 +263,12 @@ void AORACharacter::HandleGrappleInputTriggered()
 
 void AORACharacter::HandleGrappleInputReleased()
 {
-	// Releasing only rearms the next press. It never controls the lifetime of
-	// the active grab, which ends through its gameplay rules.
+	// Releasing rearms the next press and stops an active pull: the player keeps the momentum
+	// already gained, without the relaunch (reserved for pulls held until the end).
 	bGrappleInputLatched = false;
+	if (bIsGrappling && bGrapplePulling)
+	{
+		bGrapplePulling = false;
+		EndGrapple();
+	}
 }
