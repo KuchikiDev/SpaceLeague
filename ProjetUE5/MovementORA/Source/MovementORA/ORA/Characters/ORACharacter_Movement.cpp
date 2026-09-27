@@ -22,14 +22,14 @@
 #include "Materials/MaterialInterface.h"
 #include "GameplayVariablesSettings.h"
 #include "HAL/IConsoleManager.h"
-#include "Materials/MaterialInstanceDynamic.h"
+#include "ORA/Characters/ORASpeedStreaksComponent.h"
 
 namespace
 {
 	TAutoConsoleVariable<float> CVarORAForceSpeedLines(
 		TEXT("ora.SpeedLines.Force"),
 		-1.0f,
-		TEXT("Forces the speed lines intensity (0-2) for testing. -1 = driven by the player speed."));
+		TEXT("Forces the wind streaks intensity (0-2) for testing, even standing still. -1 = driven by the player speed."));
 }
 #include "ORA/Core/ORAPlayerState.h"
 #include "ORA/Gameplay/ORAGameState.h"
@@ -314,18 +314,30 @@ void AORACharacter::UpdateRunCamera(float DeltaSeconds)
 	}
 	bWasWallSlidingLastCameraUpdate = bWallSliding;
 
-	// Speed lines: only from ~75 % of the speed effects (dash, grapple), full at over-speed. Weight 0 = pass disabled.
-	if (IsValid(SpeedLinesMID) && IsValid(ViewCamera))
+	// Wind streaks in the world (not on the screen edges): from half of the speed effects, full at over-speed.
+	if (IsValid(ViewCamera) && IsLocallyControlled())
 	{
-		const float LinesAlpha = FMath::Max(OverSpeedAlpha, FMath::Clamp((SpeedEffectsAlpha - 0.75f) / 0.25f, 0.0f, 1.0f));
+		const float LinesAlpha = FMath::Max(OverSpeedAlpha, FMath::Clamp((SpeedEffectsAlpha - 0.5f) / 0.5f, 0.0f, 1.0f));
 		float LinesIntensity = bShowSpeedLines ? SpeedLinesIntensity * LinesAlpha : 0.0f;
+		FVector StreakVelocity = GetVelocity();
 		const float ForcedIntensity = CVarORAForceSpeedLines.GetValueOnGameThread();
 		if (ForcedIntensity >= 0.0f)
 		{
 			LinesIntensity = ForcedIntensity;
+			if (StreakVelocity.SizeSquared() < FMath::Square(200.0f))
+			{
+				StreakVelocity = ViewCamera->GetForwardVector() * 3000.0f;
+			}
 		}
-		SpeedLinesMID->SetScalarParameterValue(TEXT("Intensity"), LinesIntensity);
-		ViewCamera->AddOrUpdateBlendable(SpeedLinesMID, LinesIntensity > 0.001f ? 1.0f : 0.0f);
+		if (!IsValid(SpeedStreaks) && LinesIntensity > 0.001f)
+		{
+			SpeedStreaks = NewObject<UORASpeedStreaksComponent>(this, TEXT("ORA_SpeedStreaks"));
+			SpeedStreaks->RegisterComponent();
+		}
+		if (IsValid(SpeedStreaks))
+		{
+			SpeedStreaks->UpdateStreaks(ViewCamera->GetComponentLocation(), StreakVelocity, LinesIntensity);
+		}
 	}
 
 	APlayerController* PC = Cast<APlayerController>(GetController());

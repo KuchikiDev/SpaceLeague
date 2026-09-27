@@ -620,13 +620,13 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Run|SpeedFeedback", meta = (ClampMin = "1.0"))
 	float SpeedFOVOverSpeedMaxSpeed = 8000.0f;
 
-	/** Speed lines post-process (M_SpeedLines) at high speed. */
+	/** 3D wind streaks around the local player's camera at high speed (UORASpeedStreaksComponent). */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Run|SpeedFeedback")
 	bool bShowSpeedLines = true;
 
-	/** Maximum intensity of the speed lines. */
+	/** Maximum brightness of the wind streaks. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Run|SpeedFeedback", meta = (ClampMin = "0.0", ClampMax = "2.0"))
-	float SpeedLinesIntensity = 0.5f;
+	float SpeedLinesIntensity = 1.0f;
 
 	/** Maximum camera drop (cm) when landing from a big fall. 0 disables the dip. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Run|SpeedFeedback", meta = (ClampMin = "0.0"))
@@ -840,8 +840,9 @@ private:
 	// Over-speed (0 = at SpeedEffectsFullSpeed, 1 = at SpeedFOVOverSpeedMaxSpeed)
 	float OverSpeedAlpha = 0.0f;
 
+	/** Created on first use, for the locally controlled player only. */
 	UPROPERTY(Transient)
-	TObjectPtr<UMaterialInstanceDynamic> SpeedLinesMID = nullptr;
+	TObjectPtr<class UORASpeedStreaksComponent> SpeedStreaks = nullptr;
 
 	/** Camera that renders this pawn's view: the first active camera, as AActor::CalcCamera picks it. */
 	UCameraComponent* ResolveViewCamera();

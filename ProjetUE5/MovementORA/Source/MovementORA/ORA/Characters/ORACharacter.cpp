@@ -499,11 +499,6 @@ void AORACharacter::BeginPlay()
 		StrafeRollMaxAngle = FMath::Clamp(GameplayVariables->CameraRollDegrees, 0.0f, 15.0f);
 		WallCameraNormalSmoothing = FMath::Clamp(GameplayVariables->WallCameraNormalSmoothing, 1.0f, 40.0f);
 		ApplyPlayerMovementSettings();
-		if (UMaterialInterface* SpeedLinesMaterial = LoadObject<UMaterialInterface>(
-			nullptr, TEXT("/Game/VFX/SpeedLines/M_SpeedLines.M_SpeedLines")))
-		{
-			SpeedLinesMID = UMaterialInstanceDynamic::Create(SpeedLinesMaterial, this);
-		}
 		SpeedEffectsStartSpeed = FMath::Max(0.0f, GameplayVariables->SpeedEffectsStartSpeed);
 		SpeedEffectsFullSpeed = FMath::Max(SpeedEffectsStartSpeed + 1.0f, GameplayVariables->SpeedEffectsFullSpeed);
 		SpeedEffectsInterpSpeed = FMath::Max(0.1f, GameplayVariables->SpeedEffectsInterpSpeed);
