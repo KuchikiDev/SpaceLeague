@@ -498,10 +498,17 @@ void AORACharacter::BeginPlay()
 		RunBobAmplitude = FMath::Max(0.0f, GameplayVariables->CameraBobAmplitude);
 		StrafeRollMaxAngle = FMath::Clamp(GameplayVariables->CameraRollDegrees, 0.0f, 15.0f);
 		ApplyPlayerMovementSettings();
+		if (UMaterialInterface* SpeedLinesMaterial = LoadObject<UMaterialInterface>(
+			nullptr, TEXT("/Game/VFX/SpeedLines/M_SpeedLines.M_SpeedLines")))
+		{
+			SpeedLinesMID = UMaterialInstanceDynamic::Create(SpeedLinesMaterial, this);
+		}
 		SpeedEffectsStartSpeed = FMath::Max(0.0f, GameplayVariables->SpeedEffectsStartSpeed);
 		SpeedEffectsFullSpeed = FMath::Max(SpeedEffectsStartSpeed + 1.0f, GameplayVariables->SpeedEffectsFullSpeed);
 		SpeedEffectsInterpSpeed = FMath::Max(0.1f, GameplayVariables->SpeedEffectsInterpSpeed);
 		SpeedFOVOverSpeedBoost = FMath::Clamp(GameplayVariables->SpeedFOVOverSpeedBoost, 0.0f, 40.0f);
+		bShowSpeedLines = GameplayVariables->bShowSpeedLines;
+		SpeedLinesIntensity = FMath::Clamp(GameplayVariables->SpeedLinesIntensity, 0.0f, 2.0f);
 		SpeedFOVOverSpeedMaxSpeed = FMath::Max(SpeedEffectsFullSpeed + 1.0f, GameplayVariables->SpeedFOVOverSpeedMaxSpeed);
 		LandingDipMaxDistance = FMath::Max(0.0f, GameplayVariables->LandingDipMaxDistance);
 		LandingDipFullFallSpeed = FMath::Max(1.0f, GameplayVariables->LandingDipFullFallSpeed);

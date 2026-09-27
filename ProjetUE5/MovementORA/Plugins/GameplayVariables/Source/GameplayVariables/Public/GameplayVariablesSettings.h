@@ -453,6 +453,12 @@ public:
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Camera|Effets de vitesse", meta = (DisplayName = "Vitesse du bonus FOV maximum", ClampMin = "1.0", UIMin = "1.0", Units = "cm/s", ToolTip = "Vitesse a laquelle le bonus FOV a tres grande vitesse est complet."))
 	float SpeedFOVOverSpeedMaxSpeed = 7000.0f;
 
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Camera|Effets de vitesse", meta = (DisplayName = "Lignes de vitesse", ToolTip = "Traits qui filent vers les bords de l'ecran a grande vitesse. Test : commande console ora.SpeedLines.Force 1 (-1 pour revenir au normal)."))
+	bool bShowSpeedLines = true;
+
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Camera|Effets de vitesse", meta = (DisplayName = "Intensite des lignes de vitesse", ClampMin = "0.0", ClampMax = "2.0", UIMin = "0.0", UIMax = "2.0", ToolTip = "Intensite maximale des lignes de vitesse (atteinte a tres grande vitesse)."))
+	float SpeedLinesIntensity = 1.0f;
+
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Camera|Effets de vitesse", meta = (DisplayName = "Tassement max a l'atterrissage", ClampMin = "0.0", UIMin = "0.0", Units = "cm", ToolTip = "Descente maximale de la camera a l'atterrissage d'une grosse chute. 0 desactive l'effet."))
 	float LandingDipMaxDistance = 12.0f;
 

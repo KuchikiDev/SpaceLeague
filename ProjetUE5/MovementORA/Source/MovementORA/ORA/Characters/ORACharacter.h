@@ -620,6 +620,14 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Run|SpeedFeedback", meta = (ClampMin = "1.0"))
 	float SpeedFOVOverSpeedMaxSpeed = 7000.0f;
 
+	/** Speed lines post-process (M_SpeedLines) at high speed. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Run|SpeedFeedback")
+	bool bShowSpeedLines = true;
+
+	/** Maximum intensity of the speed lines. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Run|SpeedFeedback", meta = (ClampMin = "0.0", ClampMax = "2.0"))
+	float SpeedLinesIntensity = 1.0f;
+
 	/** Maximum camera drop (cm) when landing from a big fall. 0 disables the dip. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Run|SpeedFeedback", meta = (ClampMin = "0.0"))
 	float LandingDipMaxDistance = 12.0f;
@@ -831,6 +839,14 @@ private:
 	bool bGroundMomentumActive = false;
 	// Over-speed (0 = at SpeedEffectsFullSpeed, 1 = at SpeedFOVOverSpeedMaxSpeed)
 	float OverSpeedAlpha = 0.0f;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UMaterialInstanceDynamic> SpeedLinesMID = nullptr;
+
+	/** Camera that renders this pawn's view: the first active camera, as AActor::CalcCamera picks it. */
+	UCameraComponent* ResolveViewCamera();
+	TWeakObjectPtr<UCameraComponent> CachedViewCamera;
+	FVector BaseViewCameraRelativeLocation = FVector::ZeroVector;
 
 	// Landing dip: closed-form critically damped curve, peak LandingDipAmplitude at LandingDipTimeToPeak
 	float LandingDipAmplitude = 0.0f;

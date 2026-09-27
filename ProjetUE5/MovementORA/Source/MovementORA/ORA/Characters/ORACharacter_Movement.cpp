@@ -21,6 +21,16 @@
 #include "Materials/MaterialInstanceDynamic.h"
 #include "Materials/MaterialInterface.h"
 #include "GameplayVariablesSettings.h"
+#include "HAL/IConsoleManager.h"
+#include "Materials/MaterialInstanceDynamic.h"
+
+namespace
+{
+	TAutoConsoleVariable<float> CVarORAForceSpeedLines(
+		TEXT("ora.SpeedLines.Force"),
+		-1.0f,
+		TEXT("Forces the speed lines intensity (0-2) for testing. -1 = driven by the player speed."));
+}
 #include "ORA/Core/ORAPlayerState.h"
 #include "ORA/Gameplay/ORAGameState.h"
 #include "ORA/Gameplay/ORAObstacleSpawnBlueprintLibrary.h"
@@ -220,14 +230,20 @@ void AORACharacter::UpdateRunCamera(float DeltaSeconds)
 		BobTime = 0.0f;
 	}
 
-	// Landing dip, layered after the bob so FollowCamera is back at its base location first.
-	if (IsValid(FollowCamera))
+	// Landing dip on the camera that renders. FollowCamera is reset to its base location above;
+	// another view camera (added by the Blueprint) is placed from its own base location.
+	UCameraComponent* ViewCamera = ResolveViewCamera();
+	const float LandingDipOffset = EvaluateLandingDipOffset(DeltaSeconds);
+	if (IsValid(ViewCamera) && ViewCamera == FollowCamera)
 	{
-		const float LandingDipOffset = EvaluateLandingDipOffset(DeltaSeconds);
 		if (!FMath::IsNearlyZero(LandingDipOffset, 0.01f))
 		{
 			FollowCamera->AddRelativeLocation(FVector(0.0f, 0.0f, LandingDipOffset));
 		}
+	}
+	else if (IsValid(ViewCamera))
+	{
+		ViewCamera->SetRelativeLocation(BaseViewCameraRelativeLocation + FVector(0.0f, 0.0f, LandingDipOffset));
 	}
 
 	// ------------------------------------------------------------------
@@ -297,6 +313,20 @@ void AORACharacter::UpdateRunCamera(float DeltaSeconds)
 	}
 	bWasWallSlidingLastCameraUpdate = bWallSliding;
 
+	// Speed lines: from ~60 % of the speed effects, full at over-speed. Weight 0 = pass disabled.
+	if (IsValid(SpeedLinesMID) && IsValid(ViewCamera))
+	{
+		const float LinesAlpha = FMath::Max(OverSpeedAlpha, FMath::Clamp((SpeedEffectsAlpha - 0.6f) / 0.4f, 0.0f, 1.0f));
+		float LinesIntensity = bShowSpeedLines ? SpeedLinesIntensity * LinesAlpha : 0.0f;
+		const float ForcedIntensity = CVarORAForceSpeedLines.GetValueOnGameThread();
+		if (ForcedIntensity >= 0.0f)
+		{
+			LinesIntensity = ForcedIntensity;
+		}
+		SpeedLinesMID->SetScalarParameterValue(TEXT("Intensity"), LinesIntensity);
+		ViewCamera->AddOrUpdateBlendable(SpeedLinesMID, LinesIntensity > 0.001f ? 1.0f : 0.0f);
+	}
+
 	APlayerController* PC = Cast<APlayerController>(GetController());
 	if (!IsValid(PC) || !IsValid(PC->PlayerCameraManager)) return;
 
@@ -323,14 +353,44 @@ void AORACharacter::UpdateRunCamera(float DeltaSeconds)
 	// ------------------------------------------------------------------
 	// Post-process — vignette + chromatic aberration driven by SprintAlpha
 	// ------------------------------------------------------------------
-	if (IsValid(FollowCamera))
+	if (IsValid(ViewCamera))
 	{
 		const float SpeedFxAlpha = FMath::Max3(SprintAlpha, GrappleCameraAlpha, SpeedEffectsAlpha);
-		FollowCamera->PostProcessSettings.bOverride_VignetteIntensity   = true;
-		FollowCamera->PostProcessSettings.VignetteIntensity             = FMath::Lerp(SprintVignetteMin, SprintVignetteMax + 0.08f, SpeedFxAlpha);
-		FollowCamera->PostProcessSettings.bOverride_SceneFringeIntensity = true;
-		FollowCamera->PostProcessSettings.SceneFringeIntensity          = FMath::Lerp(0.0f, SprintChromaticMax + GrappleCameraChromaticBoost, SpeedFxAlpha);
+		ViewCamera->PostProcessSettings.bOverride_VignetteIntensity   = true;
+		ViewCamera->PostProcessSettings.VignetteIntensity             = FMath::Lerp(SprintVignetteMin, SprintVignetteMax + 0.08f, SpeedFxAlpha);
+		ViewCamera->PostProcessSettings.bOverride_SceneFringeIntensity = true;
+		ViewCamera->PostProcessSettings.SceneFringeIntensity          = FMath::Lerp(0.0f, SprintChromaticMax + GrappleCameraChromaticBoost, SpeedFxAlpha);
 	}
+}
+
+UCameraComponent* AORACharacter::ResolveViewCamera()
+{
+	// Same rule as AActor::CalcCamera: the first active camera component renders the view.
+	TInlineComponentArray<UCameraComponent*> Cameras;
+	GetComponents(Cameras);
+	UCameraComponent* ViewCamera = nullptr;
+	for (UCameraComponent* Camera : Cameras)
+	{
+		if (IsValid(Camera) && Camera->IsActive())
+		{
+			ViewCamera = Camera;
+			break;
+		}
+	}
+	if (ViewCamera == nullptr)
+	{
+		ViewCamera = FollowCamera;
+	}
+
+	if (CachedViewCamera.Get() != ViewCamera)
+	{
+		CachedViewCamera = ViewCamera;
+		BaseViewCameraRelativeLocation = IsValid(ViewCamera) ? ViewCamera->GetRelativeLocation() : FVector::ZeroVector;
+		UE_LOG(LogTemp, Log, TEXT("[ViewCamera] %s renders the view (attached to %s)."),
+			*GetNameSafe(ViewCamera),
+			IsValid(ViewCamera) ? *GetNameSafe(ViewCamera->GetAttachParent()) : TEXT("none"));
+	}
+	return ViewCamera;
 }
 
 void AORACharacter::Landed(const FHitResult& Hit)
