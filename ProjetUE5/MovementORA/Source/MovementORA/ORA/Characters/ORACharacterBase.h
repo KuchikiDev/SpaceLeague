@@ -558,6 +558,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "WallSlide", meta = (ClampMin = "0.0", UIMin = "0.0", EditCondition = "bEnableWallSlide"))
 	float WallLookPushBackSpeed = 75.0f;
 
+	/** Speed at which the camera follows the wall orientation (smoothed wall normal for carry and look limit). */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Wall|Camera", meta = (ClampMin = "1.0", ClampMax = "40.0"))
+	float WallCameraNormalSmoothing = 12.0f;
+
 	/** Max yaw angle from the wall outward normal while clinging to a wall without wall-running. */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "WallSlide", meta = (ClampMin = "0.0", ClampMax = "179.0", UIMin = "0.0", UIMax = "179.0", EditCondition = "bEnableWallSlide"))
 	float WallSlideLookAngleLimit = 95.0f;
@@ -862,6 +866,7 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "WallSlide")
 	bool IsWallSlideActive() const { return bWallSlideActive; }
+	bool IsWallSlideExitRecoveryActive() const { return bWallSlideExitRecoveryActive; }
 
 	UFUNCTION(BlueprintPure, Category = "WallSlide")
 	bool IsWallRunActive() const { return bWallRunActive; }
@@ -1451,6 +1456,11 @@ private:
 
 	UPROPERTY(Transient)
 	bool bWallRunCameraAdjustedThisTick = false;
+
+	// Single camera pass: wall normal seen by the camera, smoothed, and the carried yaw reference.
+	FVector CameraWallNormalSmoothed = FVector::ZeroVector;
+	float CameraCarryLastYaw = 0.0f;
+	bool bHasCameraCarryYaw = false;
 
 	UPROPERTY(Transient)
 	bool bWallDashCameraInterpolating = false;

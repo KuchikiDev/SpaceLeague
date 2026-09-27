@@ -497,6 +497,7 @@ void AORACharacter::BeginPlay()
 		SprintFOVInterpSpeed = FMath::Max(0.1f, GameplayVariables->FOVInterpSpeed);
 		RunBobAmplitude = FMath::Max(0.0f, GameplayVariables->CameraBobAmplitude);
 		StrafeRollMaxAngle = FMath::Clamp(GameplayVariables->CameraRollDegrees, 0.0f, 15.0f);
+		WallCameraNormalSmoothing = FMath::Clamp(GameplayVariables->WallCameraNormalSmoothing, 1.0f, 40.0f);
 		ApplyPlayerMovementSettings();
 		if (UMaterialInterface* SpeedLinesMaterial = LoadObject<UMaterialInterface>(
 			nullptr, TEXT("/Game/VFX/SpeedLines/M_SpeedLines.M_SpeedLines")))

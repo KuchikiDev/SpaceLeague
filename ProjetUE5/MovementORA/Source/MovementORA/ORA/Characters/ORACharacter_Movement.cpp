@@ -296,7 +296,8 @@ void AORACharacter::UpdateRunCamera(float DeltaSeconds)
 		}
 
 		// Apply roll when not wall sliding (base class owns roll during wall slide)
-		if (!IsWallSlideActive())
+		// The wall exit recovery owns the roll while it runs.
+		if (!IsWallSlideActive() && !IsWallSlideExitRecoveryActive())
 		{
 			const float TargetRoll = bRecoveringWallCameraRoll ? 0.0f : CurrentStrafeRoll;
 			const float RollRecoverySpeed = bRecoveringWallCameraRoll

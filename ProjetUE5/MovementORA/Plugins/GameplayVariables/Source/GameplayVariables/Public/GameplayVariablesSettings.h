@@ -438,6 +438,9 @@ public:
 	UPROPERTY(Config, EditAnywhere, Category = "Camera", meta = (DisplayName = "Roulis max", ClampMin = "0.0", ClampMax = "15.0", UIMin = "0.0", UIMax = "15.0", ToolTip = "Inclinaison laterale maximale de la camera pendant la course."))
 	float CameraRollDegrees = 4.0f;
 
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Camera", meta = (DisplayName = "Lissage de la camera sur les murs", ClampMin = "1.0", ClampMax = "40.0", UIMin = "1.0", UIMax = "40.0", ToolTip = "Vitesse a laquelle la camera suit l'orientation du mur en wall run. Plus bas = plus doux (moins de tremblement sur les murs courbes ou a facettes), plus haut = plus reactif."))
+	float WallCameraNormalSmoothing = 12.0f;
+
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Camera|Effets de vitesse", meta = (DisplayName = "Vitesse de debut des effets", ClampMin = "0.0", UIMin = "0.0", Units = "cm/s", ToolTip = "Vitesse reelle (dash, wall run, chute, grappin, sprint...) a partir de laquelle FOV, vignettage et aberration chromatique commencent a s'intensifier."))
 	float SpeedEffectsStartSpeed = 800.0f;
 

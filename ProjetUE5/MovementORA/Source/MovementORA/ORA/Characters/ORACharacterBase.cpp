@@ -314,6 +314,47 @@ void AORACharacterBase::Tick(const float DeltaSeconds)
 	if (AController* Ctrl = GetController())
 	{
 		FRotator CtrlRot = Ctrl->GetControlRotation();
+
+		// Wall normal seen by the camera, smoothed: traces on faceted or curved walls return a slightly
+		// different normal every frame, which made the carry and the look limit shake the view.
+		const FVector RawCameraWallNormal = bWallSlideActive
+			? WallSlideNormal.GetSafeNormal2D()
+			: GroundWallLookBlockNormal.GetSafeNormal2D();
+		if (RawCameraWallNormal.IsNearlyZero())
+		{
+			CameraWallNormalSmoothed = FVector::ZeroVector;
+		}
+		else if (CameraWallNormalSmoothed.IsNearlyZero())
+		{
+			CameraWallNormalSmoothed = RawCameraWallNormal;
+		}
+		else
+		{
+			const FRotator SmoothedRotation = FMath::RInterpTo(
+				CameraWallNormalSmoothed.Rotation(),
+				RawCameraWallNormal.Rotation(),
+				DeltaSeconds,
+				FMath::Max(1.0f, WallCameraNormalSmoothing));
+			CameraWallNormalSmoothed = SmoothedRotation.Vector().GetSafeNormal2D();
+		}
+
+		// Carry the view along curved walls while wall running (was applied from the raw normal).
+		if (bWallSlideActive && !CameraWallNormalSmoothed.IsNearlyZero())
+		{
+			const float SmoothedYaw = CameraWallNormalSmoothed.Rotation().Yaw;
+			if (bHasCameraCarryYaw)
+			{
+				CtrlRot.Yaw += FRotator::NormalizeAxis(SmoothedYaw - CameraCarryLastYaw);
+				bWallRunCameraAdjustedThisTick = true;
+			}
+			CameraCarryLastYaw = SmoothedYaw;
+			bHasCameraCarryYaw = true;
+		}
+		else
+		{
+			bHasCameraCarryYaw = false;
+		}
+
 		if (bWallSlideActive && WallSlideCameraRollAngle > KINDA_SMALL_NUMBER)
 		{
 			float TargetRollDirection = WallSlideCameraRollDir;
@@ -344,14 +385,14 @@ void AORACharacterBase::Tick(const float DeltaSeconds)
 		float PushBackSpeedMultiplier = 1.0f;
 		if (bWallSlideActive)
 		{
-			ActiveWallLookNormal = WallSlideNormal;
+			ActiveWallLookNormal = CameraWallNormalSmoothed.IsNearlyZero() ? WallSlideNormal : CameraWallNormalSmoothed;
 			bApplyWallLookLimit = !ActiveWallLookNormal.IsNearlyZero();
 			bUseWallRunLookLimit = bWallRunActive;
 			PushBackSpeedMultiplier = bUseWallRunLookLimit ? 0.45f : 1.0f;
 		}
 		else if (!GroundWallLookBlockNormal.IsNearlyZero())
 		{
-			ActiveWallLookNormal = GroundWallLookBlockNormal;
+			ActiveWallLookNormal = CameraWallNormalSmoothed.IsNearlyZero() ? GroundWallLookBlockNormal : CameraWallNormalSmoothed;
 			bApplyWallLookLimit = true;
 			bUseWallRunLookLimit = true;
 			PushBackSpeedMultiplier = 1.15f;

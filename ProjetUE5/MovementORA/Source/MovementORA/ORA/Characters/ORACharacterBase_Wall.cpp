@@ -1540,25 +1540,10 @@ void AORACharacterBase::UpdateWallSlide(const float DeltaSeconds)
 		}
 	}
 
+	// The view is carried along curved walls by the single camera pass in Tick, from a smoothed normal.
 	const FVector CurrentCameraCarryNormal = WallSlideNormal.GetSafeNormal2D();
 	if (!CurrentCameraCarryNormal.IsNearlyZero())
 	{
-		const FVector PreviousCameraCarryNormal = WallRunCameraCarryLastWallNormal.GetSafeNormal2D();
-		if (!PreviousCameraCarryNormal.IsNearlyZero())
-		{
-			const float CarryYawDelta = FRotator::NormalizeAxis(
-				CurrentCameraCarryNormal.Rotation().Yaw - PreviousCameraCarryNormal.Rotation().Yaw);
-			if (FMath::Abs(CarryYawDelta) > KINDA_SMALL_NUMBER)
-			{
-				if (AController* Ctrl = GetController())
-				{
-					FRotator CtrlRot = Ctrl->GetControlRotation();
-					CtrlRot.Yaw += CarryYawDelta;
-					Ctrl->SetControlRotation(CtrlRot);
-					bWallRunCameraAdjustedThisTick = true;
-				}
-			}
-		}
 		WallRunCameraCarryLastWallNormal = CurrentCameraCarryNormal;
 	}
 
