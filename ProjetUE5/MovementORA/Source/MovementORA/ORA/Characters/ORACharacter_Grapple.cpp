@@ -86,6 +86,10 @@ void AORACharacter::UpdateGrappleTargeting(float DeltaSeconds)
 	AActor* FirstHitObstacle = nullptr;
 	FVector FirstHitLocation = FVector::ZeroVector;
 	float FirstHitDistanceSq = TNumericLimits<float>::Max();
+	// Aim assist: when no obstacle is hit precisely, the enlarged aim box closest to the screen center wins.
+	AActor* AssistObstacle = nullptr;
+	FVector AssistLocation = FVector::ZeroVector;
+	float AssistBestDot = -1.0f;
 	for (const TObjectPtr<AActor>& ObstacleRef : ObstacleActors)
 	{
 		AActor* Obstacle = ObstacleRef.Get();
@@ -125,37 +129,49 @@ void AORACharacter::UpdateGrappleTargeting(float DeltaSeconds)
 					ComponentTraceParams);
 			}
 
-			FVector CandidateHitLocation = ComponentHit.ImpactPoint;
-			if (!bHitComponent)
+			if (bHitComponent)
 			{
-				// BP_ObstacleGrappin's imported visual mesh can have no usable
-				// simple or complex query collision. Its render bounds still
-				// represent what the player actually sees under the crosshair.
-				const FBox VisualBounds = StaticMeshComponent->Bounds.GetBox().ExpandBy(12.0f);
-				if (!FMath::LineBoxIntersection(
-					VisualBounds,
-					PreciseTraceStart,
-					PreciseTraceEnd,
-					PreciseTraceEnd - PreciseTraceStart))
+				const float HitDistanceSq = FVector::DistSquared(PreciseTraceStart, ComponentHit.ImpactPoint);
+				if (HitDistanceSq < FirstHitDistanceSq)
 				{
-					continue;
+					FirstHitDistanceSq = HitDistanceSq;
+					FirstHitObstacle = Obstacle;
+					FirstHitLocation = ComponentHit.ImpactPoint;
 				}
+				continue;
+			}
 
+			// Enlarged box for the aim ray only; the anchor stays on the real obstacle bounds.
+			const FBox RealBounds = StaticMeshComponent->Bounds.GetBox();
+			const FBox AimBounds = RealBounds.ExpandBy(FMath::Max(12.0f, GrappleAimHitboxExpansion));
+			if (!FMath::LineBoxIntersection(
+				AimBounds,
+				PreciseTraceStart,
+				PreciseTraceEnd,
+				PreciseTraceEnd - PreciseTraceStart))
+			{
+				continue;
+			}
+
+			const FVector ToCenter = RealBounds.GetCenter() - PreciseTraceStart;
+			const float CenterDot = FVector::DotProduct(ToCenter.GetSafeNormal(), ForwardDir);
+			if (CenterDot > AssistBestDot)
+			{
 				const float ProjectedDistance = FMath::Clamp(
-					FVector::DotProduct(VisualBounds.GetCenter() - PreciseTraceStart, ForwardDir),
+					FVector::DotProduct(ToCenter, ForwardDir),
 					0.0f,
 					EffectiveTraceDistance);
-				CandidateHitLocation = PreciseTraceStart + ForwardDir * ProjectedDistance;
-			}
-
-			const float HitDistanceSq = FVector::DistSquared(PreciseTraceStart, CandidateHitLocation);
-			if (HitDistanceSq < FirstHitDistanceSq)
-			{
-				FirstHitDistanceSq = HitDistanceSq;
-				FirstHitObstacle = Obstacle;
-				FirstHitLocation = CandidateHitLocation;
+				AssistBestDot = CenterDot;
+				AssistObstacle = Obstacle;
+				AssistLocation = RealBounds.GetClosestPointTo(PreciseTraceStart + ForwardDir * ProjectedDistance);
 			}
 		}
+	}
+
+	if (!IsValid(FirstHitObstacle) && IsValid(AssistObstacle))
+	{
+		FirstHitObstacle = AssistObstacle;
+		FirstHitLocation = AssistLocation;
 	}
 
 	const bool bFirstHitUsable = IsValid(FirstHitObstacle)

@@ -254,6 +254,13 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Grapple|Config", meta = (ClampMin = "0.0"))
 	float GrappleArrivalUpBoost = 300.0f;
 
+	/** Margin (cm) added around grapple obstacles for the aim ray only (collisions are unchanged). */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Grapple|Config", meta = (ClampMin = "0.0"))
+	float GrappleAimHitboxExpansion = 250.0f;
+
+	/** True while a usable grapple obstacle is under the aim (drives the HUD aim dot). */
+	bool HasGrappleAimTarget() const { return !bIsGrappling && bHasGrappleLocation && GrappleTargetActor != nullptr; }
+
 	/** Time used for the white-to-red consume animation before the obstacle disappears. */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Grapple|Config", meta = (ClampMin = "0.01"))
 	float GrappleConsumedFadeDuration = 2.5f;

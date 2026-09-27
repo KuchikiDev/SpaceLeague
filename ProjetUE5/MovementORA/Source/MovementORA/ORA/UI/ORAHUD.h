@@ -14,6 +14,7 @@ class MOVEMENTORA_API AORAHUD : public AHUD
 
 protected:
 	virtual void BeginPlay() override;
+	virtual void DrawHUD() override;
 
 private:
 	UPROPERTY(Transient)

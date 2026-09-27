@@ -387,6 +387,15 @@ public:
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Grappin|Coupure", meta = (DisplayName = "Impulsion vers le haut a la relance", ClampMin = "0.0", UIMin = "0.0", Units = "cm/s", ToolTip = "Petite vitesse verticale ajoutee a la relance pour faciliter l'enchainement."))
 	float GrappleArrivalUpBoost = 300.0f;
 
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Grappin|Detection", meta = (DisplayName = "Agrandissement de la zone de visee", ClampMin = "0.0", UIMin = "0.0", Units = "cm", ToolTip = "Marge ajoutee autour des obstacles uniquement pour le rayon de visee du grappin (les collisions ne changent pas). Plus grand = plus facile de viser vite."))
+	float GrappleAimHitboxExpansion = 250.0f;
+
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Camera|Point de visee", meta = (DisplayName = "Afficher le point de visee", ToolTip = "Petit point au centre de l'ecran. Il grossit et devient cyan quand un obstacle grappinable est vise."))
+	bool bShowAimDot = true;
+
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Camera|Point de visee", meta = (DisplayName = "Taille du point de visee", ClampMin = "1.0", ClampMax = "30.0", UIMin = "1.0", UIMax = "30.0", ToolTip = "Taille du point en pixels pour un ecran de 1080 lignes (adaptee automatiquement a la resolution)."))
+	float AimDotSize = 5.0f;
+
 	UPROPERTY(Config, EditAnywhere, Category = "Grappin|Corde", meta = (DisplayName = "Longueur min corde", ClampMin = "1.0", UIMin = "1.0", ToolTip = "Longueur minimale gardee pour eviter que le grappin s'effondre directement sur l'ancre."))
 	float GrappleMinCableLength = 150.0f;
 
