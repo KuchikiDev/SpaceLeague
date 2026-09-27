@@ -603,22 +603,22 @@ public:
 
 	/** Real speed (cm/s) where FOV / vignette / chromatic aberration start to ramp up. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Run|SpeedFeedback", meta = (ClampMin = "0.0"))
-	float SpeedEffectsStartSpeed = 800.0f;
+	float SpeedEffectsStartSpeed = 2600.0f;
 
 	/** Real speed (cm/s) where the speed effects reach the sprint FOV. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Run|SpeedFeedback", meta = (ClampMin = "1.0"))
-	float SpeedEffectsFullSpeed = 3600.0f;
+	float SpeedEffectsFullSpeed = 5000.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Run|SpeedFeedback", meta = (ClampMin = "0.1"))
 	float SpeedEffectsInterpSpeed = 6.0f;
 
 	/** Extra FOV (deg) added beyond the sprint FOV between SpeedEffectsFullSpeed and SpeedFOVOverSpeedMaxSpeed. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Run|SpeedFeedback", meta = (ClampMin = "0.0", ClampMax = "40.0"))
-	float SpeedFOVOverSpeedBoost = 15.0f;
+	float SpeedFOVOverSpeedBoost = 5.0f;
 
 	/** Real speed (cm/s) where the over-speed FOV bonus is complete. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Run|SpeedFeedback", meta = (ClampMin = "1.0"))
-	float SpeedFOVOverSpeedMaxSpeed = 7000.0f;
+	float SpeedFOVOverSpeedMaxSpeed = 8000.0f;
 
 	/** Speed lines post-process (M_SpeedLines) at high speed. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Run|SpeedFeedback")
@@ -626,7 +626,7 @@ public:
 
 	/** Maximum intensity of the speed lines. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Run|SpeedFeedback", meta = (ClampMin = "0.0", ClampMax = "2.0"))
-	float SpeedLinesIntensity = 1.0f;
+	float SpeedLinesIntensity = 0.5f;
 
 	/** Maximum camera drop (cm) when landing from a big fall. 0 disables the dip. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Run|SpeedFeedback", meta = (ClampMin = "0.0"))

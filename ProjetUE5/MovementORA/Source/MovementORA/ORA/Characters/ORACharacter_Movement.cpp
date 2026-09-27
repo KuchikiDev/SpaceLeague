@@ -151,21 +151,21 @@ void AORACharacter::UpdateRunCamera(float DeltaSeconds)
 
 	// Speed feedback from the real 3D speed: dash, wall run, falls and air momentum count,
 	// not only the sprint key.
-	// Ease-out curve (pow 0.7): the FOV opens as soon as the player speeds up, then settles.
+	// Linear ramp from above the normal run speed: running alone must not widen the view.
 	const float Speed3D = static_cast<float>(GetVelocity().Size());
-	const auto EaseOutRamp = [](const float Value, const float Start, const float End)
+	const auto SpeedRamp = [](const float Value, const float Start, const float End)
 	{
 		const float Range = FMath::Max(1.0f, End - Start);
-		return FMath::Pow(FMath::Clamp((Value - Start) / Range, 0.0f, 1.0f), 0.7f);
+		return FMath::Clamp((Value - Start) / Range, 0.0f, 1.0f);
 	};
 	SpeedEffectsAlpha = FMath::FInterpTo(
 		SpeedEffectsAlpha,
-		EaseOutRamp(Speed3D, SpeedEffectsStartSpeed, SpeedEffectsFullSpeed),
+		SpeedRamp(Speed3D, SpeedEffectsStartSpeed, SpeedEffectsFullSpeed),
 		DeltaSeconds,
 		SpeedEffectsInterpSpeed);
 	OverSpeedAlpha = FMath::FInterpTo(
 		OverSpeedAlpha,
-		EaseOutRamp(Speed3D, SpeedEffectsFullSpeed, SpeedFOVOverSpeedMaxSpeed),
+		SpeedRamp(Speed3D, SpeedEffectsFullSpeed, SpeedFOVOverSpeedMaxSpeed),
 		DeltaSeconds,
 		SpeedEffectsInterpSpeed);
 
@@ -314,10 +314,10 @@ void AORACharacter::UpdateRunCamera(float DeltaSeconds)
 	}
 	bWasWallSlidingLastCameraUpdate = bWallSliding;
 
-	// Speed lines: from ~60 % of the speed effects, full at over-speed. Weight 0 = pass disabled.
+	// Speed lines: only from ~75 % of the speed effects (dash, grapple), full at over-speed. Weight 0 = pass disabled.
 	if (IsValid(SpeedLinesMID) && IsValid(ViewCamera))
 	{
-		const float LinesAlpha = FMath::Max(OverSpeedAlpha, FMath::Clamp((SpeedEffectsAlpha - 0.6f) / 0.4f, 0.0f, 1.0f));
+		const float LinesAlpha = FMath::Max(OverSpeedAlpha, FMath::Clamp((SpeedEffectsAlpha - 0.75f) / 0.25f, 0.0f, 1.0f));
 		float LinesIntensity = bShowSpeedLines ? SpeedLinesIntensity * LinesAlpha : 0.0f;
 		const float ForcedIntensity = CVarORAForceSpeedLines.GetValueOnGameThread();
 		if (ForcedIntensity >= 0.0f)
@@ -343,7 +343,7 @@ void AORACharacter::UpdateRunCamera(float DeltaSeconds)
 	const float GrappleFOVKick = FMath::InterpEaseOut(0.0f, GrappleCameraFOVBoost, GrappleCameraAlpha, 2.0f);
 	const float OverSpeedFOV   = SpeedFOVOverSpeedBoost * OverSpeedAlpha;
 	const float TargetFOV      = FMath::Min(
-		150.0f,
+		125.0f,
 		FMath::Lerp(DefaultFOV, SprintFOV, SprintFOVAlpha) + BreathPulse + SlideFOVBoost * GroundSlideCameraEase + GrappleFOVKick + OverSpeedFOV);
 	const float CurrentFOV  = PC->PlayerCameraManager->GetFOVAngle();
 	const float FovInterpSpeed = GroundSlideCameraAlpha > KINDA_SMALL_NUMBER
@@ -358,9 +358,9 @@ void AORACharacter::UpdateRunCamera(float DeltaSeconds)
 	{
 		const float SpeedFxAlpha = FMath::Max3(SprintAlpha, GrappleCameraAlpha, SpeedEffectsAlpha);
 		ViewCamera->PostProcessSettings.bOverride_VignetteIntensity   = true;
-		ViewCamera->PostProcessSettings.VignetteIntensity             = FMath::Lerp(SprintVignetteMin, SprintVignetteMax + 0.08f, SpeedFxAlpha);
+		ViewCamera->PostProcessSettings.VignetteIntensity             = FMath::Lerp(SprintVignetteMin, SprintVignetteMax, SpeedFxAlpha);
 		ViewCamera->PostProcessSettings.bOverride_SceneFringeIntensity = true;
-		ViewCamera->PostProcessSettings.SceneFringeIntensity          = FMath::Lerp(0.0f, SprintChromaticMax + GrappleCameraChromaticBoost, SpeedFxAlpha);
+		ViewCamera->PostProcessSettings.SceneFringeIntensity          = 0.5f * (SprintChromaticMax * SpeedFxAlpha + GrappleCameraChromaticBoost * GrappleCameraAlpha);
 	}
 }
 
