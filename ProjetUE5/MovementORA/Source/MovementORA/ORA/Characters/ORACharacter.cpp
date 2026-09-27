@@ -560,6 +560,9 @@ void AORACharacter::BeginPlay()
 		GrappleArrivalSpeedKeep = FMath::Clamp(GameplayVariables->GrappleArrivalSpeedKeep, 0.0f, 1.5f);
 		GrappleArrivalUpBoost = FMath::Max(0.0f, GameplayVariables->GrappleArrivalUpBoost);
 		GrappleAimHitboxExpansion = FMath::Max(0.0f, GameplayVariables->GrappleAimHitboxExpansion);
+		GrappleSwingSagRatio = FMath::Clamp(GameplayVariables->GrappleSwingSagRatio, 0.0f, 1.0f);
+		GrappleSwingMaxSag = FMath::Max(0.0f, GameplayVariables->GrappleSwingMaxSag);
+		GrappleSwingSpeedBoost = FMath::Clamp(GameplayVariables->GrappleSwingSpeedBoost, 0.0f, 1.0f);
 		GrappleMinCableLength = FMath::Max(1.0f, GameplayVariables->GrappleMinCableLength);
 		GrappleCableSlack = FMath::Max(0.0f, GameplayVariables->GrappleCableSlack);
 		GrappleConsumedFadeDuration = FMath::Max(0.01f, GameplayVariables->GrappleConsumedFadeDuration);
@@ -1454,6 +1457,8 @@ void AORACharacter::TryStartGrapple()
 	GrappleAnchorNormal = ResolveGrappleAnchorNormal();
 	// Pull to a point just in front of the aimed surface so the capsule never crashes into it.
 	GrappleArrivalPoint = GrappleAnchorLocation + GrappleAnchorNormal * (CapsuleRadius + 25.0f);
+	GrapplePullStartLocation = GetActorLocation();
+	GrappleSwingSagOffset = ComputeGrappleSwingSag();
 	UE_LOG(LogTemp, Warning, TEXT("[Grapple] Started | Target=%s | Anchor=%s | LaunchSpeed=%.1f | Velocity=%s"),
 		*GetNameSafe(GrappleTargetActor.Get()),
 		*GrappleAnchorLocation.ToCompactString(),

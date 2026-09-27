@@ -837,9 +837,31 @@ void AORACharacter::UpdateGrapplePull(const float DeltaSeconds)
 		return;
 	}
 
-	// Straight to the aimed point. The ease-out ramp from the momentum the player had to the full
-	// pull speed avoids a velocity snap and curves the first few meters naturally.
-	const FVector TargetVelocity = ToArrival.GetSafeNormal() * GrapplePullSpeed;
+	// Swing: follow an inverted-bell (U) curve from the start point to the aimed point, faster at the
+	// bottom like a pendulum. Aiming at a point slightly ahead on the curve keeps the player on it.
+	FVector PullDirection = ToArrival.GetSafeNormal();
+	float SwingSpeedScale = 1.0f;
+	const FVector Chord = GrappleArrivalPoint - GrapplePullStartLocation;
+	const float ChordLengthSq = Chord.SizeSquared();
+	if (ChordLengthSq > 1.0f && !GrappleSwingSagOffset.IsNearlyZero())
+	{
+		const float ChordLength = FMath::Sqrt(ChordLengthSq);
+		const float Progress = FMath::Clamp(
+			FVector::DotProduct(GetActorLocation() - GrapplePullStartLocation, Chord) / ChordLengthSq, 0.0f, 1.0f);
+		const float LookAhead = FMath::Max(150.0f, ChordLength * 0.08f) / ChordLength;
+		const float TargetProgress = FMath::Min(1.0f, Progress + LookAhead);
+		const FVector PathPoint = GrapplePullStartLocation + Chord * TargetProgress
+			+ GrappleSwingSagOffset * FMath::Sin(PI * TargetProgress);
+		const FVector ToPathPoint = PathPoint - GetActorLocation();
+		if (!ToPathPoint.IsNearlyZero())
+		{
+			PullDirection = ToPathPoint.GetSafeNormal();
+		}
+		SwingSpeedScale = 1.0f + GrappleSwingSpeedBoost * FMath::Sin(PI * Progress);
+	}
+
+	// The ease-out ramp from the momentum the player had to the full pull speed avoids a velocity snap.
+	const FVector TargetVelocity = PullDirection * GrapplePullSpeed * SwingSpeedScale;
 	const float RampAlpha = FMath::InterpEaseOut(0.0f, 1.0f, FMath::Clamp(GrapplePullElapsed / BlendTime, 0.0f, 1.0f), 2.0f);
 	MoveComp->Velocity = FMath::Lerp(GrapplePullStartVelocity, TargetVelocity, RampAlpha);
 }
@@ -912,4 +934,46 @@ FVector AORACharacter::ResolveGrappleAnchorNormal() const
 
 	const FVector SafeNormal = BestNormal.GetSafeNormal();
 	return SafeNormal.IsNearlyZero() ? Fallback : SafeNormal;
+}
+
+FVector AORACharacter::ComputeGrappleSwingSag() const
+{
+	const FVector Start = GetActorLocation();
+	const FVector Chord = GrappleArrivalPoint - Start;
+	const float ChordLength = Chord.Size();
+	if (ChordLength < 1.0f || GrappleSwingSagRatio <= KINDA_SMALL_NUMBER || GrappleSwingMaxSag <= KINDA_SMALL_NUMBER)
+	{
+		return FVector::ZeroVector;
+	}
+
+	// Sag perpendicular to the chord and pointing down: full for horizontal grapples, none for vertical ones.
+	const FVector ChordDirection = Chord / ChordLength;
+	FVector SagDirection = -FVector::UpVector - ChordDirection * FVector::DotProduct(-FVector::UpVector, ChordDirection);
+	const float Horizontalness = SagDirection.Size();
+	if (Horizontalness < 0.05f)
+	{
+		return FVector::ZeroVector;
+	}
+	SagDirection /= Horizontalness;
+	float Depth = FMath::Min(ChordLength * GrappleSwingSagRatio, GrappleSwingMaxSag) * Horizontalness;
+
+	// Keep the lowest point of the swing above the ground (and above obstacles under the middle).
+	float CapsuleRadius = 34.0f;
+	float CapsuleHalfHeight = 88.0f;
+	if (const UCapsuleComponent* Capsule = GetCapsuleComponent())
+	{
+		Capsule->GetScaledCapsuleSize(CapsuleRadius, CapsuleHalfHeight);
+	}
+	const FVector Middle = Start + Chord * 0.5f;
+	FHitResult GroundHit;
+	FCollisionQueryParams Params(SCENE_QUERY_STAT(GrappleSwingGround), false, this);
+	if (const UWorld* World = GetWorld();
+		World && World->LineTraceSingleByChannel(GroundHit, Middle, Middle - FVector::UpVector * (Depth + 2000.0f), ECC_Visibility, Params))
+	{
+		const float Clearance = Middle.Z - (GroundHit.ImpactPoint.Z + CapsuleHalfHeight + 50.0f);
+		const float DownPerDepth = FMath::Max(0.01f, static_cast<float>(-SagDirection.Z));
+		Depth = FMath::Clamp(Depth, 0.0f, FMath::Max(0.0f, Clearance) / DownPerDepth);
+	}
+
+	return SagDirection * Depth;
 }

@@ -258,6 +258,18 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Grapple|Config", meta = (ClampMin = "0.0"))
 	float GrappleAimHitboxExpansion = 250.0f;
 
+	/** Depth of the U-shaped swing as a share of the distance to the aimed point. 0 = straight pull. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Grapple|Swing", meta = (ClampMin = "0.0", ClampMax = "1.0"))
+	float GrappleSwingSagRatio = 0.3f;
+
+	/** Maximum depth (cm) of the swing; the lowest point never goes into the ground. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Grapple|Swing", meta = (ClampMin = "0.0"))
+	float GrappleSwingMaxSag = 800.0f;
+
+	/** Extra speed at the bottom of the swing (0.25 = +25 %). */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Grapple|Swing", meta = (ClampMin = "0.0", ClampMax = "1.0"))
+	float GrappleSwingSpeedBoost = 0.25f;
+
 	/** True while a usable grapple obstacle is under the aim (drives the HUD aim dot). */
 	bool HasGrappleAimTarget() const { return !bIsGrappling && bHasGrappleLocation && GrappleTargetActor != nullptr; }
 
@@ -849,6 +861,7 @@ private:
 	void UpdateGrapplePull(float DeltaSeconds);
 	void ApplyGrappleArrival();
 	FVector ResolveGrappleAnchorNormal() const;
+	FVector ComputeGrappleSwingSag() const;
 	void StartGrappleVisual();
 	void UpdateGrappleHookVisual(float DeltaSeconds);
 	FVector CalculateGrappleVelocity() const;
@@ -903,6 +916,8 @@ private:
 	FVector GrapplePullLaunchDirection = FVector::ZeroVector;
 	FVector GrappleAnchorNormal = FVector::ZeroVector;
 	FVector GrappleArrivalPoint = FVector::ZeroVector;
+	FVector GrapplePullStartLocation = FVector::ZeroVector;
+	FVector GrappleSwingSagOffset = FVector::ZeroVector;
 	FVector GrappleInitialApproachDirection = FVector::ZeroVector;
 	FVector GrappleSurfaceAimVector = FVector::ZeroVector;
 	float GrappleCurrentCableLength = 0.0f;

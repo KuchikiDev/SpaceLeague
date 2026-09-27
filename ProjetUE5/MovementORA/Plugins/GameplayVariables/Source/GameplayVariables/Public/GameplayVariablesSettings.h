@@ -390,6 +390,15 @@ public:
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Grappin|Detection", meta = (DisplayName = "Agrandissement de la zone de visee", ClampMin = "0.0", UIMin = "0.0", Units = "cm", ToolTip = "Marge ajoutee autour des obstacles uniquement pour le rayon de visee du grappin (les collisions ne changent pas). Plus grand = plus facile de viser vite."))
 	float GrappleAimHitboxExpansion = 250.0f;
 
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Grappin|Balancier", meta = (DisplayName = "Profondeur du balancier", ClampMin = "0.0", ClampMax = "1.0", UIMin = "0.0", UIMax = "1.0", ToolTip = "Creux de la trajectoire en U, en part de la distance au point vise. 0 = ligne droite."))
+	float GrappleSwingSagRatio = 0.3f;
+
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Grappin|Balancier", meta = (DisplayName = "Creux maximum", ClampMin = "0.0", UIMin = "0.0", Units = "cm", ToolTip = "Profondeur maximale du creux. Le creux ne descend jamais dans le sol."))
+	float GrappleSwingMaxSag = 800.0f;
+
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Grappin|Balancier", meta = (DisplayName = "Acceleration au creux", ClampMin = "0.0", ClampMax = "1.0", UIMin = "0.0", UIMax = "1.0", ToolTip = "Vitesse en plus au point le plus bas du balancier (0,25 = +25 %), comme un pendule."))
+	float GrappleSwingSpeedBoost = 0.25f;
+
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Camera|Point de visee", meta = (DisplayName = "Afficher le point de visee", ToolTip = "Petit point au centre de l'ecran. Il grossit et devient cyan quand un obstacle grappinable est vise."))
 	bool bShowAimDot = true;
 
