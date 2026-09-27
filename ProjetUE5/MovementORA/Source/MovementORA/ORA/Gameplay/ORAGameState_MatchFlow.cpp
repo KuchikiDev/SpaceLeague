@@ -209,6 +209,14 @@ void AORAGameState::BeginOfficialMatch()
 		UGameplayStatics::SetGamePaused(this, false);
 	}
 
+	for (APlayerState* BasePlayerState : PlayerArray)
+	{
+		if (AORAPlayerState* PlayerState = Cast<AORAPlayerState>(BasePlayerState))
+		{
+			PlayerState->ResetMatchStats();
+		}
+	}
+
 	SetMatchPhaseAuthority(EORAMatchPhase::InProgress);
 	StartMatchCountdown();
 

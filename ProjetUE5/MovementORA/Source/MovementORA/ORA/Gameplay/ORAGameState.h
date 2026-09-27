@@ -251,7 +251,7 @@ protected:
 	void StartPrisonSentence(APawn* Pawn);
 	void AdvancePrisonSentence(TWeakObjectPtr<APawn> WeakPawn);
 	void ReleasePawnFromPrison(APawn* Pawn);
-	void CheckPrisonCompletion(EORATeam ImprisonedTeam);
+	void CheckPrisonCompletion(EORATeam ImprisonedTeam, AORAPlayerState* Finisher = nullptr);
 	void UpdateBallCampRules(const TArray<AActor*>& Balls);
 	bool AwardPointToTeam(EORATeam ScoringTeam, AActor* BallActor, const TCHAR* Reason, int32 Points = 1);
 	void RelaunchBallRandomly(AActor* BallActor);

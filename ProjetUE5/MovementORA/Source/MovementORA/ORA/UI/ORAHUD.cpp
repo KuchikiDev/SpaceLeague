@@ -6,6 +6,7 @@
 #include "GameplayVariablesSettings.h"
 #include "ORA/Characters/ORACharacter.h"
 #include "ORA/UI/ORABallCampWarningWidget.h"
+#include "ORA/UI/ORAScoreboardWidget.h"
 #include "ORA/UI/ORAStartCountdownWidget.h"
 
 void AORAHUD::BeginPlay()
@@ -31,6 +32,14 @@ void AORAHUD::BeginPlay()
 	if (StartCountdownWidget)
 	{
 		StartCountdownWidget->AddToViewport(100);
+	}
+
+	ScoreboardWidget = CreateWidget<UORAScoreboardWidget>(
+		PlayerOwner,
+		UORAScoreboardWidget::StaticClass());
+	if (ScoreboardWidget)
+	{
+		ScoreboardWidget->AddToViewport(90);
 	}
 }
 

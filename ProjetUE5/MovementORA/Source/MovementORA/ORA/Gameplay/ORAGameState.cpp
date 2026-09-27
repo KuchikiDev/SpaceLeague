@@ -134,6 +134,42 @@ namespace
 		return EORATeam::None;
 	}
 
+	AORAPlayerState* ResolveActorPlayerState(AActor* Actor)
+	{
+		if (AORAPlayerState* PlayerState = Cast<AORAPlayerState>(Actor))
+		{
+			return PlayerState;
+		}
+		if (const APawn* Pawn = Cast<APawn>(Actor))
+		{
+			return Pawn->GetPlayerState<AORAPlayerState>();
+		}
+		if (const AController* Controller = Cast<AController>(Actor))
+		{
+			return Controller->GetPlayerState<AORAPlayerState>();
+		}
+		return nullptr;
+	}
+
+	/** Same lookup as goals: BP_Ball.LastCharacter, then OwnerCharacter, then the ball owner. */
+	AActor* ResolveBallShooter(AActor* BallActor)
+	{
+		if (!BallActor)
+		{
+			return nullptr;
+		}
+		AActor* Shooter = ReadActorProperty(BallActor, TEXT("LastCharacter"));
+		if (!Shooter)
+		{
+			Shooter = ReadActorProperty(BallActor, TEXT("OwnerCharacter"));
+		}
+		if (!Shooter)
+		{
+			Shooter = BallActor->GetOwner();
+		}
+		return Shooter;
+	}
+
 	void SetLegacyScoreProperty(UObject* Object, const FName PropertyName, const int32 Value)
 	{
 		if (Object)
@@ -389,15 +425,7 @@ bool AORAGameState::AwardPointFromBall(AActor* BallActor, AActor* GoalActor)
 			return false;
 		}
 	}
-	AActor* Shooter = ReadActorProperty(BallActor, TEXT("LastCharacter"));
-	if (!Shooter)
-	{
-		Shooter = ReadActorProperty(BallActor, TEXT("OwnerCharacter"));
-	}
-	if (!Shooter)
-	{
-		Shooter = BallActor->GetOwner();
-	}
+	AActor* Shooter = ResolveBallShooter(BallActor);
 
 	EORATeam ScoringTeam = ResolveActorTeam(Shooter);
 	if (ScoringTeam == EORATeam::None && GoalActor)
@@ -424,6 +452,15 @@ bool AORAGameState::AwardPointFromBall(AActor* BallActor, AActor* GoalActor)
 	if (!AwardPointToTeam(ScoringTeam, BallActor, TEXT("goal")))
 	{
 		return false;
+	}
+
+	// An own goal counts for the team but is not credited to the player.
+	if (AORAPlayerState* ShooterPlayerState = ResolveActorPlayerState(Shooter);
+		ShooterPlayerState && ShooterPlayerState->Team == ScoringTeam)
+	{
+		++ShooterPlayerState->Goals;
+		++ShooterPlayerState->MatchPoints;
+		ShooterPlayerState->ForceNetUpdate();
 	}
 
 	RecentScoringBalls.FindOrAdd(BallActor) = Now;
@@ -902,6 +939,23 @@ bool AORAGameState::TeleportPawnToBallHitTarget(APawn* Pawn, AActor* BallActor)
 	// the impact feedback window cannot eliminate the same player twice.
 	StartPrisonSentence(Pawn);
 
+	// Scoreboard: the victim goes to prison, an opposing thrower gets the elimination.
+	TWeakObjectPtr<AORAPlayerState> WeakEliminator;
+	if (PlayerState && (MatchPhase == EORAMatchPhase::InProgress || MatchPhase == EORAMatchPhase::Overtime))
+	{
+		++PlayerState->TimesImprisoned;
+		AORAPlayerState* EliminatorPlayerState = ResolveActorPlayerState(ResolveBallShooter(BallActor));
+		if (EliminatorPlayerState
+			&& EliminatorPlayerState != PlayerState
+			&& EliminatorPlayerState->Team != EORATeam::None
+			&& EliminatorPlayerState->Team != PlayerState->Team)
+		{
+			++EliminatorPlayerState->Eliminations;
+			EliminatorPlayerState->ForceNetUpdate();
+			WeakEliminator = EliminatorPlayerState;
+		}
+	}
+
 	if (AORACharacterBase* ORACharacter = Cast<AORACharacterBase>(Pawn))
 	{
 		ORACharacter->ReleaseOrbitBall(false);
@@ -914,7 +968,7 @@ bool AORAGameState::TeleportPawnToBallHitTarget(APawn* Pawn, AActor* BallActor)
 	FTimerHandle DelayedTeleportHandle;
 	GetWorldTimerManager().SetTimer(
 		DelayedTeleportHandle,
-		FTimerDelegate::CreateWeakLambda(this, [this, WeakPawn, WeakBall, WeakTarget, Destination]()
+		FTimerDelegate::CreateWeakLambda(this, [this, WeakPawn, WeakBall, WeakTarget, WeakEliminator, Destination]()
 		{
 			APawn* HitPawn = WeakPawn.Get();
 			if (!IsValid(HitPawn))
@@ -936,7 +990,7 @@ bool AORAGameState::TeleportPawnToBallHitTarget(APawn* Pawn, AActor* BallActor)
 			// Checked after the teleport so a complete prison never races the queued teleport.
 			if (const AORAPlayerState* HitPlayerState = HitPawn->GetPlayerState<AORAPlayerState>())
 			{
-				CheckPrisonCompletion(HitPlayerState->Team);
+				CheckPrisonCompletion(HitPlayerState->Team, WeakEliminator.Get());
 			}
 		}),
 		0.08f,
@@ -947,7 +1001,7 @@ bool AORAGameState::TeleportPawnToBallHitTarget(APawn* Pawn, AActor* BallActor)
 	return true;
 }
 
-void AORAGameState::CheckPrisonCompletion(const EORATeam ImprisonedTeam)
+void AORAGameState::CheckPrisonCompletion(const EORATeam ImprisonedTeam, AORAPlayerState* Finisher)
 {
 	if (!HasAuthority() || ImprisonedTeam == EORATeam::None || GetWorld() == nullptr)
 	{
@@ -980,9 +1034,17 @@ void AORAGameState::CheckPrisonCompletion(const EORATeam ImprisonedTeam)
 	}
 
 	const EORATeam ScoringTeam = ImprisonedTeam == EORATeam::TeamA ? EORATeam::TeamB : EORATeam::TeamA;
-	if (!AwardPointToTeam(ScoringTeam, nullptr, TEXT("complete prison"), FMath::Max(1, GameplayVariables->PrisonCompletePoints)))
+	const int32 PrisonPoints = FMath::Max(1, GameplayVariables->PrisonCompletePoints);
+	if (!AwardPointToTeam(ScoringTeam, nullptr, TEXT("complete prison"), PrisonPoints))
 	{
 		return;
+	}
+
+	if (IsValid(Finisher) && Finisher->Team == ScoringTeam)
+	{
+		++Finisher->PrisonCompletions;
+		Finisher->MatchPoints += PrisonPoints;
+		Finisher->ForceNetUpdate();
 	}
 
 	UE_LOG(LogTemp, Display, TEXT("[Prison] Team %s prison complete (%d prisoners); releasing them."),
