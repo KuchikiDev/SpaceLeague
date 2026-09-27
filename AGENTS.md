@@ -24,6 +24,16 @@ Apres **chaque feature ajoutee, chaque fix, ou chaque changement important** (re
 - Gameplay modifie : tester le cas concerne (PIE, ou lancement sans rendu `-game -nullrhi` sur `TerrainSandbox`).
 - **Si la verification echoue : on corrige, ou on n'envoie pas et on le signale.** Jamais de submit d'un projet qui ne compile pas.
 
+### Raccourci : tout envoyer en une commande
+
+`Tools/Envoyer.ps1` fait les etapes 2 et 3 d'un coup (changelist + reconcile de Source/Config/GameplayVariables, confirmation, submit, puis fusion de la branche `claude/*` dans `main` et push) :
+
+```
+powershell -ExecutionPolicy Bypass -File Tools\Envoyer.ps1
+```
+
+Options : `-Message`, `-Paths`, `-Branch`, `-Oui` (sans confirmation), `-SansGit`, `-SansPerforce`.
+
 ### 2. Perforce : submit
 
 - Toujours lancer `p4` depuis `S:\Programmation\Jeu\UE5\Byakuya\ORA` (le `.p4config` y definit `P4PORT=127.0.0.1:1667`, un tunnel SSH vers le serveur).
