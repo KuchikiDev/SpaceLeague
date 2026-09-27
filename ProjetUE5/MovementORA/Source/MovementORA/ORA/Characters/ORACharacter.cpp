@@ -1449,6 +1449,8 @@ void AORACharacter::TryStartGrapple()
 		bGrapplePulling = true;
 	}
 	GrappleAnchorNormal = ResolveGrappleAnchorNormal();
+	// Pull to a point just in front of the aimed surface so the capsule never crashes into it.
+	GrappleArrivalPoint = GrappleAnchorLocation + GrappleAnchorNormal * (CapsuleRadius + 25.0f);
 	UE_LOG(LogTemp, Warning, TEXT("[Grapple] Started | Target=%s | Anchor=%s | LaunchSpeed=%.1f | Velocity=%s"),
 		*GetNameSafe(GrappleTargetActor.Get()),
 		*GrappleAnchorLocation.ToCompactString(),

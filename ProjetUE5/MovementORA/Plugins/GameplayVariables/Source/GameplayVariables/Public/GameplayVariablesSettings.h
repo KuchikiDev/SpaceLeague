@@ -375,11 +375,11 @@ public:
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Grappin|Depart et puissance", meta = (DisplayName = "Duree de montee de la traction", ClampMin = "0.01", UIMin = "0.01", Units = "s", ToolTip = "Temps pour passer de la vitesse actuelle du joueur a la pleine vitesse du grappin. Plus court = plus sec, plus long = plus doux."))
 	float GrapplePullBlendTime = 0.12f;
 
-	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Grappin|Coupure", meta = (DisplayName = "Vitesse conservee a l'arrivee", ClampMin = "0.0", ClampMax = "1.5", UIMin = "0.0", UIMax = "1.5", ToolTip = "Part de la vitesse gardee quand le grappin lache pres de l'obstacle. Le joueur glisse le long de l'obstacle au lieu de s'y ecraser."))
-	float GrappleArrivalSpeedKeep = 0.9f;
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Grappin|Coupure", meta = (DisplayName = "Vitesse de relance", ClampMin = "0.0", ClampMax = "1.5", UIMin = "0.0", UIMax = "1.5", ToolTip = "Juste avant l'impact, le joueur est relance dans la direction ou il regarde avec cette part de la vitesse du grappin. S'il regarde l'obstacle, il longe sa surface."))
+	float GrappleArrivalSpeedKeep = 0.8f;
 
-	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Grappin|Coupure", meta = (DisplayName = "Impulsion vers le haut a l'arrivee", ClampMin = "0.0", UIMin = "0.0", Units = "cm/s", ToolTip = "Vitesse verticale ajoutee quand le grappin lache, pour passer au-dessus de l'obstacle."))
-	float GrappleArrivalUpBoost = 450.0f;
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Grappin|Coupure", meta = (DisplayName = "Impulsion vers le haut a la relance", ClampMin = "0.0", UIMin = "0.0", Units = "cm/s", ToolTip = "Petite vitesse verticale ajoutee a la relance pour faciliter l'enchainement."))
+	float GrappleArrivalUpBoost = 300.0f;
 
 	UPROPERTY(Config, EditAnywhere, Category = "Grappin|Corde", meta = (DisplayName = "Longueur min corde", ClampMin = "1.0", UIMin = "1.0", ToolTip = "Longueur minimale gardee pour eviter que le grappin s'effondre directement sur l'ancre."))
 	float GrappleMinCableLength = 150.0f;

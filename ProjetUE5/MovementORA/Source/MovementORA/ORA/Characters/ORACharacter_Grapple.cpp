@@ -802,34 +802,30 @@ void AORACharacter::UpdateGrapplePull(const float DeltaSeconds)
 	}
 
 	GrapplePullElapsed += FMath::Max(0.0f, DeltaSeconds);
-	const FVector ToAnchor = GrappleAnchorLocation - GetActorLocation();
-	const float Distance = ToAnchor.Size();
+	const FVector ToArrival = GrappleArrivalPoint - GetActorLocation();
+	const float Distance = ToArrival.Size();
 	const float BlendTime = FMath::Max(0.01f, GrapplePullBlendTime);
 	const bool bBlendDone = GrapplePullElapsed >= BlendTime;
 
-	// Release before touching the obstacle: the faster the pull, the earlier the release.
-	const float DetachDistance = ActiveGrappleReleaseDistance
-		+ GrappleEarlyDetachBuffer
-		+ GrapplePullSpeed * GrappleEarlyDetachLeadTime;
-	const bool bReachedAnchor = Distance <= DetachDistance;
+	// Relaunch just before the impact: the faster the pull, the earlier the relaunch.
+	const float RelaunchDistance = FMath::Max(ActiveGrappleReleaseDistance, GrapplePullSpeed * GrappleEarlyDetachLeadTime);
+	const bool bReachedTarget = Distance <= RelaunchDistance;
 	const bool bTimeOut = GrapplePullElapsed >= FMath::Max(BlendTime, GrappleMaxPullDuration);
-	const bool bPassedAnchor = bBlendDone && FVector::DotProduct(MoveComp->Velocity, ToAnchor) <= 0.0f;
-	// Something blocked the pull (wall, floor, obstacle edge): stop instead of pushing into it.
+	const bool bPassedTarget = bBlendDone && FVector::DotProduct(MoveComp->Velocity, ToArrival) <= 0.0f;
+	// Something blocked the pull (wall, floor, obstacle edge): relaunch instead of pushing into it.
 	const bool bBlocked = bBlendDone && MoveComp->Velocity.Size() < GrapplePullSpeed * 0.35f;
-	if (bReachedAnchor || bTimeOut || bPassedAnchor || bBlocked || !MoveComp->IsFalling())
+	if (bReachedTarget || bTimeOut || bPassedTarget || bBlocked || !MoveComp->IsFalling())
 	{
 		ApplyGrappleArrival();
 		EndGrapple();
 		return;
 	}
 
-	// The launch direction keeps its lift and lateral carry, then the rope homes onto the anchor.
-	const float HomingAlpha = FMath::SmoothStep(0.0f, BlendTime * 3.0f, GrapplePullElapsed);
-	const FVector PullDirection = FMath::Lerp(GrapplePullLaunchDirection, ToAnchor.GetSafeNormal(), HomingAlpha).GetSafeNormal();
-
-	// Ease-out ramp from the momentum the player had to the full pull speed: no velocity snap.
+	// Straight to the aimed point. The ease-out ramp from the momentum the player had to the full
+	// pull speed avoids a velocity snap and curves the first few meters naturally.
+	const FVector TargetVelocity = ToArrival.GetSafeNormal() * GrapplePullSpeed;
 	const float RampAlpha = FMath::InterpEaseOut(0.0f, 1.0f, FMath::Clamp(GrapplePullElapsed / BlendTime, 0.0f, 1.0f), 2.0f);
-	MoveComp->Velocity = FMath::Lerp(GrapplePullStartVelocity, PullDirection * GrapplePullSpeed, RampAlpha);
+	MoveComp->Velocity = FMath::Lerp(GrapplePullStartVelocity, TargetVelocity, RampAlpha);
 }
 
 void AORACharacter::ApplyGrappleArrival()
@@ -842,21 +838,25 @@ void AORACharacter::ApplyGrappleArrival()
 		return;
 	}
 
-	const FVector Velocity = MoveComp->Velocity;
-	const float Speed = Velocity.Size();
-	if (Speed <= KINDA_SMALL_NUMBER)
+	// Relaunch in the look direction so grapples chain. When looking into the obstacle, the part of
+	// the direction that points into its surface is removed: the player runs along it instead.
+	FVector LaunchDirection = GetControlRotation().Vector();
+	if (!GrappleAnchorNormal.IsNearlyZero())
 	{
-		return;
+		const float IntoSurface = FVector::DotProduct(LaunchDirection, -GrappleAnchorNormal);
+		if (IntoSurface > 0.0f)
+		{
+			LaunchDirection += GrappleAnchorNormal * IntoSurface;
+		}
+	}
+	if (LaunchDirection.IsNearlyZero())
+	{
+		LaunchDirection = FVector::UpVector;
 	}
 
-	// Keep the momentum but remove the part that would crash into the obstacle: the player glides
-	// past it, or over it when arriving head-on, instead of stopping dead.
-	const FVector Normal = GrappleAnchorNormal.IsNearlyZero() ? -Velocity.GetSafeNormal() : GrappleAnchorNormal;
-	const float IntoSurface = FVector::DotProduct(Velocity, -Normal);
-	FVector Exit = IntoSurface > 0.0f ? Velocity + Normal * IntoSurface : Velocity;
-	Exit += FVector::UpVector * Speed * 0.25f;
-
-	MoveComp->Velocity = Exit.GetSafeNormal() * Speed * FMath::Clamp(GrappleArrivalSpeedKeep, 0.0f, 1.5f)
+	const float RelaunchSpeed = FMath::Max(GrapplePullSpeed, static_cast<float>(MoveComp->Velocity.Size()))
+		* FMath::Clamp(GrappleArrivalSpeedKeep, 0.0f, 1.5f);
+	MoveComp->Velocity = LaunchDirection.GetSafeNormal() * RelaunchSpeed
 		+ FVector::UpVector * GrappleArrivalUpBoost;
 }
 

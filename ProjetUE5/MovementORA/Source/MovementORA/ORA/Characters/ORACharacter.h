@@ -239,13 +239,13 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Grapple|Config", meta = (ClampMin = "0.1"))
 	float GrappleMaxPullDuration = 1.2f;
 
-	/** Share of the speed kept when the grapple releases near the obstacle. */
+	/** Share of the pull speed used to relaunch the player in the look direction just before impact. */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Grapple|Config", meta = (ClampMin = "0.0", ClampMax = "1.5"))
-	float GrappleArrivalSpeedKeep = 0.9f;
+	float GrappleArrivalSpeedKeep = 0.8f;
 
-	/** Upward speed (cm/s) added when the grapple releases, to clear the obstacle. */
+	/** Upward speed (cm/s) added to the relaunch. */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Grapple|Config", meta = (ClampMin = "0.0"))
-	float GrappleArrivalUpBoost = 450.0f;
+	float GrappleArrivalUpBoost = 300.0f;
 
 	/** Time used for the white-to-red consume animation before the obstacle disappears. */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Grapple|Config", meta = (ClampMin = "0.01"))
@@ -882,6 +882,7 @@ private:
 	FVector GrapplePullStartVelocity = FVector::ZeroVector;
 	FVector GrapplePullLaunchDirection = FVector::ZeroVector;
 	FVector GrappleAnchorNormal = FVector::ZeroVector;
+	FVector GrappleArrivalPoint = FVector::ZeroVector;
 	FVector GrappleInitialApproachDirection = FVector::ZeroVector;
 	FVector GrappleSurfaceAimVector = FVector::ZeroVector;
 	float GrappleCurrentCableLength = 0.0f;
