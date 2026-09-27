@@ -1,4 +1,5 @@
 #include "ORA/Characters/ORACharacterBase.h"
+#include "ORA/Characters/ORAPostMovementTickComponent.h"
 
 #include "Components/PrimitiveComponent.h"
 #include "Components/CapsuleComponent.h"
@@ -183,6 +184,17 @@ void AORACharacterBase::BeginPlay()
 	{
 		SpringArm->bInheritRoll = true;
 	}
+
+	// Orbit ball and aim spline follow the final position of the frame (see TickAfterMovement).
+	PostMovementTickComponent = NewObject<UORAPostMovementTickComponent>(this, TEXT("PostMovementTick"));
+	if (IsValid(PostMovementTickComponent))
+	{
+		PostMovementTickComponent->RegisterComponent();
+		if (UCharacterMovementComponent* MovementComponent = GetCharacterMovement())
+		{
+			PostMovementTickComponent->PrimaryComponentTick.AddPrerequisite(MovementComponent, MovementComponent->PrimaryComponentTick);
+		}
+	}
 }
 
 void AORACharacterBase::Tick(const float DeltaSeconds)
@@ -192,7 +204,10 @@ void AORACharacterBase::Tick(const float DeltaSeconds)
 	UpdateWallJumpAvailability();
 	UpdatePassFocus(DeltaSeconds);
 	UpdateStopBallInputBuffer();
-	UpdateOrbitBall(DeltaSeconds);
+	if (!IsValid(PostMovementTickComponent))
+	{
+		UpdateOrbitBall(DeltaSeconds);
+	}
 	if (bOrbitBallActive)
 	{
 		if (const APlayerController* PlayerController = Cast<APlayerController>(GetController()))
@@ -214,7 +229,10 @@ void AORACharacterBase::Tick(const float DeltaSeconds)
 			}
 		}
 	}
-	UpdateOrbitAimSpline(DeltaSeconds);
+	if (!IsValid(PostMovementTickComponent))
+	{
+		UpdateOrbitAimSpline(DeltaSeconds);
+	}
 	UpdateNativeDashVisuals(DeltaSeconds);
 	UpdateGroundSlide(DeltaSeconds);
 	UpdateGroundSlideStance(DeltaSeconds);

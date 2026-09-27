@@ -1053,6 +1053,14 @@ protected:
 
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaSeconds) override;
+
+public:
+	/** Called by UORAPostMovementTickComponent once the movement of this frame is done. */
+	void TickAfterMovement(float DeltaSeconds);
+
+protected:
+	UPROPERTY(Transient)
+	TObjectPtr<class UORAPostMovementTickComponent> PostMovementTickComponent = nullptr;
 	virtual void PossessedBy(AController* NewController) override;
 	virtual void OnRep_Controller() override;
 	virtual void Landed(const FHitResult& Hit) override;

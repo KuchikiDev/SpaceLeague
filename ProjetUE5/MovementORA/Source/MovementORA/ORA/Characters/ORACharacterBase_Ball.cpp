@@ -354,6 +354,13 @@ void AORACharacterBase::UpdateStopBallInputBuffer()
 	}
 }
 
+void AORACharacterBase::TickAfterMovement(const float DeltaSeconds)
+{
+	// Placed from the position the character reached this frame: no one-frame lag behind the player.
+	UpdateOrbitBall(DeltaSeconds);
+	UpdateOrbitAimSpline(DeltaSeconds);
+}
+
 void AORACharacterBase::UpdateOrbitBall(const float DeltaSeconds)
 {
 	if (!bOrbitBallActive)
