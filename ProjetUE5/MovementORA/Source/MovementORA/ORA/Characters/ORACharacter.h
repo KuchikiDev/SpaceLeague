@@ -43,6 +43,7 @@ public:
 	AORACharacter();
 
 	virtual void Tick(float DeltaSeconds) override;
+	virtual void Landed(const FHitResult& Hit) override;
 
 	// -----------------------------------------------------------------------
 	// Components
@@ -551,6 +552,33 @@ public:
 	float GrappleCameraChromaticBoost = 0.55f;
 
 	// -----------------------------------------------------------------------
+	// Speed feedback — camera effects driven by the real speed, not only the sprint key
+	// -----------------------------------------------------------------------
+
+	/** Real speed (cm/s) where FOV / vignette / chromatic aberration start to ramp up. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Run|SpeedFeedback", meta = (ClampMin = "0.0"))
+	float SpeedEffectsStartSpeed = 1200.0f;
+
+	/** Real speed (cm/s) where the speed effects reach the sprint FOV. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Run|SpeedFeedback", meta = (ClampMin = "1.0"))
+	float SpeedEffectsFullSpeed = 3600.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Run|SpeedFeedback", meta = (ClampMin = "0.1"))
+	float SpeedEffectsInterpSpeed = 4.0f;
+
+	/** Maximum camera drop (cm) when landing from a big fall. 0 disables the dip. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Run|SpeedFeedback", meta = (ClampMin = "0.0"))
+	float LandingDipMaxDistance = 12.0f;
+
+	/** Fall speed at impact (cm/s) giving the full landing dip. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Run|SpeedFeedback", meta = (ClampMin = "1.0"))
+	float LandingDipFullFallSpeed = 2000.0f;
+
+	/** Time (s) for the landing dip to reach its lowest point before recovering. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Run|SpeedFeedback", meta = (ClampMin = "0.01"))
+	float LandingDipTimeToPeak = 0.08f;
+
+	// -----------------------------------------------------------------------
 	// Movement config
 	// -----------------------------------------------------------------------
 
@@ -738,6 +766,14 @@ private:
 	// Sprint alpha (0=stopped/walking, 1=full sprint) — drives post-process and FOV
 	float SprintAlpha = 0.0f;
 	float GrappleCameraAlpha = 0.0f;
+
+	// Speed feedback (0 = below SpeedEffectsStartSpeed, 1 = at SpeedEffectsFullSpeed)
+	float SpeedEffectsAlpha = 0.0f;
+
+	// Landing dip: closed-form critically damped curve, peak LandingDipAmplitude at LandingDipTimeToPeak
+	float LandingDipAmplitude = 0.0f;
+	float LandingDipElapsed = 0.0f;
+	float EvaluateLandingDipOffset(float DeltaSeconds);
 
 	// Ground dash slide (friction management)
 	void UpdateGroundDashFriction();

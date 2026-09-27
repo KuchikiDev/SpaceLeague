@@ -139,6 +139,14 @@ void AORACharacter::UpdateRunCamera(float DeltaSeconds)
 		: 0.0f;
 	GrappleCameraAlpha = FMath::FInterpTo(GrappleCameraAlpha, GrappleSpeedTarget, DeltaSeconds, 6.0f);
 
+	// Speed feedback from the real 3D speed: dash, wall run, falls and air momentum count,
+	// not only the sprint key.
+	const float SpeedEffectsTarget = FMath::SmoothStep(
+		SpeedEffectsStartSpeed,
+		FMath::Max(SpeedEffectsStartSpeed + 1.0f, SpeedEffectsFullSpeed),
+		static_cast<float>(GetVelocity().Size()));
+	SpeedEffectsAlpha = FMath::FInterpTo(SpeedEffectsAlpha, SpeedEffectsTarget, DeltaSeconds, SpeedEffectsInterpSpeed);
+
 	// ------------------------------------------------------------------
 	// Head bob — sine wave on Z + half-freq sway on Y
 	// ------------------------------------------------------------------
@@ -198,6 +206,16 @@ void AORACharacter::UpdateRunCamera(float DeltaSeconds)
 		CameraBoom->SocketOffset    = FMath::VInterpTo(CameraBoom->SocketOffset, BaseSocketOffset, DeltaSeconds, 8.0f);
 		CameraBoom->TargetArmLength = FMath::FInterpTo(CameraBoom->TargetArmLength, DefaultCameraArmLength, DeltaSeconds, 6.0f);
 		BobTime = 0.0f;
+	}
+
+	// Landing dip, layered after the bob so FollowCamera is back at its base location first.
+	if (IsValid(FollowCamera))
+	{
+		const float LandingDipOffset = EvaluateLandingDipOffset(DeltaSeconds);
+		if (!FMath::IsNearlyZero(LandingDipOffset, 0.01f))
+		{
+			FollowCamera->AddRelativeLocation(FVector(0.0f, 0.0f, LandingDipOffset));
+		}
 	}
 
 	// ------------------------------------------------------------------
@@ -276,7 +294,7 @@ void AORACharacter::UpdateRunCamera(float DeltaSeconds)
 	// FOV — driven by SprintAlpha + subtle breathing pulse synced to bob
 	// ------------------------------------------------------------------
 	// Sqrt curve: FOV jumps aggressively at sprint start then eases into the target
-	const float SprintFOVAlpha = FMath::Sqrt(SprintAlpha);
+	const float SprintFOVAlpha = FMath::Max(FMath::Sqrt(SprintAlpha), SpeedEffectsAlpha);
 	const float BreathPulse    = FMath::Sin(BobTime * 0.5f) * SprintFOVBreathAmplitude * SprintAlpha;
 	const float SlideFOVBoost  = FMath::Min(GroundSlideRunFOVBoost, 2.5f);
 	const float GrappleFOVKick = FMath::InterpEaseOut(0.0f, GrappleCameraFOVBoost, GrappleCameraAlpha, 2.0f);
@@ -292,12 +310,53 @@ void AORACharacter::UpdateRunCamera(float DeltaSeconds)
 	// ------------------------------------------------------------------
 	if (IsValid(FollowCamera))
 	{
-		const float SpeedFxAlpha = FMath::Max(SprintAlpha, GrappleCameraAlpha);
+		const float SpeedFxAlpha = FMath::Max3(SprintAlpha, GrappleCameraAlpha, SpeedEffectsAlpha);
 		FollowCamera->PostProcessSettings.bOverride_VignetteIntensity   = true;
 		FollowCamera->PostProcessSettings.VignetteIntensity             = FMath::Lerp(SprintVignetteMin, SprintVignetteMax + 0.08f, SpeedFxAlpha);
 		FollowCamera->PostProcessSettings.bOverride_SceneFringeIntensity = true;
 		FollowCamera->PostProcessSettings.SceneFringeIntensity          = FMath::Lerp(0.0f, SprintChromaticMax + GrappleCameraChromaticBoost, SpeedFxAlpha);
 	}
+}
+
+void AORACharacter::Landed(const FHitResult& Hit)
+{
+	// Read the impact speed before the base class and the movement component reset it.
+	const float FallSpeed = FMath::Max(0.0f, -GetVelocity().Z);
+	Super::Landed(Hit);
+
+	if (!IsLocallyControlled() || LandingDipMaxDistance <= KINDA_SMALL_NUMBER)
+	{
+		return;
+	}
+
+	// Small hops (under 30 % of the full fall speed) keep the camera still.
+	const float FullFallSpeed = FMath::Max(1.0f, LandingDipFullFallSpeed);
+	const float Strength = FMath::SmoothStep(FullFallSpeed * 0.3f, FullFallSpeed, FallSpeed);
+	if (Strength > KINDA_SMALL_NUMBER)
+	{
+		LandingDipAmplitude = LandingDipMaxDistance * Strength;
+		LandingDipElapsed = 0.0f;
+	}
+}
+
+float AORACharacter::EvaluateLandingDipOffset(const float DeltaSeconds)
+{
+	if (LandingDipAmplitude <= KINDA_SMALL_NUMBER)
+	{
+		return 0.0f;
+	}
+
+	// Critically damped response: -A * (w t) * e^(1 - w t) reaches -A at t = 1/w, then settles
+	// smoothly without overshoot. Closed form, so it does not depend on the frame rate.
+	LandingDipElapsed += FMath::Max(0.0f, DeltaSeconds);
+	const float Omega = 1.0f / FMath::Max(0.01f, LandingDipTimeToPeak);
+	const float Phase = Omega * LandingDipElapsed;
+	if (Phase > 8.0f)
+	{
+		LandingDipAmplitude = 0.0f;
+		return 0.0f;
+	}
+	return -LandingDipAmplitude * Phase * FMath::Exp(1.0f - Phase);
 }
 
 // ---------------------------------------------------------------------------

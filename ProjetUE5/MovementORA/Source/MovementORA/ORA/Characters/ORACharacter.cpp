@@ -495,6 +495,13 @@ void AORACharacter::BeginPlay()
 		DefaultFOV = FMath::Clamp(GameplayVariables->RunFOV, 60.0f, 150.0f);
 		SprintFOV = FMath::Clamp(GameplayVariables->SprintFOV, 60.0f, 150.0f);
 		SprintFOVInterpSpeed = FMath::Max(0.1f, GameplayVariables->FOVInterpSpeed);
+		RunBobAmplitude = FMath::Max(0.0f, GameplayVariables->CameraBobAmplitude);
+		StrafeRollMaxAngle = FMath::Clamp(GameplayVariables->CameraRollDegrees, 0.0f, 15.0f);
+		SpeedEffectsStartSpeed = FMath::Max(0.0f, GameplayVariables->SpeedEffectsStartSpeed);
+		SpeedEffectsFullSpeed = FMath::Max(SpeedEffectsStartSpeed + 1.0f, GameplayVariables->SpeedEffectsFullSpeed);
+		SpeedEffectsInterpSpeed = FMath::Max(0.1f, GameplayVariables->SpeedEffectsInterpSpeed);
+		LandingDipMaxDistance = FMath::Max(0.0f, GameplayVariables->LandingDipMaxDistance);
+		LandingDipFullFallSpeed = FMath::Max(1.0f, GameplayVariables->LandingDipFullFallSpeed);
 
 		// GameplayVariables definit directement la taille finale de detection.
 		StopBallCaptureRadius = FMath::Max(0.0f, GameplayVariables->BallControlRadius);

@@ -401,4 +401,19 @@ public:
 
 	UPROPERTY(Config, EditAnywhere, Category = "Camera", meta = (DisplayName = "Roulis max", ClampMin = "0.0", ClampMax = "15.0", UIMin = "0.0", UIMax = "15.0", ToolTip = "Inclinaison laterale maximale de la camera pendant la course."))
 	float CameraRollDegrees = 4.0f;
+
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Camera|Effets de vitesse", meta = (DisplayName = "Vitesse de debut des effets", ClampMin = "0.0", UIMin = "0.0", Units = "cm/s", ToolTip = "Vitesse reelle (dash, wall run, chute, grappin, sprint...) a partir de laquelle FOV, vignettage et aberration chromatique commencent a s'intensifier."))
+	float SpeedEffectsStartSpeed = 1200.0f;
+
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Camera|Effets de vitesse", meta = (DisplayName = "Vitesse des effets au maximum", ClampMin = "1.0", UIMin = "1.0", Units = "cm/s", ToolTip = "Vitesse reelle a laquelle les effets atteignent leur maximum (FOV de sprint)."))
+	float SpeedEffectsFullSpeed = 3600.0f;
+
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Camera|Effets de vitesse", meta = (DisplayName = "Reactivite des effets", ClampMin = "0.1", UIMin = "0.1", ToolTip = "Vitesse a laquelle les effets suivent la vitesse du joueur. Plus haut = plus nerveux."))
+	float SpeedEffectsInterpSpeed = 4.0f;
+
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Camera|Effets de vitesse", meta = (DisplayName = "Tassement max a l'atterrissage", ClampMin = "0.0", UIMin = "0.0", Units = "cm", ToolTip = "Descente maximale de la camera a l'atterrissage d'une grosse chute. 0 desactive l'effet."))
+	float LandingDipMaxDistance = 12.0f;
+
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Camera|Effets de vitesse", meta = (DisplayName = "Chute pour un tassement complet", ClampMin = "1.0", UIMin = "1.0", Units = "cm/s", ToolTip = "Vitesse de chute a l'impact qui donne le tassement maximal. Les petits sauts (sous 30 % de cette valeur) ne tassent pas la camera."))
+	float LandingDipFullFallSpeed = 2000.0f;
 };
