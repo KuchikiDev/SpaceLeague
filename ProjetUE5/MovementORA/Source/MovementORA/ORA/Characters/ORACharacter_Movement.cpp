@@ -141,11 +141,23 @@ void AORACharacter::UpdateRunCamera(float DeltaSeconds)
 
 	// Speed feedback from the real 3D speed: dash, wall run, falls and air momentum count,
 	// not only the sprint key.
-	const float SpeedEffectsTarget = FMath::SmoothStep(
-		SpeedEffectsStartSpeed,
-		FMath::Max(SpeedEffectsStartSpeed + 1.0f, SpeedEffectsFullSpeed),
-		static_cast<float>(GetVelocity().Size()));
-	SpeedEffectsAlpha = FMath::FInterpTo(SpeedEffectsAlpha, SpeedEffectsTarget, DeltaSeconds, SpeedEffectsInterpSpeed);
+	// Ease-out curve (pow 0.7): the FOV opens as soon as the player speeds up, then settles.
+	const float Speed3D = static_cast<float>(GetVelocity().Size());
+	const auto EaseOutRamp = [](const float Value, const float Start, const float End)
+	{
+		const float Range = FMath::Max(1.0f, End - Start);
+		return FMath::Pow(FMath::Clamp((Value - Start) / Range, 0.0f, 1.0f), 0.7f);
+	};
+	SpeedEffectsAlpha = FMath::FInterpTo(
+		SpeedEffectsAlpha,
+		EaseOutRamp(Speed3D, SpeedEffectsStartSpeed, SpeedEffectsFullSpeed),
+		DeltaSeconds,
+		SpeedEffectsInterpSpeed);
+	OverSpeedAlpha = FMath::FInterpTo(
+		OverSpeedAlpha,
+		EaseOutRamp(Speed3D, SpeedEffectsFullSpeed, SpeedFOVOverSpeedMaxSpeed),
+		DeltaSeconds,
+		SpeedEffectsInterpSpeed);
 
 	// ------------------------------------------------------------------
 	// Head bob — sine wave on Z + half-freq sway on Y
@@ -298,7 +310,10 @@ void AORACharacter::UpdateRunCamera(float DeltaSeconds)
 	const float BreathPulse    = FMath::Sin(BobTime * 0.5f) * SprintFOVBreathAmplitude * SprintAlpha;
 	const float SlideFOVBoost  = FMath::Min(GroundSlideRunFOVBoost, 2.5f);
 	const float GrappleFOVKick = FMath::InterpEaseOut(0.0f, GrappleCameraFOVBoost, GrappleCameraAlpha, 2.0f);
-	const float TargetFOV      = FMath::Lerp(DefaultFOV, SprintFOV, SprintFOVAlpha) + BreathPulse + SlideFOVBoost * GroundSlideCameraEase + GrappleFOVKick;
+	const float OverSpeedFOV   = SpeedFOVOverSpeedBoost * OverSpeedAlpha;
+	const float TargetFOV      = FMath::Min(
+		150.0f,
+		FMath::Lerp(DefaultFOV, SprintFOV, SprintFOVAlpha) + BreathPulse + SlideFOVBoost * GroundSlideCameraEase + GrappleFOVKick + OverSpeedFOV);
 	const float CurrentFOV  = PC->PlayerCameraManager->GetFOVAngle();
 	const float FovInterpSpeed = GroundSlideCameraAlpha > KINDA_SMALL_NUMBER
 		? FMath::Min(SprintFOVInterpSpeed, 2.0f)

@@ -403,13 +403,19 @@ public:
 	float CameraRollDegrees = 4.0f;
 
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Camera|Effets de vitesse", meta = (DisplayName = "Vitesse de debut des effets", ClampMin = "0.0", UIMin = "0.0", Units = "cm/s", ToolTip = "Vitesse reelle (dash, wall run, chute, grappin, sprint...) a partir de laquelle FOV, vignettage et aberration chromatique commencent a s'intensifier."))
-	float SpeedEffectsStartSpeed = 1200.0f;
+	float SpeedEffectsStartSpeed = 800.0f;
 
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Camera|Effets de vitesse", meta = (DisplayName = "Vitesse des effets au maximum", ClampMin = "1.0", UIMin = "1.0", Units = "cm/s", ToolTip = "Vitesse reelle a laquelle les effets atteignent leur maximum (FOV de sprint)."))
 	float SpeedEffectsFullSpeed = 3600.0f;
 
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Camera|Effets de vitesse", meta = (DisplayName = "Reactivite des effets", ClampMin = "0.1", UIMin = "0.1", ToolTip = "Vitesse a laquelle les effets suivent la vitesse du joueur. Plus haut = plus nerveux."))
-	float SpeedEffectsInterpSpeed = 4.0f;
+	float SpeedEffectsInterpSpeed = 6.0f;
+
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Camera|Effets de vitesse", meta = (DisplayName = "Bonus FOV a tres grande vitesse", ClampMin = "0.0", ClampMax = "40.0", UIMin = "0.0", UIMax = "40.0", Units = "deg", ToolTip = "FOV ajoute au-dela du FOV de sprint quand la vitesse depasse 'Vitesse des effets au maximum' (dash, grappin, grandes chutes). Le FOV total reste plafonne a 150."))
+	float SpeedFOVOverSpeedBoost = 15.0f;
+
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Camera|Effets de vitesse", meta = (DisplayName = "Vitesse du bonus FOV maximum", ClampMin = "1.0", UIMin = "1.0", Units = "cm/s", ToolTip = "Vitesse a laquelle le bonus FOV a tres grande vitesse est complet."))
+	float SpeedFOVOverSpeedMaxSpeed = 7000.0f;
 
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Camera|Effets de vitesse", meta = (DisplayName = "Tassement max a l'atterrissage", ClampMin = "0.0", UIMin = "0.0", Units = "cm", ToolTip = "Descente maximale de la camera a l'atterrissage d'une grosse chute. 0 desactive l'effet."))
 	float LandingDipMaxDistance = 12.0f;

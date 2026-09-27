@@ -500,6 +500,8 @@ void AORACharacter::BeginPlay()
 		SpeedEffectsStartSpeed = FMath::Max(0.0f, GameplayVariables->SpeedEffectsStartSpeed);
 		SpeedEffectsFullSpeed = FMath::Max(SpeedEffectsStartSpeed + 1.0f, GameplayVariables->SpeedEffectsFullSpeed);
 		SpeedEffectsInterpSpeed = FMath::Max(0.1f, GameplayVariables->SpeedEffectsInterpSpeed);
+		SpeedFOVOverSpeedBoost = FMath::Clamp(GameplayVariables->SpeedFOVOverSpeedBoost, 0.0f, 40.0f);
+		SpeedFOVOverSpeedMaxSpeed = FMath::Max(SpeedEffectsFullSpeed + 1.0f, GameplayVariables->SpeedFOVOverSpeedMaxSpeed);
 		LandingDipMaxDistance = FMath::Max(0.0f, GameplayVariables->LandingDipMaxDistance);
 		LandingDipFullFallSpeed = FMath::Max(1.0f, GameplayVariables->LandingDipFullFallSpeed);
 
