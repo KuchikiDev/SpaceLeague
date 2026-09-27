@@ -399,6 +399,9 @@ public:
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Grappin|Balancier", meta = (DisplayName = "Acceleration au creux", ClampMin = "0.0", ClampMax = "1.0", UIMin = "0.0", UIMax = "1.0", ToolTip = "Vitesse en plus au point le plus bas du balancier (0,25 = +25 %), comme un pendule."))
 	float GrappleSwingSpeedBoost = 0.25f;
 
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Grappin|Balancier", meta = (DisplayName = "Hauteur max sous la cible", ClampMin = "0.0", UIMin = "0.0", Units = "cm", ToolTip = "Si le joueur est plus bas que la cible de plus que cette hauteur, le grappin l'emmene tout droit, sans balancier."))
+	float GrappleSwingMaxHeightBelowTarget = 300.0f;
+
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Camera|Point de visee", meta = (DisplayName = "Afficher le point de visee", ToolTip = "Petit point au centre de l'ecran. Il grossit et devient cyan quand un obstacle grappinable est vise."))
 	bool bShowAimDot = true;
 

@@ -563,6 +563,7 @@ void AORACharacter::BeginPlay()
 		GrappleSwingSagRatio = FMath::Clamp(GameplayVariables->GrappleSwingSagRatio, 0.0f, 1.0f);
 		GrappleSwingMaxSag = FMath::Max(0.0f, GameplayVariables->GrappleSwingMaxSag);
 		GrappleSwingSpeedBoost = FMath::Clamp(GameplayVariables->GrappleSwingSpeedBoost, 0.0f, 1.0f);
+		GrappleSwingMaxHeightBelowTarget = FMath::Max(0.0f, GameplayVariables->GrappleSwingMaxHeightBelowTarget);
 		GrappleMinCableLength = FMath::Max(1.0f, GameplayVariables->GrappleMinCableLength);
 		GrappleCableSlack = FMath::Max(0.0f, GameplayVariables->GrappleCableSlack);
 		GrappleConsumedFadeDuration = FMath::Max(0.01f, GameplayVariables->GrappleConsumedFadeDuration);

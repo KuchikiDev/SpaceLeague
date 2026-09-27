@@ -270,6 +270,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Grapple|Swing", meta = (ClampMin = "0.0", ClampMax = "1.0"))
 	float GrappleSwingSpeedBoost = 0.25f;
 
+	/** Straight pull (no swing) when the player is lower than the target by more than this (cm). */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Grapple|Swing", meta = (ClampMin = "0.0"))
+	float GrappleSwingMaxHeightBelowTarget = 300.0f;
+
 	/** True while a usable grapple obstacle is under the aim (drives the HUD aim dot). */
 	bool HasGrappleAimTarget() const { return !bIsGrappling && bHasGrappleLocation && GrappleTargetActor != nullptr; }
 

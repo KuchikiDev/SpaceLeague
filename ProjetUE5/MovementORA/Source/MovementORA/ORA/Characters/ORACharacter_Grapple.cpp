@@ -946,6 +946,12 @@ FVector AORACharacter::ComputeGrappleSwingSag() const
 		return FVector::ZeroVector;
 	}
 
+	// Too low under the target: pull straight to it, no swing.
+	if (GrappleArrivalPoint.Z - Start.Z > GrappleSwingMaxHeightBelowTarget)
+	{
+		return FVector::ZeroVector;
+	}
+
 	// Sag perpendicular to the chord and pointing down: full for horizontal grapples, none for vertical ones.
 	const FVector ChordDirection = Chord / ChordLength;
 	FVector SagDirection = -FVector::UpVector - ChordDirection * FVector::DotProduct(-FVector::UpVector, ChordDirection);
@@ -972,7 +978,13 @@ FVector AORACharacter::ComputeGrappleSwingSag() const
 	{
 		const float Clearance = Middle.Z - (GroundHit.ImpactPoint.Z + CapsuleHalfHeight + 50.0f);
 		const float DownPerDepth = FMath::Max(0.01f, static_cast<float>(-SagDirection.Z));
-		Depth = FMath::Clamp(Depth, 0.0f, FMath::Max(0.0f, Clearance) / DownPerDepth);
+		const float AllowedDepth = FMath::Max(0.0f, Clearance) / DownPerDepth;
+		// Too close to the ground for a real swing: straight pull instead of a flattened curve.
+		if (AllowedDepth < Depth * 0.5f)
+		{
+			return FVector::ZeroVector;
+		}
+		Depth = FMath::Min(Depth, AllowedDepth);
 	}
 
 	return SagDirection * Depth;
