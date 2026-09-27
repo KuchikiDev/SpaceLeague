@@ -51,15 +51,6 @@ public:
 	UPROPERTY(Config, EditAnywhere, Category = "General", meta = (DisplayName = "Début de match", ClampMin = "0", UIMin = "0", ToolTip = "Valeur initiale du compteur de match, en secondes, au lancement de Play."))
 	int32 MatchStartSeconds = 300;
 
-	UPROPERTY(Config, EditAnywhere, Category = "General", meta = (DisplayName = "Duree de manche", ToolTip = "Duree cible d'une manche en secondes."))
-	float MatchDurationSeconds = 300.0f;
-
-	UPROPERTY(Config, EditAnywhere, Category = "General", meta = (DisplayName = "Score pour gagner", ClampMin = "1", UIMin = "1", ToolTip = "Nombre de points necessaires pour gagner une manche."))
-	int32 ScoreToWin = 5;
-
-	UPROPERTY(Config, EditAnywhere, Category = "General", meta = (DisplayName = "Delai de reapparition", ClampMin = "0.0", UIMin = "0.0", ToolTip = "Delai avant reapparition d'un joueur elimine."))
-	float RespawnDelaySeconds = 3.0f;
-
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Terrain|Spawn", meta = (DisplayName = "Hauteur max de spawn des obstacles", ClampMin = "0.0", UIMin = "0.0", Units = "cm", ToolTip = "Hauteur maximale, en centimetres, a laquelle les obstacles peuvent apparaitre."))
 	float ObstacleMaxSpawnHeight = 5000.0f;
 

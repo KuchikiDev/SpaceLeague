@@ -31,7 +31,7 @@ ORA est un jeu de sport compétitif opposant deux équipes dans une arène spati
 |-----------|--------|
 | Joueurs par équipe | 2 ou 3 |
 | Formats supportés | 2v2, 3v3 |
-| Durée match | 5 minutes |
+| Durée match | Chrono réglable (`MatchStartSeconds`, GameplayVariables) ; prolongation en mort subite si égalité |
 
 ---
 
@@ -77,19 +77,15 @@ ORA est un jeu de sport compétitif opposant deux équipes dans une arène spati
 - Un joueur touché par la balle adverse va en prison
 - Le joueur est téléporté dans la zone prison (au-dessus du terrain)
 
-**Sortie de prison:**
-- Toucher un adversaire avec la balle depuis la prison
-- Ou libération automatique après X secondes (configurable)
-
-**Activités en prison:**
-- Les prisonniers peuvent se déplacer librement
-- Ils peuvent attraper une balle envoyée par un allié
-- Ils peuvent tirer sur les adversaires
-- Ils **ne peuvent PAS** marquer de but
+**Prison passive (décision du 2026-09-26):**
+- Le prisonnier est téléporté sur la zone prison de son équipe (`SolMortA` / `SolMortB`)
+- Il ne peut **ni attraper ni tirer** la balle, et il est immunisé contre les tirs
+- Libération automatique après 10 secondes : il revient à l'endroit où il a été touché
 
 **Scoring prison:**
-- Si 2 joueurs d'une équipe sont en prison simultanément → 2 points pour l'adversaire
-- Les 2 prisonniers sont alors libérés
+- Si 2 joueurs d'une équipe sont en prison simultanément → 2 points pour l'adversaire (en 2v2 comme en 3v3)
+- Les 2 prisonniers sont alors libérés (après 1 s)
+- Réglages : GameplayVariables, section `Match|Prison`
 
 ### 2.4 Mécanisme de But
 
@@ -98,10 +94,16 @@ ORA est un jeu de sport compétitif opposant deux équipes dans une arène spati
 - Quand un but est marqué, il se déplace vers un nouvel emplacement
 - Un but = 1 point
 
-### 2.5 Timer Inactivité
+### 2.5 Anti-camping de la balle
 
-- Si la balle n'est pas touchée pendant X secondes
-- La balle effectue automatiquement un tir puissant vers le but
+- Si la balle reste dans le même camp trop longtemps sans être touchée (délai de grâce puis compte à rebours affiché, 5 s + 5 s par défaut)
+- L'équipe adverse marque 1 point et la balle est relancée aléatoirement
+- Réglages : GameplayVariables, section `Balle|Anti-stagnation`
+
+### 2.6 Fin de match
+
+- Le match se termine au chrono uniquement (pas de score cible)
+- En cas d'égalité : prolongation en mort subite, le premier point gagne
 
 ---
 
