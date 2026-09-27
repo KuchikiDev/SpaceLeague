@@ -231,6 +231,22 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Grapple|Config", meta = (ClampMin = "0.0"))
 	float GrappleEarlyDetachLeadTime = 0.045f;
 
+	/** Time (s) to ramp from the current momentum to the full grapple pull speed. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Grapple|Config", meta = (ClampMin = "0.01"))
+	float GrapplePullBlendTime = 0.12f;
+
+	/** Maximum pull time (s) before the grapple releases on its own. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Grapple|Config", meta = (ClampMin = "0.1"))
+	float GrappleMaxPullDuration = 1.2f;
+
+	/** Share of the speed kept when the grapple releases near the obstacle. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Grapple|Config", meta = (ClampMin = "0.0", ClampMax = "1.5"))
+	float GrappleArrivalSpeedKeep = 0.9f;
+
+	/** Upward speed (cm/s) added when the grapple releases, to clear the obstacle. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Grapple|Config", meta = (ClampMin = "0.0"))
+	float GrappleArrivalUpBoost = 450.0f;
+
 	/** Time used for the white-to-red consume animation before the obstacle disappears. */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Grapple|Config", meta = (ClampMin = "0.01"))
 	float GrappleConsumedFadeDuration = 2.5f;
@@ -810,6 +826,9 @@ private:
 	void SyncGrappleObstacles();
 	void UpdateGrappleTargeting(float DeltaSeconds);
 	void UpdateActiveGrapple(float DeltaSeconds);
+	void UpdateGrapplePull(float DeltaSeconds);
+	void ApplyGrappleArrival();
+	FVector ResolveGrappleAnchorNormal() const;
 	void StartGrappleVisual();
 	void UpdateGrappleHookVisual(float DeltaSeconds);
 	FVector CalculateGrappleVelocity() const;
@@ -855,6 +874,14 @@ private:
 	TObjectPtr<AActor> PreviousGrappleTargetActor;
 	TWeakObjectPtr<AActor> ActiveGrappleObstacle;
 	FVector GrappleAnchorLocation = FVector::ZeroVector;
+
+	// Rope pull state (see UpdateGrapplePull)
+	bool bGrapplePulling = false;
+	float GrapplePullElapsed = 0.0f;
+	float GrapplePullSpeed = 0.0f;
+	FVector GrapplePullStartVelocity = FVector::ZeroVector;
+	FVector GrapplePullLaunchDirection = FVector::ZeroVector;
+	FVector GrappleAnchorNormal = FVector::ZeroVector;
 	FVector GrappleInitialApproachDirection = FVector::ZeroVector;
 	FVector GrappleSurfaceAimVector = FVector::ZeroVector;
 	float GrappleCurrentCableLength = 0.0f;

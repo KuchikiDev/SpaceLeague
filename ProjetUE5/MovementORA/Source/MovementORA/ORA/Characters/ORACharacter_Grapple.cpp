@@ -786,3 +786,114 @@ void AORACharacter::UpdateNoGrappleZone()
 		}
 	}
 }
+
+// ---------------------------------------------------------------------------
+// Grapple — rope pull and arrival
+// ---------------------------------------------------------------------------
+
+void AORACharacter::UpdateGrapplePull(const float DeltaSeconds)
+{
+	UCharacterMovementComponent* MoveComp = GetCharacterMovement();
+	if (!IsValid(MoveComp))
+	{
+		bGrapplePulling = false;
+		EndGrapple();
+		return;
+	}
+
+	GrapplePullElapsed += FMath::Max(0.0f, DeltaSeconds);
+	const FVector ToAnchor = GrappleAnchorLocation - GetActorLocation();
+	const float Distance = ToAnchor.Size();
+	const float BlendTime = FMath::Max(0.01f, GrapplePullBlendTime);
+	const bool bBlendDone = GrapplePullElapsed >= BlendTime;
+
+	// Release before touching the obstacle: the faster the pull, the earlier the release.
+	const float DetachDistance = ActiveGrappleReleaseDistance
+		+ GrappleEarlyDetachBuffer
+		+ GrapplePullSpeed * GrappleEarlyDetachLeadTime;
+	const bool bReachedAnchor = Distance <= DetachDistance;
+	const bool bTimeOut = GrapplePullElapsed >= FMath::Max(BlendTime, GrappleMaxPullDuration);
+	const bool bPassedAnchor = bBlendDone && FVector::DotProduct(MoveComp->Velocity, ToAnchor) <= 0.0f;
+	// Something blocked the pull (wall, floor, obstacle edge): stop instead of pushing into it.
+	const bool bBlocked = bBlendDone && MoveComp->Velocity.Size() < GrapplePullSpeed * 0.35f;
+	if (bReachedAnchor || bTimeOut || bPassedAnchor || bBlocked || !MoveComp->IsFalling())
+	{
+		ApplyGrappleArrival();
+		EndGrapple();
+		return;
+	}
+
+	// The launch direction keeps its lift and lateral carry, then the rope homes onto the anchor.
+	const float HomingAlpha = FMath::SmoothStep(0.0f, BlendTime * 3.0f, GrapplePullElapsed);
+	const FVector PullDirection = FMath::Lerp(GrapplePullLaunchDirection, ToAnchor.GetSafeNormal(), HomingAlpha).GetSafeNormal();
+
+	// Ease-out ramp from the momentum the player had to the full pull speed: no velocity snap.
+	const float RampAlpha = FMath::InterpEaseOut(0.0f, 1.0f, FMath::Clamp(GrapplePullElapsed / BlendTime, 0.0f, 1.0f), 2.0f);
+	MoveComp->Velocity = FMath::Lerp(GrapplePullStartVelocity, PullDirection * GrapplePullSpeed, RampAlpha);
+}
+
+void AORACharacter::ApplyGrappleArrival()
+{
+	bGrapplePulling = false;
+
+	UCharacterMovementComponent* MoveComp = GetCharacterMovement();
+	if (!IsValid(MoveComp) || !MoveComp->IsFalling())
+	{
+		return;
+	}
+
+	const FVector Velocity = MoveComp->Velocity;
+	const float Speed = Velocity.Size();
+	if (Speed <= KINDA_SMALL_NUMBER)
+	{
+		return;
+	}
+
+	// Keep the momentum but remove the part that would crash into the obstacle: the player glides
+	// past it, or over it when arriving head-on, instead of stopping dead.
+	const FVector Normal = GrappleAnchorNormal.IsNearlyZero() ? -Velocity.GetSafeNormal() : GrappleAnchorNormal;
+	const float IntoSurface = FVector::DotProduct(Velocity, -Normal);
+	FVector Exit = IntoSurface > 0.0f ? Velocity + Normal * IntoSurface : Velocity;
+	Exit += FVector::UpVector * Speed * 0.25f;
+
+	MoveComp->Velocity = Exit.GetSafeNormal() * Speed * FMath::Clamp(GrappleArrivalSpeedKeep, 0.0f, 1.5f)
+		+ FVector::UpVector * GrappleArrivalUpBoost;
+}
+
+FVector AORACharacter::ResolveGrappleAnchorNormal() const
+{
+	const FVector FromLocation = GetActorLocation();
+	const FVector ToAnchor = GrappleAnchorLocation - FromLocation;
+	const FVector Fallback = -ToAnchor.GetSafeNormal();
+	AActor* Target = ActiveGrappleObstacle.Get();
+	if (!IsValid(Target) || ToAnchor.IsNearlyZero())
+	{
+		return Fallback;
+	}
+
+	// Component traces ignore collision channels, so the surface is found even when the obstacle
+	// does not block the visibility channel.
+	const FVector TraceEnd = GrappleAnchorLocation + ToAnchor.GetSafeNormal() * 60.0f;
+	FCollisionQueryParams Params(SCENE_QUERY_STAT(GrappleAnchorNormal), true, this);
+	TArray<UStaticMeshComponent*> TargetMeshes;
+	Target->GetComponents<UStaticMeshComponent>(TargetMeshes);
+
+	float BestDistanceSq = TNumericLimits<float>::Max();
+	FVector BestNormal = Fallback;
+	for (UStaticMeshComponent* TargetMesh : TargetMeshes)
+	{
+		FHitResult Hit;
+		if (IsValid(TargetMesh) && TargetMesh->LineTraceComponent(Hit, FromLocation, TraceEnd, Params))
+		{
+			const float DistanceSq = FVector::DistSquared(FromLocation, Hit.ImpactPoint);
+			if (DistanceSq < BestDistanceSq)
+			{
+				BestDistanceSq = DistanceSq;
+				BestNormal = Hit.ImpactNormal;
+			}
+		}
+	}
+
+	const FVector SafeNormal = BestNormal.GetSafeNormal();
+	return SafeNormal.IsNearlyZero() ? Fallback : SafeNormal;
+}

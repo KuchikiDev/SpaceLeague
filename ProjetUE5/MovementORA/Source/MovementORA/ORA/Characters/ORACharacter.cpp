@@ -554,6 +554,10 @@ void AORACharacter::BeginPlay()
 		GrappleOrbitReleaseMinLateralSpeed = FMath::Max(0.0f, GameplayVariables->GrappleOrbitReleaseMinLateralSpeed);
 		GrappleEarlyDetachBuffer = FMath::Max(0.0f, GameplayVariables->GrappleEarlyDetachBuffer);
 		GrappleEarlyDetachLeadTime = FMath::Max(0.0f, GameplayVariables->GrappleEarlyDetachLeadTime);
+		GrappleMaxPullDuration = FMath::Max(0.1f, GameplayVariables->GrappleDurationSeconds);
+		GrapplePullBlendTime = FMath::Max(0.01f, GameplayVariables->GrapplePullBlendTime);
+		GrappleArrivalSpeedKeep = FMath::Clamp(GameplayVariables->GrappleArrivalSpeedKeep, 0.0f, 1.5f);
+		GrappleArrivalUpBoost = FMath::Max(0.0f, GameplayVariables->GrappleArrivalUpBoost);
 		GrappleMinCableLength = FMath::Max(1.0f, GameplayVariables->GrappleMinCableLength);
 		GrappleCableSlack = FMath::Max(0.0f, GameplayVariables->GrappleCableSlack);
 		GrappleConsumedFadeDuration = FMath::Max(0.01f, GameplayVariables->GrappleConsumedFadeDuration);
@@ -1426,13 +1430,25 @@ void AORACharacter::TryStartGrapple()
 	}
 	bUseControllerRotationYaw = true;
 
-	// Give the grapple a real initial pull; gravity stays active and shapes the arc after that.
+	// Rope pull: ramp from the current momentum to the launch speed, home onto the anchor and
+	// release just before the obstacle (UpdateGrapplePull). Never slower than the current speed.
 	const FVector LaunchVel = CalculateGrappleVelocity();
 	if (UCharacterMovementComponent* MoveComp = GetCharacterMovement())
 	{
 		MoveComp->SetMovementMode(MOVE_Falling);
-		MoveComp->Velocity = LaunchVel;
+		GrapplePullStartVelocity = MoveComp->Velocity;
+		GrapplePullSpeed = FMath::Max(
+			LaunchVel.Size(),
+			GrapplePullStartVelocity.Size() * FMath::Max(1.0f, GrappleReleaseVelocityBoost));
+		GrapplePullLaunchDirection = LaunchVel.GetSafeNormal();
+		if (GrapplePullLaunchDirection.IsNearlyZero())
+		{
+			GrapplePullLaunchDirection = (GrappleAnchorLocation - GetActorLocation()).GetSafeNormal();
+		}
+		GrapplePullElapsed = 0.0f;
+		bGrapplePulling = true;
 	}
+	GrappleAnchorNormal = ResolveGrappleAnchorNormal();
 	UE_LOG(LogTemp, Warning, TEXT("[Grapple] Started | Target=%s | Anchor=%s | LaunchSpeed=%.1f | Velocity=%s"),
 		*GetNameSafe(GrappleTargetActor.Get()),
 		*GrappleAnchorLocation.ToCompactString(),
@@ -1459,9 +1475,7 @@ void AORACharacter::UpdateActiveGrapple(float DeltaSeconds)
 		return;
 	}
 
-	// The grab is a single ballistic impulse applied in TryStartGrapple.
-	// While the rope is visible, do not add attraction, steering correction,
-	// rope tension, minimum speed or any other continuous velocity change.
+	// The rope pulls until UpdateGrapplePull releases it near the anchor.
 	GrappleActiveTime += DeltaSeconds;
 
 	const FVector VisualStart = GetGrappleVisualStartLocation();
@@ -1472,6 +1486,12 @@ void AORACharacter::UpdateActiveGrapple(float DeltaSeconds)
 	}
 	SetBeamMeshVisibility(GrappleLineMesh, false);
 	UpdateGrappleRopeMeshes(GrappleRopeSegments, VisualStart, GrappleAnchorLocation, GetWorld() ? GetWorld()->GetTimeSeconds() : 0.0f, true);
+
+	if (bGrapplePulling)
+	{
+		UpdateGrapplePull(DeltaSeconds);
+		return;
+	}
 
 	if (GrappleActiveTime >= FMath::Max(0.0f, GrappleRopeDisplayDuration))
 	{
@@ -1697,6 +1717,7 @@ void AORACharacter::EndGrapple()
 	if (!bIsGrappling) return;
 
 	bIsGrappling = false;
+	bGrapplePulling = false;
 	bGrappleHookAnimating = false;
 	StartGrappleCooldown();
 
