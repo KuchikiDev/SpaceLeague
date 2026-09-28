@@ -27,6 +27,17 @@ Etat courant du projet au 2026-09-26.
 - Le score "prison complete" (P1-3) est code et compile ; il reste a le tester en PIE avec 2 joueurs humains
   (les bots ne vont jamais en prison).
 
+## A faire en priorite (retours de jeu du 2026-09-28)
+
+1. **Dash sur le mur a ameliorer.** Etat actuel : on dash le long du mur si on regarde le mur ou le long du mur,
+   on se decroche et on dash la ou on regarde si on regarde vers l'exterieur (angle reglable, `Mur` dans GameplayVariables).
+   Le ressenti reste a travailler.
+2. **Camera a l'arrivee sur un mur, a remettre et fiabiliser.** Quand le joueur atterrit sur un mur en le regardant,
+   la camera doit se tourner tout de suite dans le sens de la course. Pareil quand il change de sens sur le mur.
+   Ce comportement existait et ne se declenche plus de facon fiable.
+3. **Effet de collage apres un saut depuis le mur** : correctif en test (saut qui garde la vitesse et s'eloigne
+   toujours du mur, pas de raccroche au meme mur pendant 0,8 s). Si ca colle encore : lire `LogORAWall` dans le log.
+
 ## Faits verifies (code/config)
 
 ### Identite projet
@@ -99,3 +110,4 @@ Etat courant du projet au 2026-09-26.
 - 2026-07 a 2026-09: grappin, bots, deroule du match, prison, anti-camping, authentification en ligne, serveur dedie.
 - 2026-09-25: Revue de reprise (P0/P1/P2). Corrections P0-1, P0-2, P1-3, P2-7.
 - 2026-09-26: P2 termines : decoupage C++, nettoyage assets, copie du code ORA dans Git, doc a jour.
+- 2026-09-28: Retours de jeu : priorites dash sur le mur et camera a l'arrivee sur un mur.
