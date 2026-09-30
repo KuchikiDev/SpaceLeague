@@ -1,7 +1,7 @@
 ---
 type: now
 status: active
-last_review: 2026-09-26
+last_review: 2026-09-30
 owner: dylan
 audience: humans-agents
 source_of_truth: code-and-config
@@ -27,16 +27,21 @@ Etat courant du projet au 2026-09-26.
 - Le score "prison complete" (P1-3) est code et compile ; il reste a le tester en PIE avec 2 joueurs humains
   (les bots ne vont jamais en prison).
 
-## A faire en priorite (retours de jeu du 2026-09-28)
+## A faire en priorite (mise a jour du 2026-09-30)
 
-1. **Dash sur le mur a ameliorer.** Etat actuel : on dash le long du mur si on regarde le mur ou le long du mur,
-   on se decroche et on dash la ou on regarde si on regarde vers l'exterieur (angle reglable, `Mur` dans GameplayVariables).
-   Le ressenti reste a travailler.
-2. **Camera a l'arrivee sur un mur, a remettre et fiabiliser.** Quand le joueur atterrit sur un mur en le regardant,
-   la camera doit se tourner tout de suite dans le sens de la course. Pareil quand il change de sens sur le mur.
-   Ce comportement existait et ne se declenche plus de facon fiable.
-3. **Effet de collage apres un saut depuis le mur** : correctif en test (saut qui garde la vitesse et s'eloigne
-   toujours du mur, pas de raccroche au meme mur pendant 0,8 s). Si ca colle encore : lire `LogORAWall` dans le log.
+Fait et soumis sur Perforce :
+- Mur (dash sur le mur, camera a l'arrivee sur un mur, collage apres un saut) : CL 155.
+- Coyote time sur le saut (0,12 s, le double saut reste disponible) : CL 156.
+- Suppression de 40 reglages GameplayVariables inutilises : CL 157. Le dash reste en ligne droite (pas de controle).
+- Deja en place : balle en orbite mise a jour apres le mouvement, aide a la visee du grappin (zone de visee agrandie).
+- Essai rejete : double appui rapide sur saut = saut vertical (retire, pas soumis).
+
+Ensuite :
+1. Tester le score "prison complete" en PIE avec 2 joueurs humains.
+2. Bots en prison.
+3. Rotation du terrain.
+4. Capacites Raijin/Keplar.
+5. Assets en attente cote Perforce (modifies ou supprimes, jamais soumis) : a trier avec Dylan.
 
 ## Faits verifies (code/config)
 
