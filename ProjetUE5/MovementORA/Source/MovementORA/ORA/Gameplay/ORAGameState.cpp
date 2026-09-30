@@ -318,6 +318,9 @@ void AORAGameState::Tick(const float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 
+	// Every machine animates the arena from the replicated rotation.
+	UpdateArenaRotation();
+
 	if (!HasAuthority()
 		|| (MatchPhase != EORAMatchPhase::InProgress && MatchPhase != EORAMatchPhase::Overtime))
 	{
@@ -354,6 +357,7 @@ void AORAGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLif
 	DOREPLIFETIME(AORAGameState, bMatchEndedInOvertime);
 	DOREPLIFETIME(AORAGameState, BallCampCountdownRemaining);
 	DOREPLIFETIME(AORAGameState, BallCampWarningTeam);
+	DOREPLIFETIME(AORAGameState, ArenaRotation);
 }
 
 void AORAGameState::StartMatchCountdown()

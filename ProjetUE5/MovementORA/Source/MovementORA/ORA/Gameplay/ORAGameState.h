@@ -56,8 +56,43 @@ struct FORAParamOverrideEntry
 	}
 };
 
+/** Arena rotation, decided by the server; every machine animates the arena from these server times. */
+USTRUCT(BlueprintType)
+struct FORAArenaRotation
+{
+	GENERATED_BODY()
+
+	/** Increments with every rotation (0 = none yet). */
+	UPROPERTY(BlueprintReadOnly, Category = "Arena")
+	int32 Sequence = 0;
+
+	/** Server time the on-screen alert starts. */
+	UPROPERTY(BlueprintReadOnly, Category = "Arena")
+	float AlertServerTime = -1.0f;
+
+	/** Server time the arena starts turning (alert time + warning). */
+	UPROPERTY(BlueprintReadOnly, Category = "Arena")
+	float StartServerTime = -1.0f;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Arena")
+	float DurationSeconds = 4.0f;
+
+	/** Yaw of the arena before this rotation, relative to the level layout. */
+	UPROPERTY(BlueprintReadOnly, Category = "Arena")
+	float FromYaw = 0.0f;
+
+	/** +-90 or +-180. */
+	UPROPERTY(BlueprintReadOnly, Category = "Arena")
+	float DeltaYaw = 0.0f;
+
+	/** Center of the arena, the rotation axis is vertical through it. */
+	UPROPERTY(BlueprintReadOnly, Category = "Arena")
+	FVector Pivot = FVector::ZeroVector;
+};
+
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAbilityOverridesChanged);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnORAMatchPhaseChanged, EORAMatchPhase, PreviousPhase, EORAMatchPhase, NewPhase);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnORAArenaRotationAlert, float, DeltaYaw, float, SecondsBeforeRotation);
 
 struct FORABallCampRuntimeState
 {
@@ -128,6 +163,17 @@ public:
 
 	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly, Category = "Match|Ball Camp")
 	EORATeam BallCampWarningTeam = EORATeam::None;
+
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly, Category = "Match|Arena")
+	FORAArenaRotation ArenaRotation;
+
+	/** Fired on every machine when the rotation alert starts (hook the alert sound here). */
+	UPROPERTY(BlueprintAssignable, Category = "Match|Arena")
+	FOnORAArenaRotationAlert OnArenaRotationAlert;
+
+	/** Server: announces a rotation now (alert, then the arena turns). 0 = random quarter or half turn. */
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Match|Arena")
+	void TriggerArenaRotation(float DeltaYaw = 0.0f);
 
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Match|Timer")
 	void StartMatchCountdown();
@@ -257,6 +303,9 @@ protected:
 	/** Sends the ball back the way it came, at the same speed (last hit of a complete prison). */
 	void BounceBallBack(AActor* BallActor);
 	void UpdateBallCampRules(const TArray<AActor*>& Balls);
+	void UpdateArenaRotation();
+	void ApplyArenaYawStep(float StepYaw, const FVector& Pivot);
+	FVector ComputeArenaPivot() const;
 	bool AwardPointToTeam(EORATeam ScoringTeam, AActor* BallActor, const TCHAR* Reason, int32 Points = 1);
 	void RelaunchBallRandomly(AActor* BallActor);
 
@@ -295,5 +344,13 @@ protected:
 	bool bPreMatchEnvironmentPrepared = false;
 	bool bPausedWorldForPreMatchIntro = false;
 	FTSTicker::FDelegateHandle PreMatchRealTimeTickerHandle;
+
+	// Arena rotation (see ORAGameState_Arena.cpp).
+	/** Yaw currently applied to the arena on this machine, relative to the level layout. */
+	float LocalArenaYaw = 0.0f;
+	/** Last rotation whose alert was broadcast on this machine. */
+	int32 LocalArenaAlertSequence = 0;
+	/** Server: time of the next rotation alert (negative = not scheduled). */
+	double NextArenaRotationServerTime = -1.0;
 };
 

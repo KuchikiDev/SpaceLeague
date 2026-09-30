@@ -4,6 +4,7 @@
 #include "GameFramework/HUD.h"
 #include "ORAHUD.generated.h"
 
+class UORAArenaRotationAlertWidget;
 class UORABallCampWarningWidget;
 class UORAPrisonCountdownWidget;
 class UORAScoreboardWidget;
@@ -30,5 +31,8 @@ private:
 
 	UPROPERTY(Transient)
 	TObjectPtr<UORAPrisonCountdownWidget> PrisonCountdownWidget = nullptr;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UORAArenaRotationAlertWidget> ArenaRotationAlertWidget = nullptr;
 };
 

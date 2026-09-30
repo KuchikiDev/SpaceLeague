@@ -5,6 +5,7 @@
 #include "GameFramework/PlayerController.h"
 #include "GameplayVariablesSettings.h"
 #include "ORA/Characters/ORACharacter.h"
+#include "ORA/UI/ORAArenaRotationAlertWidget.h"
 #include "ORA/UI/ORABallCampWarningWidget.h"
 #include "ORA/UI/ORAPrisonCountdownWidget.h"
 #include "ORA/UI/ORAScoreboardWidget.h"
@@ -49,6 +50,14 @@ void AORAHUD::BeginPlay()
 	if (PrisonCountdownWidget)
 	{
 		PrisonCountdownWidget->AddToViewport(85);
+	}
+
+	ArenaRotationAlertWidget = CreateWidget<UORAArenaRotationAlertWidget>(
+		PlayerOwner,
+		UORAArenaRotationAlertWidget::StaticClass());
+	if (ArenaRotationAlertWidget)
+	{
+		ArenaRotationAlertWidget->AddToViewport(82);
 	}
 }
 

@@ -60,6 +60,21 @@ public:
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Terrain|Spawn", meta = (DisplayName = "Hauteur des piliers", ClampMin = "1.0", UIMin = "1.0", Units = "cm", ToolTip = "Hauteur visuelle totale des piliers volants. Leur centre reste place a mi-hauteur du terrain."))
 	float PillarMaxSpawnHeight = 5000.0f;
 
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Terrain|Rotation", meta = (DisplayName = "Rotation du terrain", ToolTip = "Pendant le match, toute l'arene tourne d'un quart ou d'un demi-tour (au hasard, dans un sens ou l'autre), apres une alerte a l'ecran."))
+	bool bArenaRotationEnabled = true;
+
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Terrain|Rotation", meta = (DisplayName = "Intervalle min entre deux rotations", ClampMin = "5.0", UIMin = "5.0", UIMax = "300.0", Units = "s", ToolTip = "Temps minimum entre deux rotations du terrain. Le temps reel est tire au hasard entre le min et le max."))
+	float ArenaRotationMinIntervalSeconds = 30.0f;
+
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Terrain|Rotation", meta = (DisplayName = "Intervalle max entre deux rotations", ClampMin = "5.0", UIMin = "5.0", UIMax = "300.0", Units = "s", ToolTip = "Temps maximum entre deux rotations du terrain."))
+	float ArenaRotationMaxIntervalSeconds = 60.0f;
+
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Terrain|Rotation", meta = (DisplayName = "Alerte avant la rotation", ClampMin = "0.0", ClampMax = "10.0", UIMin = "0.0", UIMax = "10.0", Units = "s", ToolTip = "Duree de l'alerte a l'ecran (avec compte a rebours) avant que le terrain commence a tourner."))
+	float ArenaRotationWarningSeconds = 3.0f;
+
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Terrain|Rotation", meta = (DisplayName = "Duree de la rotation", ClampMin = "0.1", ClampMax = "20.0", UIMin = "0.5", UIMax = "10.0", Units = "s", ToolTip = "Temps que met le terrain pour faire son quart ou son demi-tour."))
+	float ArenaRotationDurationSeconds = 4.0f;
+
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Terrain|Obstacles temporaires", meta = (DisplayName = "Duree visible", ClampMin = "0.1", UIMin = "0.1", Units = "s", ToolTip = "Temps pendant lequel les obstacles temporaires restent visibles avant de disparaitre."))
 	float TimedObstacleStateDurationSeconds = 10.0f;
 
