@@ -5,6 +5,7 @@
 #include "ORAHUD.generated.h"
 
 class UORABallCampWarningWidget;
+class UORAPrisonCountdownWidget;
 class UORAScoreboardWidget;
 class UORAStartCountdownWidget;
 
@@ -26,5 +27,8 @@ private:
 
 	UPROPERTY(Transient)
 	TObjectPtr<UORAScoreboardWidget> ScoreboardWidget = nullptr;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UORAPrisonCountdownWidget> PrisonCountdownWidget = nullptr;
 };
 

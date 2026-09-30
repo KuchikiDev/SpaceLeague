@@ -6,6 +6,9 @@
 #include "ORA/Interfaces/ORALegendConsumer.h"
 #include "ORACharacterBase.generated.h"
 
+/** Wall slide / wall run events (enter, exit, jump or dash off, blocked re-attach). */
+DECLARE_LOG_CATEGORY_EXTERN(LogORAWall, Log, All);
+
 class UPrimaryDataAsset;
 class UInputAction;
 class UInputMappingContext;
@@ -350,6 +353,32 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Dash|Wall", meta = (ClampMin = "0.0", UIMin = "0.0"))
 	float WallDashInputLockSeconds = 0.18f;
 
+	/**
+	 * Dash while on a wall: looking away from the wall by more than this angle (degrees from the wall plane)
+	 * leaves the wall and dashes where the player looks, keeping the speed. Otherwise the dash runs along the wall.
+	 */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Dash|Wall", meta = (ClampMin = "0.0", ClampMax = "89.0"))
+	float WallDashDetachLookAngle = 20.0f;
+
+	/** Dash from a wall (along it or detaching): minimum speed given by the dash. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Dash|Wall", meta = (ClampMin = "0.0"))
+	float WallDashMinSpeed = 10000.0f;
+
+	/** Dash from a wall: speed added on top of the current speed. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Dash|Wall", meta = (ClampMin = "0.0"))
+	float WallDashSpeedBoost = 4000.0f;
+
+	/**
+	 * After a wall jump or a dash off the wall: during this time the player cannot drift back into that wall
+	 * nor re-attach to it (and the air turn is suspended), so leaving the wall never feels sticky.
+	 */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "WallSlide", meta = (ClampMin = "0.0", ClampMax = "2.0"))
+	float WallLeaveGraceSeconds = 0.35f;
+
+	/** After a wall jump or a dash off the wall, the same wall cannot be grabbed again for this long. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "WallSlide", meta = (ClampMin = "0.0", ClampMax = "3.0"))
+	float WallReattachSameWallSeconds = 0.8f;
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Dash|Wall", meta = (ClampMin = "0.0", UIMin = "0.0"))
 	float WallDashForwardTraceBias = 0.35f;
 
@@ -491,6 +520,14 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "WallSlide", meta = (ClampMin = "0.0", UIMin = "0.0", EditCondition = "bEnableWallSlide && bEnableWallRun"))
 	float WallRunSpeed = 1200.0f;
 
+	/** Share of the horizontal speed kept along the wall on a non-dash entry at an angle. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "WallSlide", meta = (ClampMin = "0.0", ClampMax = "1.0", EditCondition = "bEnableWallSlide && bEnableWallRun"))
+	float WallRunEntrySpeedKeep = 0.9f;
+
+	/** Speed (cm/s) lost per second while wall running faster than WallRunSpeed (sprint, jump or grapple entry). */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "WallSlide", meta = (ClampMin = "0.0", EditCondition = "bEnableWallSlide && bEnableWallRun"))
+	float WallRunMomentumDecay = 1500.0f;
+
 	/**
 	 * Minimum length of the movement input projected onto the wall tangent to trigger wall run.
 	 * 0 = any input activates it; 0.25 = must press mostly along the wall (not into it).
@@ -577,6 +614,10 @@ public:
 	 */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "WallSlide", meta = (ClampMin = "0.0", UIMin = "0.0", EditCondition = "bEnableWallSlide && bEnableWallRun"))
 	float WallRunCameraYawInterpSpeed = 720.0f;
+
+	/** Share of the angle to the run direction covered by that camera turn (1 = full alignment). */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "WallSlide", meta = (ClampMin = "0.0", ClampMax = "1.0", EditCondition = "bEnableWallSlide && bEnableWallRun"))
+	float WallRunCameraTurnStrength = 0.5f;
 
 	/** Walls carrying one of these tags are ignored by wall slide / wall dash surface detection. */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "WallSlide|Config")
@@ -867,6 +908,8 @@ public:
 	UFUNCTION(BlueprintPure, Category = "WallSlide")
 	bool IsWallSlideActive() const { return bWallSlideActive; }
 	bool IsWallSlideExitRecoveryActive() const { return bWallSlideExitRecoveryActive; }
+	/** Flat normal of the wall the player jumped or dashed off less than WallLeaveGraceSeconds ago, zero otherwise. */
+	FVector GetRecentWallLeaveNormal() const;
 
 	UFUNCTION(BlueprintPure, Category = "WallSlide")
 	bool IsWallRunActive() const { return bWallRunActive; }
@@ -1255,6 +1298,10 @@ private:
 	void ClearWallDashInputLock();
 	void TryAutoEnterWallRunFromGround();
 	void TryEnterWallSlide(const FVector& WallNormal);
+	/** Records a deliberate wall exit (jump, dash off) for the WallLeaveGraceSeconds window. */
+	void MarkWallLeft(const FVector& WallNormal);
+	/** Turns the view toward the wall run direction (landing on the wall while looking at it, direction change). */
+	void RequestWallCameraAlign(bool bOnlyWhenLookingAtWall);
 	void UpdateWallSlide(float DeltaSeconds);
 	void UpdateWallSlideExitRecovery(float DeltaSeconds);
 	void StartWallSlideExitRecovery(const FVector& DesiredFacing);
@@ -1405,6 +1452,26 @@ private:
 
 	UPROPERTY(Transient)
 	FVector WallRunCurrentAlongDir = FVector::ZeroVector;
+	// Entry speed above WallRunSpeed, kept while wall running and decaying by WallRunMomentumDecay.
+	float WallRunMomentumSpeed = 0.0f;
+	float LastWallLeaveTime = -BIG_NUMBER;
+	FVector LastWallLeaveNormal = FVector::ZeroVector;
+	bool bLoggedWallReattachBlock = false;
+
+	// View turning toward the wall run direction, and the stick input held while it turns.
+	bool bWallCameraAlignActive = false;
+	float WallCameraAlignElapsed = 0.0f;
+	bool bWallRunDirectionHeld = false;
+	FVector2D WallRunHeldMoveInput = FVector2D::ZeroVector;
+	// View yaw when the auto turn ended: turning the view further by hand releases the held direction.
+	float WallCameraAlignEndYaw = 0.0f;
+	// Yaw added by the automatic turns since the player landed on this wall (removed from the wall jump aim).
+	float WallCameraAutoYawApplied = 0.0f;
+	// Yaw the current camera turn still has to cover.
+	float WallCameraAlignRemainingYaw = 0.0f;
+	// View yaw and automatic yaw when the direction hold started (to measure the player's own view turn).
+	float WallRunHoldStartYaw = 0.0f;
+	float WallRunHoldStartAutoYaw = 0.0f;
 
 	UPROPERTY(Transient)
 	FVector WallRunCameraCarryLastWallNormal = FVector::ZeroVector;
@@ -1417,6 +1484,9 @@ private:
 
 	UPROPERTY(Transient)
 	float WallSlideElapsedTime = 0.0f;
+	// Wall the hold timer is counting for (a new wall or face restarts it), and the wall that timed out.
+	FVector WallSlideTimerNormal = FVector::ZeroVector;
+	FVector WallSlideTimedOutNormal = FVector::ZeroVector;
 
 	UPROPERTY(Transient)
 	float WallSlideLostSurfaceTime = 0.0f;

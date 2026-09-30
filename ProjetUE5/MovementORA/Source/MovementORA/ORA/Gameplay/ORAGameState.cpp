@@ -1093,7 +1093,8 @@ void AORAGameState::StartPrisonSentence(APawn* Pawn)
 	PrisonReturnTransforms.FindOrAdd(Pawn) = Pawn->GetActorTransform();
 	BallHitImmunityEndTimes.Remove(Pawn);
 	PlayerState->bIsInPrison = true;
-	PlayerState->PrisonSecondsRemaining = 10;
+	const UGameplayVariablesSettings* GameplayVariables = GetDefault<UGameplayVariablesSettings>();
+	PlayerState->PrisonSecondsRemaining = FMath::Max(1, GameplayVariables->PrisonDurationSeconds);
 	PlayerState->ForceNetUpdate();
 	SetLegacyBoolProperty(Pawn, TEXT("isDead"), true);
 

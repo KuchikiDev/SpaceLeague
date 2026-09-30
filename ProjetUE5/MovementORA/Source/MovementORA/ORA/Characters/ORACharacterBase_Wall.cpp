@@ -46,6 +46,8 @@
 #include "TimerManager.h"
 #include "UObject/ConstructorHelpers.h"
 
+DEFINE_LOG_CATEGORY(LogORAWall);
+
 void AORACharacterBase::SetCanWallJump(const bool bNewCanWallJump)
 {
 	if (bCanWallJump == bNewCanWallJump)
@@ -1021,12 +1023,57 @@ void AORACharacterBase::ApplyWallDashLaunch(const FVector& WallNormal)
 	// ------------------------------------------------------------------
 	if (bWallDashSlidesAlongWall && bWallSlideActive)
 	{
-		// Use stick input as primary slide direction; fall back to current velocity dir
+		FVector LookDirection = FVector::ZeroVector;
+		if (const AController* CurrentController = GetController())
+		{
+			LookDirection = CurrentController->GetControlRotation().Vector().GetSafeNormal2D();
+		}
+
+		// Looking away from the wall: leave it and dash where the player looks, without losing speed.
+		const float DetachDot = FMath::Sin(FMath::DegreesToRadians(FMath::Clamp(WallDashDetachLookAngle, 0.0f, 89.0f)));
+		if (!LookDirection.IsNearlyZero() && FVector::DotProduct(LookDirection, FlatWallNormal) > DetachDot)
+		{
+			const float CurrentHorizontalSpeed = IsValid(MovementComponent)
+				? static_cast<float>(MovementComponent->Velocity.Size2D())
+				: 0.0f;
+			const float DetachSpeed = FMath::Max(
+				FMath::Max(FMath::Max(0.0f, DashAirPower), FMath::Max(0.0f, WallDashMinSpeed)),
+				CurrentHorizontalSpeed + FMath::Max(0.0f, WallDashSpeedBoost));
+
+			ExitWallSlide();
+			MarkWallLeft(FlatWallNormal);
+			const float SeparationDistance = FMath::Max(0.0f, WallDashSeparationDistance);
+			if (SeparationDistance > KINDA_SMALL_NUMBER)
+			{
+				FHitResult SweepHit;
+				AddActorWorldOffset(FlatWallNormal * SeparationDistance, false, &SweepHit, ETeleportType::TeleportPhysics);
+			}
+			if (IsValid(MovementComponent))
+			{
+				MovementComponent->SetMovementMode(MOVE_Falling);
+				MovementComponent->Velocity.X = LookDirection.X * DetachSpeed;
+				MovementComponent->Velocity.Y = LookDirection.Y * DetachSpeed;
+				MovementComponent->Velocity.Z = FMath::Max(0.0f, MovementComponent->Velocity.Z);
+			}
+			SetActorRotation(FRotator(0.0f, LookDirection.Rotation().Yaw, 0.0f));
+			return;
+		}
+
+		// Looking at the wall or along it: dash along the wall.
+		// Use stick input as primary slide direction, then the view along the wall, then the current velocity.
 		float WallRunInputStrength = 0.0f;
 		FVector SlideInput = ResolveWallRunMoveDirection(WallRunInputStrength);
 		if (SlideInput.IsNearlyZero())
 		{
 			SlideInput = GetLastMovementInputVector().GetSafeNormal2D();
+		}
+		if (SlideInput.IsNearlyZero() && !LookDirection.IsNearlyZero())
+		{
+			const FVector LookAlongWall = LookDirection - FlatWallNormal * FVector::DotProduct(LookDirection, FlatWallNormal);
+			if (LookAlongWall.SizeSquared() > FMath::Square(0.2f))
+			{
+				SlideInput = LookAlongWall.GetSafeNormal();
+			}
 		}
 		if (SlideInput.IsNearlyZero())
 		{
@@ -1045,11 +1092,17 @@ void AORACharacterBase::ApplyWallDashLaunch(const FVector& WallNormal)
 			SlideDir = FVector::CrossProduct(FlatWallNormal, FVector::UpVector).GetSafeNormal();
 		}
 
-		// Boost velocity along the wall; UpdateWallSlide() will settle it back to WallRunSpeed
+		// Boost velocity along the wall, never below the current speed. UpdateWallSlide() leaves it alone
+		// during the dash, then the wall run momentum brings it back to WallRunSpeed slowly.
 		if (IsValid(MovementComponent))
 		{
-			MovementComponent->Velocity = FVector(SlideDir.X, SlideDir.Y, 0.0f)
-				* FMath::Max(0.0f, WallDashHorizontalLaunchPower);
+			const float CurrentAlongSpeed = FMath::Max(0.0f, static_cast<float>(
+				FVector::DotProduct(FVector(MovementComponent->Velocity.X, MovementComponent->Velocity.Y, 0.0f), SlideDir)));
+			const float WallDashSpeed = FMath::Max(
+				FMath::Max(FMath::Max(0.0f, WallDashHorizontalLaunchPower), FMath::Max(0.0f, WallDashMinSpeed)),
+				CurrentAlongSpeed + FMath::Max(0.0f, WallDashSpeedBoost));
+			MovementComponent->Velocity = FVector(SlideDir.X, SlideDir.Y, 0.0f) * WallDashSpeed;
+			WallRunMomentumSpeed = WallDashSpeed;
 		}
 
 		SetActorRotation(FRotator(0.0f, SlideDir.Rotation().Yaw, 0.0f));
@@ -1289,11 +1342,99 @@ void AORACharacterBase::TryAutoEnterWallRunFromGround()
 	TryEnterWallSlide(WallSurfaceNormal);
 }
 
-void AORACharacterBase::TryEnterWallSlide(const FVector& WallNormal)
+void AORACharacterBase::MarkWallLeft(const FVector& WallNormal)
 {
-	if (!bEnableWallSlide || bWallSlideActive || bWallSlideTimedOutUntilGrounded)
+	LastWallLeaveNormal = FVector(WallNormal.X, WallNormal.Y, 0.0f).GetSafeNormal();
+	if (const UWorld* World = GetWorld())
+	{
+		LastWallLeaveTime = World->GetTimeSeconds();
+	}
+	bLoggedWallReattachBlock = false;
+	UE_LOG(LogORAWall, Log, TEXT("[%s] Left the wall (normal %s), speed %.0f."),
+		*GetName(), *LastWallLeaveNormal.ToCompactString(), GetVelocity().Size2D());
+}
+
+void AORACharacterBase::RequestWallCameraAlign(const bool bOnlyWhenLookingAtWall)
+{
+	const AController* Ctrl = GetController();
+	if (WallRunCameraYawInterpSpeed <= KINDA_SMALL_NUMBER || !IsValid(Ctrl) || !bWallSlideActive)
 	{
 		return;
+	}
+
+	if (bOnlyWhenLookingAtWall)
+	{
+		const FVector ViewForward = FRotator(0.0f, Ctrl->GetControlRotation().Yaw, 0.0f).Vector();
+		if (FVector::DotProduct(ViewForward, -WallSlideNormal.GetSafeNormal2D()) < 0.2f)
+		{
+			return;
+		}
+	}
+
+	const FVector RunDirection = !WallRunCurrentAlongDir.IsNearlyZero() ? WallRunCurrentAlongDir : WallRunLastAlongDir;
+	if (RunDirection.IsNearlyZero())
+	{
+		return;
+	}
+
+	bWallCameraAlignActive = true;
+	WallCameraAlignElapsed = 0.0f;
+	WallCameraAlignEndYaw = Ctrl->GetControlRotation().Yaw;
+	// Only part of the way toward the run direction: a soft nudge, not a snap.
+	WallCameraAlignRemainingYaw = FMath::Clamp(WallRunCameraTurnStrength, 0.0f, 1.0f)
+		* FRotator::NormalizeAxis(RunDirection.Rotation().Yaw - Ctrl->GetControlRotation().Yaw);
+	// The same stick input keeps meaning the same direction while (and after) the view turns.
+	bWallRunDirectionHeld = CachedWallRunMoveInput.SizeSquared() > 0.04f;
+	WallRunHeldMoveInput = CachedWallRunMoveInput;
+	WallRunHoldStartYaw = Ctrl->GetControlRotation().Yaw;
+	WallRunHoldStartAutoYaw = WallCameraAutoYawApplied;
+	UE_LOG(LogORAWall, Log, TEXT("[%s] Camera turns toward the wall run%s."),
+		*GetName(), bOnlyWhenLookingAtWall ? TEXT(" (landed looking at the wall)") : TEXT(" (direction change)"));
+}
+
+FVector AORACharacterBase::GetRecentWallLeaveNormal() const
+{
+	const UWorld* World = GetWorld();
+	if (!IsValid(World) || LastWallLeaveNormal.IsNearlyZero()
+		|| World->GetTimeSeconds() - LastWallLeaveTime > FMath::Max(0.0f, WallLeaveGraceSeconds))
+	{
+		return FVector::ZeroVector;
+	}
+	return LastWallLeaveNormal;
+}
+
+void AORACharacterBase::TryEnterWallSlide(const FVector& WallNormal)
+{
+	if (!bEnableWallSlide || bWallSlideActive)
+	{
+		return;
+	}
+
+	// The wall held until the time limit stays unavailable until landing; any other wall is fine.
+	if (bWallSlideTimedOutUntilGrounded)
+	{
+		if (FVector::DotProduct(FVector(WallNormal.X, WallNormal.Y, 0.0f).GetSafeNormal(), WallSlideTimedOutNormal) > 0.7f)
+		{
+			return;
+		}
+		bWallSlideTimedOutUntilGrounded = false;
+	}
+
+	// Just jumped or dashed off this wall: do not stick back to it. Another wall is fine.
+	if (const UWorld* World = GetWorld())
+	{
+		const float SinceLeft = World->GetTimeSeconds() - LastWallLeaveTime;
+		if (!LastWallLeaveNormal.IsNearlyZero()
+			&& SinceLeft < FMath::Max(0.0f, WallReattachSameWallSeconds)
+			&& FVector::DotProduct(FVector(WallNormal.X, WallNormal.Y, 0.0f).GetSafeNormal(), LastWallLeaveNormal) > 0.7f)
+		{
+			if (!bLoggedWallReattachBlock)
+			{
+				bLoggedWallReattachBlock = true;
+				UE_LOG(LogORAWall, Log, TEXT("[%s] Re-attach to the same wall blocked (%.2f s after leaving)."), *GetName(), SinceLeft);
+			}
+			return;
+		}
 	}
 
 	UCharacterMovementComponent* MovementComponent = GetCharacterMovement();
@@ -1348,6 +1489,7 @@ void AORACharacterBase::TryEnterWallSlide(const FVector& WallNormal)
 	WallRunLastSideInputSign = 0.0f;
 	WallRunResolvedSideInputSign = 0.0f;
 	WallSlideElapsedTime = 0.0f;
+	WallSlideTimerNormal = FlatNormal;
 	WallSlideLostSurfaceTime = 0.0f;
 	WallSlideDefaultGravityScale = MovementComponent->GravityScale;
 	bWallSlideSavedOrientRotationToMovement = MovementComponent->bOrientRotationToMovement;
@@ -1379,10 +1521,10 @@ void AORACharacterBase::TryEnterWallSlide(const FVector& WallNormal)
 	{
 		MovementComponent->Velocity += FlatNormal * IntoDot;
 	}
-	if (bEnteredFromDash)
+	WallRunMomentumSpeed = 0.0f;
 	{
-		// Redirect part of the dash along the contacted surface. The old behavior
-		// zeroed XY here, causing a visible stop before wall-run acceleration resumed.
+		// Redirect the entry speed along the contacted surface. A dash entry used to zero XY (visible stop),
+		// and an entry at an angle lost the part of the speed going into the wall.
 		const FVector ProjectedHorizontalVelocity(
 			MovementComponent->Velocity.X,
 			MovementComponent->Velocity.Y,
@@ -1390,12 +1532,24 @@ void AORACharacterBase::TryEnterWallSlide(const FVector& WallNormal)
 		const float ExistingAlongSpeed = FMath::Max(
 			0.0f,
 			FVector::DotProduct(ProjectedHorizontalVelocity, EntryAlongDir));
-		const float RedirectedDashSpeed =
-			FMath::Min(HorizontalSpeed, FMath::Max(0.0f, WallRunSpeed)) *
-			FMath::Clamp(WallRunEntryMomentumTransfer, 0.0f, 1.0f);
-		const float SmoothEntrySpeed = FMath::Max(ExistingAlongSpeed, RedirectedDashSpeed);
+		float RedirectedSpeed = 0.0f;
+		if (bEnteredFromDash)
+		{
+			RedirectedSpeed = FMath::Min(HorizontalSpeed, FMath::Max(0.0f, WallRunSpeed)) *
+				FMath::Clamp(WallRunEntryMomentumTransfer, 0.0f, 1.0f);
+		}
+		else if (ExistingAlongSpeed >= HorizontalSpeed * 0.25f)
+		{
+			// Not head-on (at most ~75 degrees from the wall normal): keep most of the speed along the wall.
+			RedirectedSpeed = HorizontalSpeed * FMath::Clamp(WallRunEntrySpeedKeep, 0.0f, 1.0f);
+		}
+		const float SmoothEntrySpeed = FMath::Max(ExistingAlongSpeed, RedirectedSpeed);
 		MovementComponent->Velocity.X = EntryAlongDir.X * SmoothEntrySpeed;
 		MovementComponent->Velocity.Y = EntryAlongDir.Y * SmoothEntrySpeed;
+		if (!bEnteredFromDash)
+		{
+			WallRunMomentumSpeed = SmoothEntrySpeed;
+		}
 	}
 
 	// Reset both our counter and UE5's internal counter so double jump is available from wall
@@ -1403,6 +1557,11 @@ void AORACharacterBase::TryEnterWallSlide(const FVector& WallNormal)
 	JumpCurrentCount = 0;
 	NotifyJumpStateChanged();
 
+	UE_LOG(LogORAWall, Log, TEXT("[%s] Wall enter (normal %s), speed along %.0f, from dash %d."),
+		*GetName(), *FlatNormal.ToCompactString(), MovementComponent->Velocity.Size2D(), bEnteredFromDash ? 1 : 0);
+	bWallRunDirectionHeld = false;
+	WallCameraAutoYawApplied = 0.0f;
+	RequestWallCameraAlign(true);
 	OnWallSlideStarted(WallNormal);
 }
 
@@ -1431,11 +1590,21 @@ void AORACharacterBase::UpdateWallSlide(const float DeltaSeconds)
 	const float MaxWallSlideDuration = FMath::Max(0.0f, WallSlideMaxDuration);
 	if (MaxWallSlideDuration > KINDA_SMALL_NUMBER)
 	{
+		// Changing wall without letting go (corner, another face) restarts the hold time.
+		const FVector CurrentTimerNormal = WallSlideNormal.GetSafeNormal2D();
+		if (!CurrentTimerNormal.IsNearlyZero() && FVector::DotProduct(CurrentTimerNormal, WallSlideTimerNormal) < 0.7f)
+		{
+			WallSlideElapsedTime = 0.0f;
+			WallSlideTimerNormal = CurrentTimerNormal;
+		}
+
 		WallSlideElapsedTime += FMath::Max(0.0f, DeltaSeconds);
 		if (WallSlideElapsedTime >= MaxWallSlideDuration)
 		{
 			const FVector TimeoutWallNormal = WallSlideNormal;
 			bWallSlideTimedOutUntilGrounded = true;
+			WallSlideTimedOutNormal = TimeoutWallNormal.GetSafeNormal2D();
+			UE_LOG(LogORAWall, Log, TEXT("[%s] Held the wall %.1f s: this wall is blocked until landing."), *GetName(), WallSlideElapsedTime);
 			ExitWallSlide();
 			if (const UCapsuleComponent* Capsule = GetCapsuleComponent())
 			{
@@ -1594,17 +1763,38 @@ void AORACharacterBase::UpdateWallSlide(const float DeltaSeconds)
 		if (bEnableWallRun)
 		{
 			float WallRunInputStrength = 0.0f;
-			const FVector DesiredWallRunDir = ResolveWallRunMoveDirection(WallRunInputStrength);
+			FVector DesiredWallRunDir = ResolveWallRunMoveDirection(WallRunInputStrength);
+			// While the view turns toward the run (and until the stick changes), the same input keeps the same
+			// direction: a turning camera must not reinterpret it as a reversal.
+			if (bWallRunDirectionHeld)
+			{
+				// Only side input is held: forward/back always follow the view, as the player expects.
+				const bool bSideInput = FMath::Abs(CachedWallRunMoveInput.X) > FMath::Abs(CachedWallRunMoveInput.Y);
+				const bool bSameInput = CachedWallRunMoveInput.SizeSquared() > 0.04f
+					&& FVector2D::DotProduct(CachedWallRunMoveInput.GetSafeNormal(), WallRunHeldMoveInput.GetSafeNormal()) > 0.7f;
+				// Turning the view by hand means a new intent. The automatic turn does not count.
+				const float PlayerViewTurn = IsValid(Controller)
+					? FRotator::NormalizeAxis(Controller->GetControlRotation().Yaw - WallRunHoldStartYaw
+						- (WallCameraAutoYawApplied - WallRunHoldStartAutoYaw))
+					: 0.0f;
+				if (bSideInput && bSameInput && FMath::Abs(PlayerViewTurn) <= 45.0f
+					&& !WallRunCurrentAlongDir.IsNearlyZero() && !DesiredWallRunDir.IsNearlyZero())
+				{
+					DesiredWallRunDir = WallRunCurrentAlongDir;
+				}
+				else
+				{
+					bWallRunDirectionHeld = false;
+				}
+			}
 			const float MinInputProjection = FMath::Clamp(WallRunMinInputProjection, 0.0f, 1.0f);
 			if (!DesiredWallRunDir.IsNearlyZero() && WallRunInputStrength > MinInputProjection)
 			{
 				bIsRunningThisTick = true;
 				FVector StableDesiredWallRunDir = DesiredWallRunDir;
-				const float InputDominanceDeadband = 0.15f;
 				const float AbsSideInput = FMath::Abs(CachedWallRunMoveInput.X);
 				const float AbsForwardInput = FMath::Abs(CachedWallRunMoveInput.Y);
 				const bool bMostlySideInput = AbsSideInput > 0.2f && AbsSideInput + 0.05f >= AbsForwardInput;
-				const bool bMostlyForwardInput = AbsForwardInput > AbsSideInput + InputDominanceDeadband;
 				const float CurrentSideInputSign =
 					(bMostlySideInput && !FMath::IsNearlyZero(CachedWallRunMoveInput.X, KINDA_SMALL_NUMBER))
 						? FMath::Sign(CachedWallRunMoveInput.X)
@@ -1615,8 +1805,9 @@ void AORACharacterBase::UpdateWallSlide(const float DeltaSeconds)
 					CurrentSideInputSign != WallRunLastSideInputSign &&
 					!WallRunCurrentAlongDir.IsNearlyZero() &&
 					FVector::DotProduct(StableDesiredWallRunDir, WallRunCurrentAlongDir) < 0.0f;
+				// Any request opposite to the current direction turns around at once: blending between opposite
+				// directions never flips, which kept the player running backward with a diagonal stick.
 				const bool bRequestedForwardTurnaround =
-					bMostlyForwardInput &&
 					!WallRunCurrentAlongDir.IsNearlyZero() &&
 					FVector::DotProduct(StableDesiredWallRunDir, WallRunCurrentAlongDir) < -0.25f;
 
@@ -1626,7 +1817,16 @@ void AORACharacterBase::UpdateWallSlide(const float DeltaSeconds)
 					bRequestedSideReversal ||
 					bRequestedForwardTurnaround)
 				{
+					const bool bStartedRunning = WallRunCurrentAlongDir.IsNearlyZero();
 					WallRunCurrentAlongDir = StableDesiredWallRunDir;
+					if (bRequestedSideReversal || bRequestedForwardTurnaround)
+					{
+						RequestWallCameraAlign(false);
+					}
+					else if (bStartedRunning)
+					{
+						RequestWallCameraAlign(true);
+					}
 				}
 				else
 				{
@@ -1642,13 +1842,21 @@ void AORACharacterBase::UpdateWallSlide(const float DeltaSeconds)
 					: WallRunCurrentAlongDir;
 				WallRunLastAlongDir = WallRunAlongDir;
 				WallRunLastSideInputSign = CurrentSideInputSign;
-				const float TargetSpeedXY = WallRunSpeed * WallRunInputStrength;
+				// Entering faster than the wall run speed keeps that speed and lets it decay slowly.
+				WallRunMomentumSpeed = FMath::Max(
+					0.0f,
+					WallRunMomentumSpeed - FMath::Max(0.0f, WallRunMomentumDecay) * DeltaSeconds);
+				const float TargetSpeedXY = FMath::Max(WallRunSpeed, WallRunMomentumSpeed) * WallRunInputStrength;
 				const float WallRunVelocityInterpSpeed = 8.0f;
 
-				MovementComponent->Velocity.X = FMath::FInterpTo(
-					MovementComponent->Velocity.X, WallRunAlongDir.X * TargetSpeedXY, DeltaSeconds, WallRunVelocityInterpSpeed);
-				MovementComponent->Velocity.Y = FMath::FInterpTo(
-					MovementComponent->Velocity.Y, WallRunAlongDir.Y * TargetSpeedXY, DeltaSeconds, WallRunVelocityInterpSpeed);
+				// A dash along the wall keeps its own velocity until it ends.
+				if (!bDashActive)
+				{
+					MovementComponent->Velocity.X = FMath::FInterpTo(
+						MovementComponent->Velocity.X, WallRunAlongDir.X * TargetSpeedXY, DeltaSeconds, WallRunVelocityInterpSpeed);
+					MovementComponent->Velocity.Y = FMath::FInterpTo(
+						MovementComponent->Velocity.Y, WallRunAlongDir.Y * TargetSpeedXY, DeltaSeconds, WallRunVelocityInterpSpeed);
+				}
 
 				// Keep the character at the same height while running.
 				MovementComponent->Velocity.Z = FMath::FInterpTo(
@@ -1658,13 +1866,15 @@ void AORACharacterBase::UpdateWallSlide(const float DeltaSeconds)
 
 		if (!bIsRunningThisTick)
 		{
+			WallRunMomentumSpeed = 0.0f;
+			bWallRunDirectionHeld = false;
 			WallRunCurrentAlongDir = FVector::ZeroVector;
 			WallRunLastSideInputSign = 0.0f;
 			WallRunResolvedSideInputSign = 0.0f;
 
 			// Keep the character pinned vertically while clinging; after WallSlideMaxDuration they fall.
 			const float IdleHorizontalDamping = FMath::Max(0.0f, WallSlideIdleHorizontalDamping);
-			if (IdleHorizontalDamping > KINDA_SMALL_NUMBER)
+			if (IdleHorizontalDamping > KINDA_SMALL_NUMBER && !bDashActive)
 			{
 				MovementComponent->Velocity.X = FMath::FInterpTo(
 					MovementComponent->Velocity.X, 0.0f, DeltaSeconds, IdleHorizontalDamping);
@@ -1773,6 +1983,7 @@ void AORACharacterBase::ExitWallSlide()
 		return;
 	}
 
+	UE_LOG(LogORAWall, Log, TEXT("[%s] Wall exit after %.2f s."), *GetName(), WallSlideElapsedTime);
 	bWallSlideActive = false;
 	WallSlideElapsedTime = 0.0f;
 	WallSlideLostSurfaceTime = 0.0f;

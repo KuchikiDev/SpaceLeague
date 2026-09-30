@@ -101,7 +101,8 @@ bool AORACharacterBase::TryStartDash()
 			CharacterMovementComponent->Velocity.Z = 0.0f;
 		}
 	}
-	else if (TryConsumeWallDashContact(WallNormal))
+	// Right after jumping or dashing off a wall, the contact grace would bounce the dash back into it.
+	else if (GetRecentWallLeaveNormal().IsNearlyZero() && TryConsumeWallDashContact(WallNormal))
 	{
 		bDashWallBounceConsumed = true;
 		DashPower = WallDashHorizontalLaunchPower;
@@ -236,6 +237,7 @@ bool AORACharacterBase::TryHandleJumpInput()
 	{
 		const FVector CachedSlideNormal = WallSlideNormal;
 		ExitWallSlide();
+		MarkWallLeft(CachedSlideNormal);
 
 		// Separate from wall first so collision doesn't absorb the launch
 		const float Sep = FMath::Max(0.0f, WallDashSeparationDistance);
@@ -252,7 +254,11 @@ bool AORACharacterBase::TryHandleJumpInput()
 			FVector HorizontalDir = CachedSlideNormal;
 			if (const AController* C = GetController())
 			{
-				FVector LookDir = C->GetControlRotation().Vector();
+				// Aim with the player's own look: the automatic turn toward the run (landing, direction change)
+				// is removed, so jumping right after landing goes straight off the wall, not along it.
+				FRotator AimRotation = C->GetControlRotation();
+				AimRotation.Yaw -= WallCameraAutoYawApplied;
+				FVector LookDir = AimRotation.Vector();
 				LookDir.Z = 0.0f;
 				if (!LookDir.IsNearlyZero())
 				{
@@ -264,9 +270,22 @@ bool AORACharacterBase::TryHandleJumpInput()
 				}
 			}
 
+			// Always leave the wall: at least ~24 degrees away from it, even when looking along it.
+			const float MinAwayDot = 0.4f;
+			const float AwayDot = FVector::DotProduct(HorizontalDir, CachedSlideNormal);
+			if (AwayDot < MinAwayDot)
+			{
+				const FVector AlongWall = (HorizontalDir - CachedSlideNormal * AwayDot).GetSafeNormal();
+				HorizontalDir = (AlongWall * FMath::Sqrt(1.0f - MinAwayDot * MinAwayDot) + CachedSlideNormal * MinAwayDot).GetSafeNormal();
+			}
+
+			// Keep the wall run speed when it is higher than the jump push (no slowdown when jumping off).
+			const float JumpHorizontalSpeed = FMath::Max(
+				FMath::Max(0.0f, WallSlideJumpHorizontalPower),
+				static_cast<float>(MC->Velocity.Size2D()));
 			MC->SetMovementMode(MOVE_Falling);
 			MC->Velocity =
-				(HorizontalDir * FMath::Max(0.0f, WallSlideJumpHorizontalPower)) +
+				(HorizontalDir * JumpHorizontalSpeed) +
 				(FVector::UpVector * FMath::Max(0.0f, WallSlideJumpVerticalPower));
 		}
 		JumpInputCount = 1;
@@ -276,8 +295,10 @@ bool AORACharacterBase::TryHandleJumpInput()
 
 	if (bCanWallJump)
 	{
+		const FVector WallJumpNormal = CachedWallJumpNormal;
 		if (ExecuteWallJump())
 		{
+			MarkWallLeft(WallJumpNormal);
 			bCanWallJump = false;
 			CachedWallJumpNormal = FVector::ZeroVector;
 			JumpInputCount = FMath::Clamp(JumpInputCount - 1, 0, FMath::Max(0, MaxJumpCount - 1));

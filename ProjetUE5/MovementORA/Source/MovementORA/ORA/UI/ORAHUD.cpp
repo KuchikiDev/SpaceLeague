@@ -6,6 +6,7 @@
 #include "GameplayVariablesSettings.h"
 #include "ORA/Characters/ORACharacter.h"
 #include "ORA/UI/ORABallCampWarningWidget.h"
+#include "ORA/UI/ORAPrisonCountdownWidget.h"
 #include "ORA/UI/ORAScoreboardWidget.h"
 #include "ORA/UI/ORAStartCountdownWidget.h"
 
@@ -40,6 +41,14 @@ void AORAHUD::BeginPlay()
 	if (ScoreboardWidget)
 	{
 		ScoreboardWidget->AddToViewport(90);
+	}
+
+	PrisonCountdownWidget = CreateWidget<UORAPrisonCountdownWidget>(
+		PlayerOwner,
+		UORAPrisonCountdownWidget::StaticClass());
+	if (PrisonCountdownWidget)
+	{
+		PrisonCountdownWidget->AddToViewport(85);
 	}
 }
 

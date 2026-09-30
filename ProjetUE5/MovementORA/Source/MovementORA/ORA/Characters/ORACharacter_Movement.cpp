@@ -129,8 +129,21 @@ void AORACharacter::UpdateRunCamera(float DeltaSeconds)
 	}
 
 	// Keep some damping on the wall, but avoid very slow camera lag that exaggerates jitter on curved walls.
-	const float TargetLagSpeed = bWallSliding ? 8.0f : (bGroundWallLookBlocked ? 8.75f : 10.0f);
-	CameraBoom->CameraLagSpeed = FMath::FInterpTo(CameraBoom->CameraLagSpeed, TargetLagSpeed, DeltaSeconds, 5.0f);
+	// A dash is a burst: the camera follows it at once instead of trailing behind (the dash looked late).
+	// Applied to the arm that carries the view camera, which is not always CameraBoom.
+	if (USpringArmComponent* ViewArm = ResolveViewArm())
+	{
+		ViewArm->CameraLagMaxDistance = ViewCameraLagMaxDistance;
+		if (bDashActive)
+		{
+			ViewArm->CameraLagSpeed = 30.0f;
+		}
+		else
+		{
+			const float TargetLagSpeed = bWallSliding ? 8.0f : (bGroundWallLookBlocked ? 8.75f : 10.0f);
+			ViewArm->CameraLagSpeed = FMath::FInterpTo(ViewArm->CameraLagSpeed, TargetLagSpeed, DeltaSeconds, 5.0f);
+		}
+	}
 
 	const float Speed2D  = GetVelocity().Size2D();
 	const float MaxSpeed = FMath::Max(1.0f, GetCharacterMoveSpeed());
@@ -158,11 +171,14 @@ void AORACharacter::UpdateRunCamera(float DeltaSeconds)
 		const float Range = FMath::Max(1.0f, End - Start);
 		return FMath::Clamp((Value - Start) / Range, 0.0f, 1.0f);
 	};
+	// Rise fast (the effects must answer a burst at once), fall smoothly.
+	const float SpeedEffectsTarget = SpeedRamp(Speed3D, SpeedEffectsStartSpeed, SpeedEffectsFullSpeed);
 	SpeedEffectsAlpha = FMath::FInterpTo(
 		SpeedEffectsAlpha,
-		SpeedRamp(Speed3D, SpeedEffectsStartSpeed, SpeedEffectsFullSpeed),
+		SpeedEffectsTarget,
 		DeltaSeconds,
-		SpeedEffectsInterpSpeed);
+		SpeedEffectsTarget > SpeedEffectsAlpha ? FMath::Max(SpeedEffectsInterpSpeed, 25.0f) : SpeedEffectsInterpSpeed);
+	DashVignetteAlpha = bDashActive ? 1.0f : FMath::FInterpTo(DashVignetteAlpha, 0.0f, DeltaSeconds, 4.0f);
 	OverSpeedAlpha = FMath::FInterpTo(
 		OverSpeedAlpha,
 		SpeedRamp(Speed3D, SpeedEffectsFullSpeed, SpeedFOVOverSpeedMaxSpeed),
@@ -343,37 +359,52 @@ void AORACharacter::UpdateRunCamera(float DeltaSeconds)
 	APlayerController* PC = Cast<APlayerController>(GetController());
 	if (!IsValid(PC) || !IsValid(PC->PlayerCameraManager)) return;
 
-	if (bDashActive && GroundSlideCameraAlpha <= KINDA_SMALL_NUMBER) return;
-
-	// ------------------------------------------------------------------
-	// FOV — driven by SprintAlpha + subtle breathing pulse synced to bob
-	// ------------------------------------------------------------------
-	// Sqrt curve: FOV jumps aggressively at sprint start then eases into the target
-	const float SprintFOVAlpha = FMath::Max(FMath::Sqrt(SprintAlpha), SpeedEffectsAlpha);
-	const float BreathPulse    = FMath::Sin(BobTime * 0.5f) * SprintFOVBreathAmplitude * SprintAlpha;
-	const float SlideFOVBoost  = FMath::Min(GroundSlideRunFOVBoost, 2.5f);
-	const float GrappleFOVKick = FMath::InterpEaseOut(0.0f, GrappleCameraFOVBoost, GrappleCameraAlpha, 2.0f);
-	const float OverSpeedFOV   = SpeedFOVOverSpeedBoost * OverSpeedAlpha;
-	const float TargetFOV      = FMath::Min(
-		125.0f,
-		FMath::Lerp(DefaultFOV, SprintFOV, SprintFOVAlpha) + BreathPulse + SlideFOVBoost * GroundSlideCameraEase + GrappleFOVKick + OverSpeedFOV);
-	const float CurrentFOV  = PC->PlayerCameraManager->GetFOVAngle();
-	const float FovInterpSpeed = GroundSlideCameraAlpha > KINDA_SMALL_NUMBER
-		? FMath::Min(SprintFOVInterpSpeed, 2.0f)
-		: SprintFOVInterpSpeed;
-	PC->PlayerCameraManager->SetFOV(FMath::FInterpTo(CurrentFOV, TargetFOV, DeltaSeconds, FovInterpSpeed));
+	// During a dash the native dash visuals own the FOV. The vignette below still updates (it used to wait
+	// for the end of the dash, so it showed too late).
+	if (!(bDashActive && GroundSlideCameraAlpha <= KINDA_SMALL_NUMBER))
+	{
+		// ------------------------------------------------------------------
+		// FOV — driven by SprintAlpha + subtle breathing pulse synced to bob
+		// ------------------------------------------------------------------
+		// Sqrt curve: FOV jumps aggressively at sprint start then eases into the target
+		const float SprintFOVAlpha = FMath::Max(FMath::Sqrt(SprintAlpha), SpeedEffectsAlpha);
+		const float BreathPulse    = FMath::Sin(BobTime * 0.5f) * SprintFOVBreathAmplitude * SprintAlpha;
+		const float SlideFOVBoost  = FMath::Min(GroundSlideRunFOVBoost, 2.5f);
+		const float GrappleFOVKick = FMath::InterpEaseOut(0.0f, GrappleCameraFOVBoost, GrappleCameraAlpha, 2.0f);
+		const float OverSpeedFOV   = SpeedFOVOverSpeedBoost * OverSpeedAlpha;
+		const float TargetFOV      = FMath::Min(
+			125.0f,
+			FMath::Lerp(DefaultFOV, SprintFOV, SprintFOVAlpha) + BreathPulse + SlideFOVBoost * GroundSlideCameraEase + GrappleFOVKick + OverSpeedFOV);
+		const float CurrentFOV  = PC->PlayerCameraManager->GetFOVAngle();
+		const float FovInterpSpeed = GroundSlideCameraAlpha > KINDA_SMALL_NUMBER
+			? FMath::Min(SprintFOVInterpSpeed, 2.0f)
+			: SprintFOVInterpSpeed;
+		PC->PlayerCameraManager->SetFOV(FMath::FInterpTo(CurrentFOV, TargetFOV, DeltaSeconds, FovInterpSpeed));
+	}
 
 	// ------------------------------------------------------------------
 	// Post-process — vignette + chromatic aberration driven by SprintAlpha
 	// ------------------------------------------------------------------
 	if (IsValid(ViewCamera))
 	{
-		const float SpeedFxAlpha = FMath::Max3(SprintAlpha, GrappleCameraAlpha, SpeedEffectsAlpha);
+		const float SpeedFxAlpha = FMath::Max(FMath::Max3(SprintAlpha, GrappleCameraAlpha, SpeedEffectsAlpha), DashVignetteAlpha);
 		ViewCamera->PostProcessSettings.bOverride_VignetteIntensity   = true;
 		ViewCamera->PostProcessSettings.VignetteIntensity             = FMath::Lerp(SprintVignetteMin, SprintVignetteMax, SpeedFxAlpha);
 		ViewCamera->PostProcessSettings.bOverride_SceneFringeIntensity = true;
 		ViewCamera->PostProcessSettings.SceneFringeIntensity          = 0.5f * (SprintChromaticMax * SpeedFxAlpha + GrappleCameraChromaticBoost * GrappleCameraAlpha);
 	}
+}
+
+USpringArmComponent* AORACharacter::ResolveViewArm()
+{
+	if (const UCameraComponent* ViewCamera = ResolveViewCamera())
+	{
+		if (USpringArmComponent* ViewArm = Cast<USpringArmComponent>(ViewCamera->GetAttachParent()))
+		{
+			return ViewArm;
+		}
+	}
+	return CameraBoom;
 }
 
 UCameraComponent* AORACharacter::ResolveViewCamera()
@@ -452,6 +483,20 @@ void AORACharacter::ApplyPlayerMovementSettings()
 	}
 
 	BaseMoveSpeed = FMath::Max(0.0f, GameplayVariables->BaseWalkSpeed);
+	SprintMoveSpeed = FMath::Max(0.0f, GameplayVariables->SprintWalkSpeed);
+	WallRunSpeed = FMath::Max(0.0f, GameplayVariables->WallRunSpeed);
+	WallRunEntrySpeedKeep = FMath::Clamp(GameplayVariables->WallRunEntrySpeedKeep, 0.0f, 1.0f);
+	WallRunMomentumDecay = FMath::Max(0.0f, GameplayVariables->WallRunMomentumDecay);
+	WallLookPushBackSpeed = FMath::Max(0.0f, GameplayVariables->WallLookPushBackSpeed);
+	WallSlideLookAngleLimit = FMath::Clamp(GameplayVariables->WallSlideLookAngleLimit, 0.0f, 179.0f);
+	WallDashDetachLookAngle = FMath::Clamp(GameplayVariables->WallDashDetachLookAngle, 0.0f, 89.0f);
+	WallDashMinSpeed = FMath::Max(0.0f, GameplayVariables->WallDashMinSpeed);
+	WallDashSpeedBoost = FMath::Max(0.0f, GameplayVariables->WallDashSpeedBoost);
+	WallLeaveGraceSeconds = FMath::Clamp(GameplayVariables->WallLeaveGraceSeconds, 0.0f, 2.0f);
+	WallReattachSameWallSeconds = FMath::Clamp(GameplayVariables->WallReattachSameWallSeconds, 0.0f, 3.0f);
+	WallRunCameraYawInterpSpeed = FMath::Clamp(GameplayVariables->WallRunCameraTurnSpeed, 0.0f, 3600.0f);
+	WallRunCameraTurnStrength = FMath::Clamp(GameplayVariables->WallRunCameraTurnStrength, 0.0f, 1.0f);
+	WallSlideMaxDuration = FMath::Clamp(GameplayVariables->WallSlideMaxDuration, 0.0f, 30.0f);
 	DashGroundPower = FMath::Max(0.0f, GameplayVariables->DashImpulse);
 	DashAirPower = DashGroundPower;
 	DashDurationSeconds = FMath::Max(0.01f, GameplayVariables->DashDurationSeconds);
@@ -459,6 +504,10 @@ void AORACharacter::ApplyPlayerMovementSettings()
 	MaxJumpCount = FMath::Max(1, GameplayVariables->MaxJumpCount);
 	JumpMaxCount = MaxJumpCount;
 	GroundMomentumDecay = FMath::Max(0.0f, GameplayVariables->GroundMomentumDecay);
+	AirTurnRate = FMath::Clamp(GameplayVariables->AirTurnRate, 0.0f, 3600.0f);
+	AirTurnSpeedKeep = FMath::Clamp(GameplayVariables->AirTurnSpeedKeep, 0.0f, 1.0f);
+	JumpRiseGravityScale = FMath::Clamp(GameplayVariables->JumpRiseGravityScale, 0.1f, 40.0f);
+	FallGravityScale = FMath::Clamp(GameplayVariables->FallGravityScale, 0.1f, 40.0f);
 
 	if (UCharacterMovementComponent* MoveComp = GetCharacterMovement())
 	{
@@ -469,6 +518,100 @@ void AORACharacter::ApplyPlayerMovementSettings()
 		MoveComp->FallingLateralFriction = FMath::Max(0.0f, GameplayVariables->AirMomentumFriction);
 	}
 	SetCharacterMoveSpeed(GetDesiredGroundSpeed());
+}
+
+void AORACharacter::UpdateAirMovement(const float DeltaSeconds)
+{
+	UCharacterMovementComponent* MoveComp = GetCharacterMovement();
+	if (!UsesPlayerMovementTuning() || !IsValid(MoveComp) || DeltaSeconds <= 0.0f)
+	{
+		return;
+	}
+
+	// Plain air only: the grapple, the wall slide and the dash own the velocity (and the gravity scale).
+	const bool bPlainAir = MoveComp->IsFalling()
+		&& !bIsGrappling
+		&& !bDashActive
+		&& !IsWallSlideActive()
+		&& !IsGroundSlideActive()
+		&& MoveComp->GravityScale > KINDA_SMALL_NUMBER;
+
+	// A new jump (from the ground or a double jump) starts the snappy rise; it ends at the apex.
+	if (JumpCurrentCount > LastJumpCurrentCount)
+	{
+		bJumpRiseActive = true;
+	}
+	LastJumpCurrentCount = JumpCurrentCount;
+	if (!bPlainAir || MoveComp->Velocity.Z <= 0.0f)
+	{
+		bJumpRiseActive = false;
+	}
+	if (!bPlainAir)
+	{
+		AirTurnReferenceSpeed = 0.0f;
+		return;
+	}
+	// Jump gravity on top of the base gravity scale, which stays untouched for the wall and the grapple.
+	float TargetGravityScale = MoveComp->GravityScale;
+	if (bJumpRiseActive)
+	{
+		TargetGravityScale = JumpRiseGravityScale;
+	}
+	else if (MoveComp->Velocity.Z < 0.0f)
+	{
+		TargetGravityScale = FallGravityScale;
+	}
+	if (!FMath::IsNearlyEqual(TargetGravityScale, MoveComp->GravityScale))
+	{
+		MoveComp->Velocity.Z += MoveComp->GetGravityZ() * (TargetGravityScale / MoveComp->GravityScale - 1.0f) * DeltaSeconds;
+	}
+
+	// Just jumped or dashed off a wall: keep the push-off. No drift back into that wall and no air turn,
+	// which brought the player back against the wall (re-attach) or along it right after leaving.
+	const FVector LeftWallNormal = GetRecentWallLeaveNormal();
+	if (!LeftWallNormal.IsNearlyZero())
+	{
+		const float TowardWall = static_cast<float>(
+			MoveComp->Velocity.X * LeftWallNormal.X + MoveComp->Velocity.Y * LeftWallNormal.Y);
+		if (TowardWall < 0.0f)
+		{
+			MoveComp->Velocity.X -= LeftWallNormal.X * TowardWall;
+			MoveComp->Velocity.Y -= LeftWallNormal.Y * TowardWall;
+		}
+		AirTurnReferenceSpeed = static_cast<float>(MoveComp->Velocity.Size2D());
+		return;
+	}
+
+	// Air turns: the horizontal velocity rotates toward the input and keeps its speed, instead of
+	// being braked to zero by the opposite acceleration and rebuilt the other way.
+	const FVector Input = GetLastMovementInputVector();
+	const FVector InputDirection = FVector(Input.X, Input.Y, 0.0f).GetSafeNormal();
+	const FVector Horizontal(MoveComp->Velocity.X, MoveComp->Velocity.Y, 0.0f);
+	const float HorizontalSpeed = static_cast<float>(Horizontal.Size());
+	if (AirTurnRate <= KINDA_SMALL_NUMBER || InputDirection.IsNearlyZero() || HorizontalSpeed < 300.0f)
+	{
+		AirTurnReferenceSpeed = HorizontalSpeed;
+		return;
+	}
+
+	const FVector CurrentDirection = Horizontal / HorizontalSpeed;
+	const float AngleDegrees = FMath::RadiansToDegrees(FMath::Acos(FMath::Clamp(
+		static_cast<float>(CurrentDirection | InputDirection), -1.0f, 1.0f)));
+	if (AngleDegrees <= 1.0f)
+	{
+		AirTurnReferenceSpeed = HorizontalSpeed;
+		return;
+	}
+
+	// The engine acceleration already braked part of the speed this frame: turn from the speed we had.
+	const float ReferenceSpeed = FMath::Max(HorizontalSpeed, AirTurnReferenceSpeed);
+	const float StepDegrees = FMath::Min(AngleDegrees, AirTurnRate * DeltaSeconds);
+	const float TurnSign = (CurrentDirection ^ InputDirection).Z >= 0.0f ? 1.0f : -1.0f;
+	const FVector NewDirection = CurrentDirection.RotateAngleAxis(StepDegrees * TurnSign, FVector::UpVector);
+	const float NewSpeed = ReferenceSpeed * FMath::Pow(AirTurnSpeedKeep, StepDegrees / 180.0f);
+	MoveComp->Velocity.X = NewDirection.X * NewSpeed;
+	MoveComp->Velocity.Y = NewDirection.Y * NewSpeed;
+	AirTurnReferenceSpeed = NewSpeed;
 }
 
 float AORACharacter::GetDesiredGroundSpeed() const

@@ -52,6 +52,22 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement|Momentum", meta = (ClampMin = "0.0"))
 	float GroundMomentumDecay = 3500.0f;
 
+	/** Degrees per second the air velocity turns toward the input, keeping its speed. 0 = engine air control only. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement|Momentum", meta = (ClampMin = "0.0", ClampMax = "3600.0"))
+	float AirTurnRate = 720.0f;
+
+	/** Share of the horizontal speed kept after a full 180 degree turn in the air. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement|Momentum", meta = (ClampMin = "0.0", ClampMax = "1.0"))
+	float AirTurnSpeedKeep = 0.9f;
+
+	/** Gravity scale while rising from a jump (snappier, with a higher jump velocity). */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement|Jump", meta = (ClampMin = "0.1", ClampMax = "40.0"))
+	float JumpRiseGravityScale = 12.0f;
+
+	/** Gravity scale while falling in plain air (not grappling, wall sliding or dashing). */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement|Jump", meta = (ClampMin = "0.1", ClampMax = "40.0"))
+	float FallGravityScale = 9.0f;
+
 	// -----------------------------------------------------------------------
 	// Components
 	// -----------------------------------------------------------------------
@@ -603,11 +619,11 @@ public:
 
 	/** Real speed (cm/s) where FOV / vignette / chromatic aberration start to ramp up. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Run|SpeedFeedback", meta = (ClampMin = "0.0"))
-	float SpeedEffectsStartSpeed = 2600.0f;
+	float SpeedEffectsStartSpeed = 2900.0f;
 
 	/** Real speed (cm/s) where the speed effects reach the sprint FOV. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Run|SpeedFeedback", meta = (ClampMin = "1.0"))
-	float SpeedEffectsFullSpeed = 5000.0f;
+	float SpeedEffectsFullSpeed = 5400.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Run|SpeedFeedback", meta = (ClampMin = "0.1"))
 	float SpeedEffectsInterpSpeed = 6.0f;
@@ -831,12 +847,20 @@ private:
 
 	// Speed feedback (0 = below SpeedEffectsStartSpeed, 1 = at SpeedEffectsFullSpeed)
 	float SpeedEffectsAlpha = 0.0f;
+	// 1 during a dash, then fades: the dark vignette shows at once on a dash.
+	float DashVignetteAlpha = 0.0f;
 
 	// Momentum carry on the ground (see UpdateGroundMomentum)
 	void ApplyPlayerMovementSettings();
 	void UpdateGroundMomentum(float DeltaSeconds);
 	float GetDesiredGroundSpeed() const;
 	bool bGroundMomentumActive = false;
+
+	// Jump gravity and air turns (see UpdateAirMovement)
+	void UpdateAirMovement(float DeltaSeconds);
+	bool bJumpRiseActive = false;
+	int32 LastJumpCurrentCount = 0;
+	float AirTurnReferenceSpeed = 0.0f;
 	// Over-speed (0 = at SpeedEffectsFullSpeed, 1 = at SpeedFOVOverSpeedMaxSpeed)
 	float OverSpeedAlpha = 0.0f;
 
@@ -846,6 +870,10 @@ private:
 
 	/** Camera that renders this pawn's view: the first active camera, as AActor::CalcCamera picks it. */
 	UCameraComponent* ResolveViewCamera();
+	/** Spring arm that carries the view camera (can differ from CameraBoom, which the Blueprint re-targets). */
+	USpringArmComponent* ResolveViewArm();
+	/** Max distance the view camera may trail behind the player (GameplayVariables "Retard max de la camera"). */
+	float ViewCameraLagMaxDistance = 150.0f;
 	TWeakObjectPtr<UCameraComponent> CachedViewCamera;
 	FVector BaseViewCameraRelativeLocation = FVector::ZeroVector;
 

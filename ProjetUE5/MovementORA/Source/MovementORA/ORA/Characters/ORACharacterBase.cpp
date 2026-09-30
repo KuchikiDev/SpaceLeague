@@ -355,6 +355,29 @@ void AORACharacterBase::Tick(const float DeltaSeconds)
 			bHasCameraCarryYaw = false;
 		}
 
+		// Turn the view toward the run direction (landing on a wall while looking at it, direction change).
+		if (bWallCameraAlignActive)
+		{
+			WallCameraAlignElapsed += DeltaSeconds;
+			if (!bWallSlideActive || WallCameraAlignElapsed > 2.0f || FMath::Abs(WallCameraAlignRemainingYaw) < 0.3f)
+			{
+				bWallCameraAlignActive = false;
+				WallCameraAlignEndYaw = CtrlRot.Yaw;
+			}
+			else
+			{
+				// Eased: fast at first (capped by the max speed), slowing down at the end.
+				const float MaxStep = FMath::Max(0.0f, WallRunCameraYawInterpSpeed) * DeltaSeconds;
+				const float AutoYawStep = FMath::Clamp(
+					WallCameraAlignRemainingYaw * FMath::Min(1.0f, DeltaSeconds * 4.0f), -MaxStep, MaxStep);
+				CtrlRot.Yaw += AutoYawStep;
+				WallCameraAutoYawApplied += AutoYawStep;
+				WallCameraAlignRemainingYaw -= AutoYawStep;
+				bWallRunCameraAdjustedThisTick = true;
+				WallCameraAlignEndYaw = CtrlRot.Yaw;
+			}
+		}
+
 		if (bWallSlideActive && WallSlideCameraRollAngle > KINDA_SMALL_NUMBER)
 		{
 			float TargetRollDirection = WallSlideCameraRollDir;

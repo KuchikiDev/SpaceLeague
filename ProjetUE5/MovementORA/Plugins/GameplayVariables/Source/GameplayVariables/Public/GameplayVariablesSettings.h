@@ -39,6 +39,9 @@ public:
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Match|Initialisation", meta = (DisplayName = "Joueurs requis en reseau", ClampMin = "1", ClampMax = "4", UIMin = "1", UIMax = "4", ToolTip = "Nombre de joueurs humains que le serveur attend avant de lancer l'introduction. Ignore en mode solo. Utilisez 4 pour un vrai match 2c2."))
 	int32 RequiredNetworkPlayersToStart = 4;
 
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Match|Prison", meta = (DisplayName = "Duree de prison", ClampMin = "1", ClampMax = "60", UIMin = "1", UIMax = "30", Units = "s", ToolTip = "Secondes passees en prison apres avoir ete touche par la balle, avant le retour sur le terrain."))
+	int32 PrisonDurationSeconds = 8;
+
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Match|Prison", meta = (DisplayName = "Prisonniers pour une prison complete", ClampMin = "1", ClampMax = "3", UIMin = "1", UIMax = "3", ToolTip = "Nombre de joueurs d'une meme equipe qui doivent etre en prison en meme temps pour donner les points de prison complete a l'adversaire. 2 en 2c2 comme en 3c3."))
 	int32 PrisonCompletePlayerCount = 2;
 
@@ -67,7 +70,10 @@ public:
 	float TimedObstacleScale = 3.0f;
 
 	UPROPERTY(Config, EditAnywhere, Category = "Deplacement", meta = (DisplayName = "Vitesse de marche", ClampMin = "0.0", UIMin = "0.0", ToolTip = "Vitesse de deplacement de base quand le joueur court normalement."))
-	float BaseWalkSpeed = 2500.0f;
+	float BaseWalkSpeed = 2800.0f;
+
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Deplacement", meta = (DisplayName = "Vitesse de sprint", ClampMin = "0.0", UIMin = "0.0", Units = "cm/s", ToolTip = "Vitesse de deplacement quand le joueur sprinte."))
+	float SprintWalkSpeed = 4000.0f;
 
 	UPROPERTY(Config, EditAnywhere, Category = "Deplacement", meta = (DisplayName = "Acceleration max", ClampMin = "0.0", UIMin = "0.0", ToolTip = "Acceleration horizontale appliquee au personnage."))
 	float MaxAcceleration = 9000.0f;
@@ -83,6 +89,51 @@ public:
 
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Deplacement|Elan", meta = (DisplayName = "Perte d'elan au sol", ClampMin = "0.0", UIMin = "0.0", Units = "cm/s", ToolTip = "Vitesse perdue par seconde quand le joueur court au-dessus de sa vitesse max (apres un atterrissage, un dash ou un grappin). 0 = l'ancien comportement (vitesse coupee net par la friction)."))
 	float GroundMomentumDecay = 3500.0f;
+
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Deplacement|Elan", meta = (DisplayName = "Virage en l'air", ClampMin = "0.0", ClampMax = "3600.0", UIMin = "0.0", UIMax = "1800.0", Units = "deg", ToolTip = "Degres par seconde dont la vitesse tourne vers la direction voulue en l'air, sans freiner. 720 = demi-tour en 0,25 s. 0 = ancien comportement (freinage puis reacceleration)."))
+	float AirTurnRate = 720.0f;
+
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Deplacement|Elan", meta = (DisplayName = "Vitesse gardee au demi-tour en l'air", ClampMin = "0.0", ClampMax = "1.0", UIMin = "0.0", UIMax = "1.0", ToolTip = "Part de la vitesse horizontale conservee apres un demi-tour complet en l'air (moins de perte pour un virage plus petit). 1 = aucune perte."))
+	float AirTurnSpeedKeep = 0.9f;
+
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Mur", meta = (DisplayName = "Vitesse du wall run", ClampMin = "0.0", UIMin = "0.0", Units = "cm/s", ToolTip = "Vitesse de course le long d'un mur, stick a fond."))
+	float WallRunSpeed = 5500.0f;
+
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Mur", meta = (DisplayName = "Vitesse gardee en arrivant sur le mur", ClampMin = "0.0", ClampMax = "1.0", UIMin = "0.0", UIMax = "1.0", ToolTip = "Part de la vitesse horizontale conservee le long du mur quand on arrive en biais (hors dash). 0 = seule la partie deja le long du mur est gardee."))
+	float WallRunEntrySpeedKeep = 0.9f;
+
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Mur", meta = (DisplayName = "Perte d'elan au mur", ClampMin = "0.0", UIMin = "0.0", Units = "cm/s", ToolTip = "Vitesse perdue par seconde quand on court sur le mur plus vite que la vitesse du wall run (arrivee en sprint, apres un saut ou un grappin)."))
+	float WallRunMomentumDecay = 1500.0f;
+
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Mur", meta = (DisplayName = "Vitesse de recadrage de la camera au mur", ClampMin = "0.0", UIMin = "0.0", Units = "deg", ToolTip = "Degres par seconde dont la camera est ramenee quand on regarde trop vers le mur."))
+	float WallLookPushBackSpeed = 120.0f;
+
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Mur", meta = (DisplayName = "Angle de vue max vers le mur", ClampMin = "0.0", ClampMax = "179.0", UIMin = "90.0", UIMax = "179.0", Units = "deg", ToolTip = "Accroche au mur sans courir : angle maximum entre le regard et la direction qui s'eloigne du mur. Au-dela, la camera est ramenee (vitesse de recadrage). 179 = presque libre, 90 = on ne peut pas regarder vers le mur."))
+	float WallSlideLookAngleLimit = 140.0f;
+
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Mur", meta = (DisplayName = "Angle pour se decrocher en dash", ClampMin = "0.0", ClampMax = "89.0", UIMin = "0.0", UIMax = "89.0", Units = "deg", ToolTip = "Dash sur un mur : si le regard s'ecarte du mur de plus de cet angle (vers l'exterieur), le joueur se decroche et dash la ou il regarde sans perdre de vitesse. Sinon (regard vers le mur ou le long du mur), il dash le long du mur."))
+	float WallDashDetachLookAngle = 20.0f;
+
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Mur", meta = (DisplayName = "Vitesse min du dash sur le mur", ClampMin = "0.0", UIMin = "0.0", Units = "cm/s", ToolTip = "Dash depuis un mur (le long du mur ou en se decrochant) : vitesse minimum donnee par le dash."))
+	float WallDashMinSpeed = 10000.0f;
+
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Mur", meta = (DisplayName = "Boost du dash sur le mur", ClampMin = "0.0", UIMin = "0.0", Units = "cm/s", ToolTip = "Dash depuis un mur : vitesse ajoutee a la vitesse actuelle (on garde au moins la vitesse min)."))
+	float WallDashSpeedBoost = 4000.0f;
+
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Mur", meta = (DisplayName = "Temps de decollage du mur", ClampMin = "0.0", ClampMax = "2.0", UIMin = "0.0", UIMax = "1.0", Units = "s", ToolTip = "Apres un saut ou un dash qui quitte le mur : pendant ce temps le joueur ne peut ni etre ramene vers ce mur ni s'y raccrocher, et le virage en l'air est suspendu. Evite l'effet de collage."))
+	float WallLeaveGraceSeconds = 0.35f;
+
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Mur", meta = (DisplayName = "Delai avant de se raccrocher au meme mur", ClampMin = "0.0", ClampMax = "3.0", UIMin = "0.0", UIMax = "2.0", Units = "s", ToolTip = "Apres un saut ou un dash qui quitte le mur, on ne peut pas se raccrocher a ce meme mur pendant ce temps. Un autre mur reste possible."))
+	float WallReattachSameWallSeconds = 0.8f;
+
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Mur", meta = (DisplayName = "Rotation de la camera vers la course", ClampMin = "0.0", ClampMax = "3600.0", UIMin = "0.0", UIMax = "1800.0", Units = "deg", ToolTip = "Vitesse max (degres par seconde) de la rotation de la camera vers le sens de la course, quand on arrive sur un mur en le regardant ou qu'on change de sens. Elle ralentit en fin de mouvement. 0 = desactive."))
+	float WallRunCameraTurnSpeed = 300.0f;
+
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Mur", meta = (DisplayName = "Force de la rotation de la camera", ClampMin = "0.0", ClampMax = "1.0", UIMin = "0.0", UIMax = "1.0", ToolTip = "Part de l'angle vers le sens de la course que la camera parcourt. 1 = s'aligne completement, 0.5 = fait la moitie du chemin, 0 = ne tourne pas."))
+	float WallRunCameraTurnStrength = 0.5f;
+
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Mur", meta = (DisplayName = "Duree max sur un mur", ClampMin = "0.0", ClampMax = "30.0", UIMin = "0.0", UIMax = "15.0", Units = "s", ToolTip = "Temps maximum accroche a un meme mur. Le compteur repart de zero a chaque changement de mur (autre mur ou autre face). Le mur tenu jusqu'a la limite reste interdit jusqu'au sol. 0 = sans limite."))
+	float WallSlideMaxDuration = 5.0f;
 
 	UPROPERTY(Config, EditAnywhere, Category = "Dash", meta = (DisplayName = "Impulsion du dash", ClampMin = "0.0", UIMin = "0.0", ToolTip = "Force principale appliquee lors d'un dash."))
 	float DashImpulse = 8000.0f;
@@ -100,7 +151,13 @@ public:
 	int32 MaxJumpCount = 2;
 
 	UPROPERTY(Config, EditAnywhere, Category = "Saut", meta = (DisplayName = "Vitesse de saut", ClampMin = "0.0", UIMin = "0.0", ToolTip = "Vitesse verticale donnee au joueur au moment du saut."))
-	float JumpVelocity = 3500.0f;
+	float JumpVelocity = 4800.0f;
+
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Saut", meta = (DisplayName = "Gravite a la montee du saut", ClampMin = "0.1", ClampMax = "40.0", UIMin = "1.0", UIMax = "20.0", ToolTip = "Echelle de gravite pendant la montee d'un saut. Plus haut = montee plus rapide (a monter avec la vitesse de saut pour garder la hauteur). La gravite de base du personnage est 8."))
+	float JumpRiseGravityScale = 12.0f;
+
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Saut", meta = (DisplayName = "Gravite a la descente", ClampMin = "0.1", ClampMax = "40.0", UIMin = "1.0", UIMax = "20.0", ToolTip = "Echelle de gravite quand le joueur retombe (hors grappin, mur et dash). La gravite de base du personnage est 8."))
+	float FallGravityScale = 9.0f;
 
 	UPROPERTY(Config, EditAnywhere, Category = "Saut", meta = (DisplayName = "Coyote time", ClampMin = "0.0", UIMin = "0.0", ToolTip = "Fenetre de coyote time pour accepter un saut juste apres avoir quitte le sol."))
 	float CoyoteTimeSeconds = 0.12f;
@@ -441,11 +498,14 @@ public:
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Camera", meta = (DisplayName = "Lissage de la camera sur les murs", ClampMin = "1.0", ClampMax = "40.0", UIMin = "1.0", UIMax = "40.0", ToolTip = "Vitesse a laquelle la camera suit l'orientation du mur en wall run. Plus bas = plus doux (moins de tremblement sur les murs courbes ou a facettes), plus haut = plus reactif."))
 	float WallCameraNormalSmoothing = 12.0f;
 
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Camera", meta = (DisplayName = "Retard max de la camera", ClampMin = "0.0", ClampMax = "2000.0", UIMin = "0.0", UIMax = "600.0", Units = "cm", ToolTip = "Distance maximale dont la camera peut trainer derriere le joueur (effet de retard qui adoucit les mouvements). Sans limite, elle trainait de plusieurs metres a grande vitesse et un dash semblait partir en retard. 0 = pas de limite."))
+	float CameraLagMaxDistance = 150.0f;
+
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Camera|Effets de vitesse", meta = (DisplayName = "Vitesse de debut des effets", ClampMin = "0.0", UIMin = "0.0", Units = "cm/s", ToolTip = "Vitesse reelle (dash, wall run, chute, grappin, sprint...) a partir de laquelle FOV, vignettage et aberration chromatique commencent a s'intensifier."))
-	float SpeedEffectsStartSpeed = 2600.0f;
+	float SpeedEffectsStartSpeed = 2900.0f;
 
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Camera|Effets de vitesse", meta = (DisplayName = "Vitesse des effets au maximum", ClampMin = "1.0", UIMin = "1.0", Units = "cm/s", ToolTip = "Vitesse reelle a laquelle les effets atteignent leur maximum (FOV de sprint)."))
-	float SpeedEffectsFullSpeed = 5000.0f;
+	float SpeedEffectsFullSpeed = 5400.0f;
 
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Camera|Effets de vitesse", meta = (DisplayName = "Reactivite des effets", ClampMin = "0.1", UIMin = "0.1", ToolTip = "Vitesse a laquelle les effets suivent la vitesse du joueur. Plus haut = plus nerveux."))
 	float SpeedEffectsInterpSpeed = 6.0f;
