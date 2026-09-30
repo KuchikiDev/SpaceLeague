@@ -535,29 +535,15 @@ void AORACharacter::BeginPlay()
 		GrappleLaunchDistanceExponent = FMath::Max(0.1f, GameplayVariables->GrappleLaunchDistanceExponent);
 		GrappleLaunchCarryBoost = FMath::Max(0.0f, GameplayVariables->GrappleLaunchCarryBoost);
 		GrappleRange = FMath::Max(0.0f, GameplayVariables->GrappleRange);
-		GrapplePullAcceleration = FMath::Max(0.0f, GameplayVariables->GrapplePullAcceleration);
-		GrappleActiveMinPullAcceleration = FMath::Max(0.0f, GameplayVariables->GrappleActiveMinPullAcceleration);
-		GrappleActiveDistanceBoostStart = FMath::Max(0.0f, GameplayVariables->GrappleActiveDistanceBoostStart);
-		GrappleActiveDistanceBoostScale = FMath::Max(0.0f, GameplayVariables->GrappleActiveDistanceBoostScale);
-		GrappleActiveMinTowardSpeed = FMath::Max(0.0f, GameplayVariables->GrappleActiveMinTowardSpeed);
-		GrappleSwingAcceleration = FMath::Max(0.0f, GameplayVariables->GrappleSwingAcceleration);
 		GrappleSwingMaxSpeed = FMath::Max(0.0f, GameplayVariables->GrappleSwingMaxSpeed);
-		GrappleActiveMaxSpeed = FMath::Max(GrappleSwingMaxSpeed, GameplayVariables->GrappleActiveMaxSpeed);
-		GrappleRopeShortenSpeed = FMath::Max(0.0f, GameplayVariables->GrappleRopeShortenSpeed);
 		GrappleReleaseVelocityBoost = FMath::Max(0.0f, GameplayVariables->GrappleReleaseVelocityBoost);
 		GrappleRestartDelay = FMath::Max(0.0f, GameplayVariables->GrappleRestartDelay);
 		GrappleReleaseDelay = FMath::Max(0.0f, GameplayVariables->GrappleReleaseDelay);
 		GrappleRopeDisplayDuration = FMath::Max(0.0f, GameplayVariables->GrappleRopeDisplayDuration);
 		GrappleMinTargetDistance = FMath::Max(0.0f, GameplayVariables->GrappleMinTargetDistance);
-		GrappleTraceHalfSize = GameplayVariables->GrappleTraceHalfSize.ComponentMax(FVector::ZeroVector);
 		GrappleTraceStartOffset = FMath::Max(0.0f, GameplayVariables->GrappleTraceStartOffset);
-		GrappleTraceEndDistance = FMath::Max(GrappleTraceStartOffset, GameplayVariables->GrappleTraceEndDistance);
 		GrappleAutoDetachBuffer = FMath::Max(0.0f, GameplayVariables->GrappleAutoDetachBuffer);
-		GrappleMinActiveDuration = FMath::Max(0.0f, GameplayVariables->GrappleMinActiveDuration);
 		GrappleAutoReleaseDistance = FMath::Max(0.0f, GameplayVariables->GrappleAutoReleaseDistance);
-		GrappleOrbitReleaseBuffer = FMath::Max(0.0f, GameplayVariables->GrappleOrbitReleaseBuffer);
-		GrappleOrbitReleaseMinLateralSpeed = FMath::Max(0.0f, GameplayVariables->GrappleOrbitReleaseMinLateralSpeed);
-		GrappleEarlyDetachBuffer = FMath::Max(0.0f, GameplayVariables->GrappleEarlyDetachBuffer);
 		GrappleEarlyDetachLeadTime = FMath::Max(0.0f, GameplayVariables->GrappleEarlyDetachLeadTime);
 		GrappleMaxPullDuration = FMath::Max(0.1f, GameplayVariables->GrappleDurationSeconds);
 		GrapplePullBlendTime = FMath::Max(0.01f, GameplayVariables->GrapplePullBlendTime);
@@ -572,26 +558,11 @@ void AORACharacter::BeginPlay()
 		GrappleCableSlack = FMath::Max(0.0f, GameplayVariables->GrappleCableSlack);
 		GrappleConsumedFadeDuration = FMath::Max(0.01f, GameplayVariables->GrappleConsumedFadeDuration);
 		GrappleObstacleRespawnDelay = FMath::Max(0.0f, GameplayVariables->GrappleObstacleRespawnDelay);
-		GrappleAimAssistScreenRadiusMin = FMath::Max(0.0f, GameplayVariables->GrappleAimAssistScreenRadiusMin);
-		GrappleAimAssistScreenRadiusRatio = FMath::Clamp(GameplayVariables->GrappleAimAssistScreenRadiusRatio, 0.0f, 0.5f);
-		GrappleAimAssistMaxAngleDegrees = FMath::Clamp(GameplayVariables->GrappleAimAssistMaxAngleDegrees, 0.0f, 45.0f);
-		GrappleArcMinPitchDegrees = FMath::Clamp(GameplayVariables->GrappleArcMinPitchDegrees, -89.0f, 89.0f);
-		GrappleArcMaxPitchDegrees = FMath::Clamp(GameplayVariables->GrappleArcMaxPitchDegrees, -89.0f, 89.0f);
-		GrappleArcBlendOutTime = FMath::Max(0.01f, GameplayVariables->GrappleArcBlendOutTime);
-		GrappleFlatForwardPitchThreshold = FMath::Clamp(GameplayVariables->GrappleFlatForwardPitchThreshold, -89.0f, 89.0f);
-		GrappleFullVerticalPitchThreshold = FMath::Clamp(GameplayVariables->GrappleFullVerticalPitchThreshold, -89.0f, 89.0f);
-		GrappleUnderObstaclePitchThreshold = FMath::Clamp(GameplayVariables->GrappleUnderObstaclePitchThreshold, -89.0f, 89.0f);
-		GrappleUnderObstacleLaunchPitch = FMath::Clamp(GameplayVariables->GrappleUnderObstacleLaunchPitch, 0.0f, 89.0f);
-		GrappleUnderObstacleVerticalBlend = FMath::Clamp(GameplayVariables->GrappleUnderObstacleVerticalBlend, 0.0f, 1.0f);
-		GrappleUnderObstacleExtraUpSpeed = FMath::Max(0.0f, GameplayVariables->GrappleUnderObstacleExtraUpSpeed);
 		GrappleFarUpBoostStart = FMath::Max(0.0f, GameplayVariables->GrappleFarUpBoostStart);
 		GrappleFarUpBoostRange = FMath::Max(1.0f, GameplayVariables->GrappleFarUpBoostRange);
 		GrappleFarLaunchExtraUpSpeed = FMath::Max(0.0f, GameplayVariables->GrappleFarLaunchExtraUpSpeed);
-		GrappleFarActiveUpAcceleration = FMath::Max(0.0f, GameplayVariables->GrappleFarActiveUpAcceleration);
-		GrappleFarActiveMinUpSpeed = FMath::Max(0.0f, GameplayVariables->GrappleFarActiveMinUpSpeed);
 		GrappleSurfaceAimDeadZone = FMath::Clamp(GameplayVariables->GrappleSurfaceAimDeadZone, 0.0f, 1.0f);
 		GrappleSurfaceAimLaunchSpeed = FMath::Max(0.0f, GameplayVariables->GrappleSurfaceAimLaunchSpeed);
-		GrappleSurfaceAimAcceleration = FMath::Max(0.0f, GameplayVariables->GrappleSurfaceAimAcceleration);
 	}
 
 	// Apply the Gameplay Variables value immediately instead of waiting for the

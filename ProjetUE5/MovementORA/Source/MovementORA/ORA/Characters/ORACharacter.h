@@ -230,25 +230,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Grapple|Config", meta = (ClampMin = "0.0"))
 	float GrappleAutoDetachBuffer = 120.0f;
 
-	/** Minimum time before automatic proximity release can happen. */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Grapple|Config", meta = (ClampMin = "0.0"))
-	float GrappleMinActiveDuration = 0.45f;
-
 	/** Distance from the obstacle/anchor at which the grapple releases automatically. */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Grapple|Config", meta = (ClampMin = "0.0"))
 	float GrappleAutoReleaseDistance = 155.0f;
-
-	/** Extra distance around the anchor where lateral orbiting releases the grapple. */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Grapple|Config", meta = (ClampMin = "0.0"))
-	float GrappleOrbitReleaseBuffer = 620.0f;
-
-	/** Minimum lateral speed required to consider the player orbiting around the anchor. */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Grapple|Config", meta = (ClampMin = "0.0"))
-	float GrappleOrbitReleaseMinLateralSpeed = 350.0f;
-
-	/** Extra release distance used so fast grapples cut before the player reaches the obstacle. */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Grapple|Config", meta = (ClampMin = "0.0"))
-	float GrappleEarlyDetachBuffer = 70.0f;
 
 	/** Seconds of forward motion anticipated when deciding if the grapple should release. */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Grapple|Config", meta = (ClampMin = "0.0"))
@@ -304,18 +288,6 @@ public:
 	/** Extra rope length kept at grapple start to avoid an overly rigid snap. */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Grapple|Config", meta = (ClampMin = "0.0"))
 	float GrappleCableSlack = 36.0f;
-
-	/** Constant pull applied toward the anchor while grappling. */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Grapple|Config", meta = (ClampMin = "0.0"))
-	float GrapplePullAcceleration = 18500.0f;
-
-	/** Player-driven acceleration projected onto the swing plane. */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Grapple|Config", meta = (ClampMin = "0.0"))
-	float GrappleSwingAcceleration = 8200.0f;
-
-	/** How quickly the rope shortens over time to create a grappling pull. */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Grapple|Config", meta = (ClampMin = "0.0"))
-	float GrappleRopeShortenSpeed = 2400.0f;
 
 	/** Max speed allowed while the grapple is active. */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Grapple|Config", meta = (ClampMin = "0.0"))
@@ -377,42 +349,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Grapple|Tuning", meta = (DisplayName = "Bonus elan lancement", ClampMin = "0.0", ToolTip = "Bonus base sur la vitesse deja dirigee vers l'obstacle au moment du lancement. Augmente pour garder plus d'elan."))
 	float GrappleLaunchCarryBoost = 0.35f;
 
-	/** Acceleration de base appliquee pendant le grab actif. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Grapple|Tuning", meta = (DisplayName = "Attraction active minimale", ClampMin = "0.0", ToolTip = "Acceleration minimale appliquee pendant que le grab est actif. Augmente si le personnage ne continue pas assez a etre attire."))
-	float GrappleActiveMinPullAcceleration = 38000.0f;
-
-	/** Distance ou la traction active commence a recevoir un bonus. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Grapple|Tuning", meta = (DisplayName = "Debut bonus attraction loin", ClampMin = "0.0", ToolTip = "Distance a partir de laquelle la traction active recoit un bonus lie a l'eloignement. Baisse pour aider aussi les distances moyennes."))
-	float GrappleActiveDistanceBoostStart = 700.0f;
-
-	/** Intensite du bonus d'attraction quand la cible est loin. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Grapple|Tuning", meta = (DisplayName = "Force bonus attraction loin", ClampMin = "0.0", ToolTip = "Force du bonus de traction selon la distance restante. Augmente si les obstacles lointains attirent trop lentement."))
-	float GrappleActiveDistanceBoostScale = 3.6f;
-
-	/** Vitesse minimale garantie vers l'obstacle pendant le grab. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Grapple|Tuning", meta = (DisplayName = "Vitesse active minimale", ClampMin = "0.0", ToolTip = "Vitesse minimale vers l'obstacle pendant le grab actif. Augmente si le grab proche reste trop mou apres le lancement."))
-	float GrappleActiveMinTowardSpeed = 2800.0f;
-
-	/** Vitesse maximale autorisee pendant le grab actif. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Grapple|Tuning", meta = (DisplayName = "Vitesse active maximale", ClampMin = "0.0", ToolTip = "Vitesse maximale autorisee pendant le grab actif. Augmente si le mouvement est bride trop tot."))
-	float GrappleActiveMaxSpeed = 10800.0f;
-
-	/** Angle minimum pour activer la trajectoire verticale quand le joueur est sous l'obstacle. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Grapple|Tuning|Under Obstacle", meta = (DisplayName = "Angle activation sous obstacle", ClampMin = "-89.0", ClampMax = "89.0", ToolTip = "Angle vertical minimum vers l'obstacle pour declencher le mode sous obstacle. Plus bas = le grab monte plus souvent."))
-	float GrappleUnderObstaclePitchThreshold = 35.0f;
-
-	/** Angle de trajectoire vise quand le joueur est sous l'obstacle. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Grapple|Tuning|Under Obstacle", meta = (DisplayName = "Angle lancement vertical", ClampMin = "0.0", ClampMax = "89.0", ToolTip = "Angle de lancement vise quand tu es sous l'obstacle. Plus haut = trajectoire plus verticale."))
-	float GrappleUnderObstacleLaunchPitch = 68.0f;
-
-	/** Melange entre trajectoire normale et trajectoire verticale sous obstacle. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Grapple|Tuning|Under Obstacle", meta = (DisplayName = "Melange vertical sous obstacle", ClampMin = "0.0", ClampMax = "1.0", ToolTip = "Melange entre trajectoire normale et trajectoire verticale sous obstacle. 0 = normal, 1 = tres vertical."))
-	float GrappleUnderObstacleVerticalBlend = 0.85f;
-
-	/** Vitesse verticale ajoutee quand le joueur est sous l'obstacle. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Grapple|Tuning|Under Obstacle", meta = (DisplayName = "Bonus vitesse verticale", ClampMin = "0.0", ToolTip = "Vitesse verticale ajoutee quand tu es sous l'obstacle. Augmente si ca ne monte pas assez."))
-	float GrappleUnderObstacleExtraUpSpeed = 900.0f;
-
 	/** Distance ou le grab commence a ajouter de la puissance verticale, meme si tu n'es pas pile sous l'obstacle. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Grapple|Tuning|Long Distance Up", meta = (DisplayName = "Debut boost vertical loin", ClampMin = "0.0", ToolTip = "Distance a partir de laquelle les grabs lointains gagnent un bonus vers le haut. Baisse cette valeur si tu veux monter plus tot."))
 	float GrappleFarUpBoostStart = 900.0f;
@@ -424,22 +360,6 @@ public:
 	/** Vitesse verticale ajoutee au lancement quand la cible est loin. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Grapple|Tuning|Long Distance Up", meta = (DisplayName = "Bonus vertical lancement loin", ClampMin = "0.0", ToolTip = "Vitesse verticale ajoutee au lancement du grab selon la distance. Augmente si un grab lointain part trop a plat."))
 	float GrappleFarLaunchExtraUpSpeed = 1600.0f;
-
-	/** Angle sous lequel un grab lointain reste presque plat si l'obstacle est surtout devant. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Grapple|Tuning|Long Distance Up", meta = (DisplayName = "Angle grab plat", ClampMin = "-89.0", ClampMax = "89.0", ToolTip = "Si l'angle vertical vers l'obstacle est sous cette valeur, le grab garde une trajectoire plus directe vers l'avant."))
-	float GrappleFlatForwardPitchThreshold = 8.0f;
-
-	/** Angle a partir duquel le grab utilise toute sa hauteur/arc vertical. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Grapple|Tuning|Long Distance Up", meta = (DisplayName = "Angle hauteur max", ClampMin = "-89.0", ClampMax = "89.0", ToolTip = "Quand l'obstacle est au-dessus de cet angle, le bonus vertical longue distance est applique a pleine force."))
-	float GrappleFullVerticalPitchThreshold = 32.0f;
-
-	/** Acceleration verticale ajoutee pendant le grab actif quand la cible est loin. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Grapple|Tuning|Long Distance Up", meta = (DisplayName = "Acceleration verticale active loin", ClampMin = "0.0", ToolTip = "Acceleration verticale appliquee pendant le grab actif selon la distance restante. Augmente si le personnage retombe trop vite sur les grabs lointains."))
-	float GrappleFarActiveUpAcceleration = 6000.0f;
-
-	/** Vitesse verticale minimale visee pendant un grab lointain. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Grapple|Tuning|Long Distance Up", meta = (DisplayName = "Vitesse verticale active loin", ClampMin = "0.0", ToolTip = "Vitesse verticale minimale visee quand le grab est loin. Augmente pour forcer une trajectoire plus montante."))
-	float GrappleFarActiveMinUpSpeed = 1200.0f;
 
 	/** Rend les obstacles trop proches transparents au lieu de les colorer comme une cible. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Grapple|Tuning|No Grapple", meta = (DisplayName = "Transparent si non grabbable", ToolTip = "Si active, un obstacle trop proche ou interdit au grab reste visible mais devient transparent. Le highlight de focus reste desactive."))
@@ -453,41 +373,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Grapple|Tuning|No Grapple", meta = (DisplayName = "C++ modifie opacite material", ToolTip = "Active seulement si le material de l'obstacle est translucide et expose un parametre Opacity, Alpha, Transparency ou NoGrappleAlpha. Sinon laisse desactive et gere la transparence dans BP_ObstacleGrappin."))
 	bool bUseNoGrappleMaterialOpacityParameters = false;
 
-	/** Box half-size for the grapple target trace. */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Grapple|Config")
-	FVector GrappleTraceHalfSize = FVector(250.0f);
-
 	/** Distance from camera at which the trace box starts. */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Grapple|Config", meta = (ClampMin = "0.0"))
 	float GrappleTraceStartOffset = 1000.0f;
-
-	/** Distance from camera at which the trace box ends. */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Grapple|Config", meta = (ClampMin = "0.0"))
-	float GrappleTraceEndDistance = 10000.0f;
-
-	/** Minimum screen radius used by grapple aim assist, in pixels. */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Grapple|Targeting", meta = (ClampMin = "0.0"))
-	float GrappleAimAssistScreenRadiusMin = 72.0f;
-
-	/** Screen radius ratio used by grapple aim assist. Smaller values make targeting more exact. */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Grapple|Targeting", meta = (ClampMin = "0.0", ClampMax = "0.5"))
-	float GrappleAimAssistScreenRadiusRatio = 0.10f;
-
-	/** Maximum camera angle allowed for assisted grapple target selection. */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Grapple|Targeting", meta = (ClampMin = "0.0", ClampMax = "45.0"))
-	float GrappleAimAssistMaxAngleDegrees = 6.5f;
-
-	/** Minimum upward pitch applied to the initial grapple arc. */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Grapple|Trajectory", meta = (ClampMin = "-89.0", ClampMax = "89.0"))
-	float GrappleArcMinPitchDegrees = 18.0f;
-
-	/** Maximum upward pitch applied to the initial grapple arc. */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Grapple|Trajectory", meta = (ClampMin = "-89.0", ClampMax = "89.0"))
-	float GrappleArcMaxPitchDegrees = 28.0f;
-
-	/** Time before the initial arc fully blends into direct pull toward the anchor. */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Grapple|Trajectory", meta = (ClampMin = "0.01"))
-	float GrappleArcBlendOutTime = 0.42f;
 
 	/** Dead zone around the obstacle center where aiming stays a direct pull. */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Grapple|Surface Aim", meta = (ClampMin = "0.0", ClampMax = "1.0"))
@@ -496,10 +384,6 @@ public:
 	/** Initial lateral speed added from the exact surface point aimed on the obstacle. */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Grapple|Surface Aim", meta = (ClampMin = "0.0"))
 	float GrappleSurfaceAimLaunchSpeed = 1250.0f;
-
-	/** Lateral acceleration maintained from the aimed surface point while the grapple is active. */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Grapple|Surface Aim", meta = (ClampMin = "0.0"))
-	float GrappleSurfaceAimAcceleration = 7200.0f;
 
 	// -----------------------------------------------------------------------
 	// Grapple state

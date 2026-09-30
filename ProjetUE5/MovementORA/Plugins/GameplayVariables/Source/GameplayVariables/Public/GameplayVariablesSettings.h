@@ -144,9 +144,6 @@ public:
 	UPROPERTY(Config, EditAnywhere, Category = "Dash", meta = (DisplayName = "Cooldown du dash", ClampMin = "0.0", UIMin = "0.0", ToolTip = "Temps necessaire avant de relancer un dash."))
 	float DashCooldownSeconds = 0.2f;
 
-	UPROPERTY(Config, EditAnywhere, Category = "Dash", meta = (DisplayName = "Controle pendant dash", ClampMin = "0.0", ClampMax = "1.0", UIMin = "0.0", UIMax = "1.0", ToolTip = "Part du controle de direction conservee pendant le dash."))
-	float DashSteeringRatio = 0.2f;
-
 	UPROPERTY(Config, EditAnywhere, Category = "Saut", meta = (DisplayName = "Nombre max de sauts", ClampMin = "1", UIMin = "1", ToolTip = "Nombre maximum de sauts consecutifs autorises."))
 	int32 MaxJumpCount = 2;
 
@@ -180,12 +177,6 @@ public:
 	UPROPERTY(Config, EditAnywhere, Category = "Balle", meta = (DisplayName = "Puissance de passe", ClampMin = "0.0", UIMin = "0.0", ToolTip = "Puissance de passe par defaut avant modificateurs."))
 	float BasePassPower = 1600.0f;
 
-	UPROPERTY(Config, EditAnywhere, Category = "Balle", meta = (DisplayName = "Aide a la visee", ClampMin = "0.0", ClampMax = "1.0", UIMin = "0.0", UIMax = "1.0", ToolTip = "Aide a la visee appliquee lors des passes et tirs."))
-	float AimAssistStrength = 0.35f;
-
-	UPROPERTY(Config, EditAnywhere, Category = "Balle", meta = (DisplayName = "Distance de trace", ClampMin = "100.0", UIMin = "100.0", ToolTip = "Distance maximale de trace pour la visee de balle."))
-	float AimTraceDistance = 2500.0f;
-
 	UPROPERTY(Config, EditAnywhere, Category = "Balle|Anti-stagnation", meta = (DisplayName = "Delai avant avertissement", ClampMin = "0.0", UIMin = "0.0", ToolTip = "Temps continu passe dans le meme camp avant d'afficher le compte a rebours."))
 	float BallCampGraceSeconds = 5.0f;
 
@@ -214,28 +205,13 @@ public:
 	float CurvedShotCloseRangeReduction = 0.45f;
 
 	UPROPERTY(Config)
-	float CurvedShotMaxDirection = 560.0f;
-
-	UPROPERTY(Config)
 	float CurvedShotScaleMultiplier = 3.0f;
 
 	UPROPERTY(Config)
 	float CurvedShotAimTraceDistance = 6500.0f;
 
 	UPROPERTY(Config)
-	float CurvedShotMidPointAlpha = 0.5f;
-
-	UPROPERTY(Config)
-	float CurvedShotMidLateralMultiplier = 1.75f;
-
-	UPROPERTY(Config)
-	float CurvedShotMidHeightMultiplier = 1.75f;
-
-	UPROPERTY(Config)
 	float CurvedShotInputChangeSpeed = 3.4f;
-
-	UPROPERTY(Config)
-	float CurvedShotResponseExponent = 1.0f;
 
 	UPROPERTY(Config)
 	int32 CurvedShotCollisionSampleCount = 16;
@@ -252,17 +228,8 @@ public:
 	UPROPERTY(Config)
 	float CurvedShotInitialStraightDistanceRatio = 0.12f;
 
-	UPROPERTY(Config, EditAnywhere, Category = "Combat", meta = (DisplayName = "Puissance de tir", ClampMin = "0.0", UIMin = "0.0", ToolTip = "Puissance de tir de base de la competence principale."))
-	float ShootPower = 1800.0f;
-
-	UPROPERTY(Config, EditAnywhere, Category = "Combat", meta = (DisplayName = "Cooldown du tir", ClampMin = "0.0", UIMin = "0.0", ToolTip = "Temps de recharge minimal entre deux tirs."))
-	float ShootCooldownSeconds = 0.35f;
-
 	UPROPERTY(Config, EditAnywhere, Category = "Grappin", meta = (DisplayName = "Portee du grappin", ClampMin = "0.0", UIMin = "0.0", ToolTip = "Portee maximale du grappin."))
 	float GrappleRange = 2200.0f;
-
-	UPROPERTY(Config, EditAnywhere, Category = "Grappin", meta = (DisplayName = "Force de traction", ClampMin = "0.0", UIMin = "0.0", ToolTip = "Force de traction appliquee lorsque le grappin touche une cible valide."))
-	float GrapplePullStrength = 2600.0f;
 
 	UPROPERTY(Config, EditAnywhere, Category = "Grappin", meta = (DisplayName = "Duree du grappin", ClampMin = "0.1", UIMin = "0.1", ToolTip = "Duree maximale de vie du grappin avant annulation."))
 	float GrappleDurationSeconds = 1.2f;
@@ -306,32 +273,8 @@ public:
 	UPROPERTY(Config, EditAnywhere, Category = "Grappin|Depart et puissance", meta = (DisplayName = "Conservation elan", ClampMin = "0.0", UIMin = "0.0", ToolTip = "Part d'elan deja dirigee vers l'obstacle conservee au depart du grab."))
 	float GrappleLaunchCarryBoost = 0.55f;
 
-	UPROPERTY(Config, EditAnywhere, Category = "Grappin|Mouvement", meta = (DisplayName = "Acceleration de traction", ClampMin = "0.0", UIMin = "0.0", ToolTip = "Acceleration constante vers le point d'ancrage pendant le grappin."))
-	float GrapplePullAcceleration = 62000.0f;
-
-	UPROPERTY(Config, EditAnywhere, Category = "Grappin|Mouvement", meta = (DisplayName = "Attraction active minimale", ClampMin = "0.0", UIMin = "0.0", ToolTip = "Acceleration minimale appliquee pendant que le grab est actif. Plus haut = le joueur continue d'etre attire plus fort."))
-	float GrappleActiveMinPullAcceleration = 72000.0f;
-
-	UPROPERTY(Config, EditAnywhere, Category = "Grappin|Mouvement", meta = (DisplayName = "Debut bonus traction loin", ClampMin = "0.0", UIMin = "0.0", ToolTip = "Distance a partir de laquelle la traction active recoit un bonus lie a l'eloignement."))
-	float GrappleActiveDistanceBoostStart = 400.0f;
-
-	UPROPERTY(Config, EditAnywhere, Category = "Grappin|Mouvement", meta = (DisplayName = "Bonus traction loin", ClampMin = "0.0", UIMin = "0.0", ToolTip = "Force ajoutee a la traction active quand l'obstacle est loin."))
-	float GrappleActiveDistanceBoostScale = 7.5f;
-
-	UPROPERTY(Config, EditAnywhere, Category = "Grappin|Mouvement", meta = (DisplayName = "Vitesse active minimale", ClampMin = "0.0", UIMin = "0.0", ToolTip = "Vitesse minimale garantie vers l'obstacle pendant le grab actif."))
-	float GrappleActiveMinTowardSpeed = 3400.0f;
-
-	UPROPERTY(Config, EditAnywhere, Category = "Grappin|Mouvement", meta = (DisplayName = "Vitesse active maximale", ClampMin = "0.0", UIMin = "0.0", ToolTip = "Vitesse maximale autorisee pendant le grab actif."))
-	float GrappleActiveMaxSpeed = 11500.0f;
-
-	UPROPERTY(Config, EditAnywhere, Category = "Grappin|Mouvement", meta = (DisplayName = "Controle de trajectoire", ClampMin = "0.0", UIMin = "0.0", ToolTip = "Force tangentielle ajoutee par l'input joueur pour courber la trajectoire en l'air."))
-	float GrappleSwingAcceleration = 10500.0f;
-
 	UPROPERTY(Config, EditAnywhere, Category = "Grappin|Mouvement", meta = (DisplayName = "Vitesse max pendant grappin", ClampMin = "0.0", UIMin = "0.0", ToolTip = "Vitesse maximale autorisee tant que le grappin est actif."))
 	float GrappleSwingMaxSpeed = 11500.0f;
-
-	UPROPERTY(Config, EditAnywhere, Category = "Grappin|Mouvement", meta = (DisplayName = "Vitesse de raccourcissement", ClampMin = "0.0", UIMin = "0.0", ToolTip = "Vitesse a laquelle la corde se raccourcit pendant la traction."))
-	float GrappleRopeShortenSpeed = 2800.0f;
 
 	UPROPERTY(Config, EditAnywhere, Category = "Grappin|Mouvement", meta = (DisplayName = "Boost a la liberation", ClampMin = "0.0", UIMin = "0.0", ToolTip = "Multiplicateur applique a la vitesse du joueur quand le grappin se coupe."))
 	float GrappleReleaseVelocityBoost = 1.08f;
@@ -345,50 +288,8 @@ public:
 	UPROPERTY(Config, EditAnywhere, Category = "Grappin|Detection", meta = (DisplayName = "Distance min cible", ClampMin = "0.0", UIMin = "0.0", ToolTip = "Distance minimale avant qu'un obstacle puisse etre cible par le grappin."))
 	float GrappleMinTargetDistance = 425.0f;
 
-	UPROPERTY(Config, EditAnywhere, Category = "Grappin|Detection", meta = (DisplayName = "Taille demi-box trace", ClampMin = "0.0", UIMin = "0.0", ToolTip = "Demi-taille de la box utilisee par l'assistance de detection du grappin."))
-	FVector GrappleTraceHalfSize = FVector(250.0f);
-
 	UPROPERTY(Config, EditAnywhere, Category = "Grappin|Detection", meta = (DisplayName = "Offset debut trace", ClampMin = "0.0", UIMin = "0.0", ToolTip = "Distance devant la camera a laquelle commence la box trace assistee."))
 	float GrappleTraceStartOffset = 1000.0f;
-
-	UPROPERTY(Config, EditAnywhere, Category = "Grappin|Detection", meta = (DisplayName = "Distance fin trace", ClampMin = "0.0", UIMin = "0.0", ToolTip = "Distance maximale de detection du grappin depuis la camera."))
-	float GrappleTraceEndDistance = 10000.0f;
-
-	UPROPERTY(Config, EditAnywhere, Category = "Grappin|Detection", meta = (DisplayName = "Rayon assist min ecran", ClampMin = "0.0", UIMin = "0.0", ToolTip = "Rayon minimum en pixels autour du viseur pour l'assistance de selection du grappin."))
-	float GrappleAimAssistScreenRadiusMin = 72.0f;
-
-	UPROPERTY(Config, EditAnywhere, Category = "Grappin|Detection", meta = (DisplayName = "Rayon assist ratio ecran", ClampMin = "0.0", ClampMax = "0.5", UIMin = "0.0", UIMax = "0.5", ToolTip = "Part de la plus petite dimension d'ecran utilisee pour l'assistance. Plus bas = selection plus precise et plus competitive."))
-	float GrappleAimAssistScreenRadiusRatio = 0.10f;
-
-	UPROPERTY(Config, EditAnywhere, Category = "Grappin|Detection", meta = (DisplayName = "Angle max assist", ClampMin = "0.0", ClampMax = "45.0", UIMin = "0.0", UIMax = "45.0", ToolTip = "Angle maximal depuis la camera pour qu'une cible puisse etre selectionnee par assistance."))
-	float GrappleAimAssistMaxAngleDegrees = 6.5f;
-
-	UPROPERTY(Config, EditAnywhere, Category = "Grappin|Trajectoire", meta = (DisplayName = "Pitch min arc", ClampMin = "-89.0", ClampMax = "89.0", UIMin = "-89.0", UIMax = "89.0", ToolTip = "Angle vertical minimum applique au debut de la trajectoire du grappin."))
-	float GrappleArcMinPitchDegrees = 18.0f;
-
-	UPROPERTY(Config, EditAnywhere, Category = "Grappin|Trajectoire", meta = (DisplayName = "Pitch max arc", ClampMin = "-89.0", ClampMax = "89.0", UIMin = "-89.0", UIMax = "89.0", ToolTip = "Angle vertical maximum applique au debut de la trajectoire du grappin."))
-	float GrappleArcMaxPitchDegrees = 28.0f;
-
-	UPROPERTY(Config, EditAnywhere, Category = "Grappin|Trajectoire", meta = (DisplayName = "Duree blend arc", ClampMin = "0.01", UIMin = "0.01", ToolTip = "Temps avant que l'arc initial devienne une traction directe vers l'ancre. Plus bas = trajectoire plus lisible."))
-	float GrappleArcBlendOutTime = 0.42f;
-
-	UPROPERTY(Config, EditAnywhere, Category = "Grappin|Trajectoire - hauteur", meta = (DisplayName = "Angle grab plat", ClampMin = "-89.0", ClampMax = "89.0", UIMin = "-89.0", UIMax = "89.0", ToolTip = "Si l'angle vertical vers l'obstacle est sous cette valeur, le grab part presque tout droit vers l'avant avec peu de hauteur."))
-	float GrappleFlatForwardPitchThreshold = 12.0f;
-
-	UPROPERTY(Config, EditAnywhere, Category = "Grappin|Trajectoire - hauteur", meta = (DisplayName = "Angle hauteur max", ClampMin = "-89.0", ClampMax = "89.0", UIMin = "-89.0", UIMax = "89.0", ToolTip = "Angle a partir duquel le grab utilise toute sa hauteur. Entre Angle grab plat et cette valeur, la hauteur monte progressivement."))
-	float GrappleFullVerticalPitchThreshold = 42.0f;
-
-	UPROPERTY(Config, EditAnywhere, Category = "Grappin|Trajectoire - hauteur", meta = (DisplayName = "Angle activation sous obstacle", ClampMin = "-89.0", ClampMax = "89.0", UIMin = "-89.0", UIMax = "89.0", ToolTip = "Angle vertical minimum pour activer le mode special quand le joueur est sous l'obstacle."))
-	float GrappleUnderObstaclePitchThreshold = 35.0f;
-
-	UPROPERTY(Config, EditAnywhere, Category = "Grappin|Trajectoire - hauteur", meta = (DisplayName = "Angle lancement sous obstacle", ClampMin = "0.0", ClampMax = "89.0", UIMin = "0.0", UIMax = "89.0", ToolTip = "Angle vise pour le lancement quand le joueur est sous l'obstacle. Plus haut = trajectoire plus verticale."))
-	float GrappleUnderObstacleLaunchPitch = 68.0f;
-
-	UPROPERTY(Config, EditAnywhere, Category = "Grappin|Trajectoire - hauteur", meta = (DisplayName = "Melange sous obstacle", ClampMin = "0.0", ClampMax = "1.0", UIMin = "0.0", UIMax = "1.0", ToolTip = "Melange entre trajectoire normale et trajectoire verticale sous obstacle."))
-	float GrappleUnderObstacleVerticalBlend = 0.85f;
-
-	UPROPERTY(Config, EditAnywhere, Category = "Grappin|Trajectoire - hauteur", meta = (DisplayName = "Bonus vertical sous obstacle", ClampMin = "0.0", UIMin = "0.0", ToolTip = "Vitesse verticale ajoutee quand le joueur est sous l'obstacle."))
-	float GrappleUnderObstacleExtraUpSpeed = 1100.0f;
 
 	UPROPERTY(Config, EditAnywhere, Category = "Grappin|Trajectoire - hauteur", meta = (DisplayName = "Debut boost vertical loin", ClampMin = "0.0", UIMin = "0.0", ToolTip = "Distance a partir de laquelle un grab lointain peut recevoir un bonus vertical. Ce bonus est attenue si l'obstacle est surtout devant."))
 	float GrappleFarUpBoostStart = 1100.0f;
@@ -399,38 +300,17 @@ public:
 	UPROPERTY(Config, EditAnywhere, Category = "Grappin|Trajectoire - hauteur", meta = (DisplayName = "Vitesse verticale depart loin", ClampMin = "0.0", UIMin = "0.0", ToolTip = "Vitesse verticale ajoutee au depart quand l'obstacle est loin et suffisamment au-dessus."))
 	float GrappleFarLaunchExtraUpSpeed = 1100.0f;
 
-	UPROPERTY(Config, EditAnywhere, Category = "Grappin|Trajectoire - hauteur", meta = (DisplayName = "Acceleration verticale active loin", ClampMin = "0.0", UIMin = "0.0", ToolTip = "Acceleration verticale ajoutee pendant le grab actif quand l'obstacle est loin et suffisamment au-dessus."))
-	float GrappleFarActiveUpAcceleration = 4500.0f;
-
-	UPROPERTY(Config, EditAnywhere, Category = "Grappin|Trajectoire - hauteur", meta = (DisplayName = "Vitesse verticale active loin", ClampMin = "0.0", UIMin = "0.0", ToolTip = "Vitesse verticale minimale visee pendant un grab lointain quand l'obstacle est suffisamment au-dessus."))
-	float GrappleFarActiveMinUpSpeed = 900.0f;
-
 	UPROPERTY(Config, EditAnywhere, Category = "Grappin|Visee surface", meta = (DisplayName = "Zone morte centre", ClampMin = "0.0", ClampMax = "1.0", UIMin = "0.0", UIMax = "1.0", ToolTip = "Zone au centre de la surface ou le grappin reste une traction directe."))
 	float GrappleSurfaceAimDeadZone = 0.12f;
 
 	UPROPERTY(Config, EditAnywhere, Category = "Grappin|Visee surface", meta = (DisplayName = "Vitesse surface depart", ClampMin = "0.0", UIMin = "0.0", ToolTip = "Vitesse laterale ajoutee au depart selon le point vise sur le cube."))
 	float GrappleSurfaceAimLaunchSpeed = 1700.0f;
 
-	UPROPERTY(Config, EditAnywhere, Category = "Grappin|Visee surface", meta = (DisplayName = "Acceleration surface", ClampMin = "0.0", UIMin = "0.0", ToolTip = "Acceleration laterale maintenue selon le point vise sur le cube pendant le grappin."))
-	float GrappleSurfaceAimAcceleration = 9500.0f;
-
 	UPROPERTY(Config, EditAnywhere, Category = "Grappin|Coupure", meta = (DisplayName = "Buffer auto-detach", ClampMin = "0.0", UIMin = "0.0", ToolTip = "Marge de securite autour du joueur et de l'obstacle pour couper le grappin."))
 	float GrappleAutoDetachBuffer = 120.0f;
 
-	UPROPERTY(Config, EditAnywhere, Category = "Grappin|Coupure", meta = (DisplayName = "Duree min avant coupure", ClampMin = "0.0", UIMin = "0.0", ToolTip = "Temps minimum pendant lequel le grappin reste actif avant une coupure automatique de proximite."))
-	float GrappleMinActiveDuration = 0.45f;
-
 	UPROPERTY(Config, EditAnywhere, Category = "Grappin|Coupure", meta = (DisplayName = "Distance coupure auto", ClampMin = "0.0", UIMin = "0.0", ToolTip = "Distance stable a partir de laquelle le grappin se coupe pres de l'obstacle ou de l'ancre."))
 	float GrappleAutoReleaseDistance = 155.0f;
-
-	UPROPERTY(Config, EditAnywhere, Category = "Grappin|Coupure", meta = (DisplayName = "Zone coupure orbite", ClampMin = "0.0", UIMin = "0.0", ToolTip = "Zone supplementaire autour de l'ancre ou le grappin se coupe si le joueur commence a tourner autour."))
-	float GrappleOrbitReleaseBuffer = 620.0f;
-
-	UPROPERTY(Config, EditAnywhere, Category = "Grappin|Coupure", meta = (DisplayName = "Vitesse laterale orbite", ClampMin = "0.0", UIMin = "0.0", ToolTip = "Vitesse laterale minimale pour considerer que le joueur orbite autour de l'ancre."))
-	float GrappleOrbitReleaseMinLateralSpeed = 350.0f;
-
-	UPROPERTY(Config, EditAnywhere, Category = "Grappin|Coupure", meta = (DisplayName = "Buffer coupure anticipee", ClampMin = "0.0", UIMin = "0.0", ToolTip = "Marge supplementaire utilisee pour eviter que le cable ramene le joueur en arriere pres de l'obstacle."))
-	float GrappleEarlyDetachBuffer = 70.0f;
 
 	UPROPERTY(Config, EditAnywhere, Category = "Grappin|Coupure", meta = (DisplayName = "Prediction coupure", ClampMin = "0.0", UIMin = "0.0", ToolTip = "Temps d'anticipation utilise pour couper les grappins rapides avant une zone dangereuse."))
 	float GrappleEarlyDetachLeadTime = 0.045f;
