@@ -36,12 +36,13 @@ Fait et soumis sur Perforce :
 - Deja en place : balle en orbite mise a jour apres le mouvement, aide a la visee du grappin (zone de visee agrandie).
 - Essai rejete : double appui rapide sur saut = saut vertical (retire, pas soumis).
 
+- Assets en attente (redirecteurs, reenregistrements du 26/09) : CL 158. Avertissement E_Legend de DT_LegendDB corrige : CL 159.
+- Prison complete testee en PIE : le dernier touche reste sur le terrain, les prisonniers reviennent tout de suite
+  et la balle repart dans l'autre sens : CL 160.
+
 Ensuite :
-1. Tester le score "prison complete" en PIE avec 2 joueurs humains.
-2. Bots en prison.
-3. Rotation du terrain.
-4. Capacites Raijin/Keplar.
-5. Assets en attente cote Perforce (modifies ou supprimes, jamais soumis) : a trier avec Dylan.
+1. Rotation du terrain.
+2. Capacites Raijin/Keplar.
 
 ## Faits verifies (code/config)
 
