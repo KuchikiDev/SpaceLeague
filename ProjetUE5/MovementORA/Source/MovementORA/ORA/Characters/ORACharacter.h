@@ -593,6 +593,12 @@ public:
 	/** Stops this character's kinematic spline control when another player catches that ball. */
 	bool CancelSplineFollowForBall(const AActor* BallActor);
 
+	/** Hands a ball flying along this character's curved shot back to physics with a new velocity (bounce). */
+	bool ReleaseSplineFollowWithVelocity(const AActor* BallActor, const FVector& Velocity);
+
+	/** Speed of BallActor along this character's curved shot, 0 when this character does not drive it. */
+	float GetSplineFollowSpeedFor(const AActor* BallActor) const;
+
 	UFUNCTION(BlueprintCallable, Category = "Shoot")
 	void SetControlPasse(bool bNewIsPassing);
 
@@ -892,6 +898,7 @@ private:
 	TArray<FVector> SplineFollowBasePoints;
 	FVector SplineFollowInitialPassTargetLocation = FVector::ZeroVector;
 	void UpdateSplineFollow(float DeltaSeconds);
+	void HandOffSplineBallToPhysics(UPrimitiveComponent* BallPrim, const FVector& ReleasePoint, const FVector& Velocity);
 	void UpdatePassHomingSpline();
 	bool ShouldShowShotSplineDebug() const;
 };

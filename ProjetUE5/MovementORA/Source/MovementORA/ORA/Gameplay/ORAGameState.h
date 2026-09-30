@@ -250,8 +250,12 @@ protected:
 	bool TeleportPawnToBallHitTarget(APawn* Pawn, AActor* BallActor);
 	void StartPrisonSentence(APawn* Pawn);
 	void AdvancePrisonSentence(TWeakObjectPtr<APawn> WeakPawn);
-	void ReleasePawnFromPrison(APawn* Pawn);
-	void CheckPrisonCompletion(EORATeam ImprisonedTeam, AORAPlayerState* Finisher = nullptr);
+	/** Sends the prisoner back to where they were hit: a short glide, or a direct teleport when bInstant. */
+	void ReleasePawnFromPrison(APawn* Pawn, bool bInstant = false);
+	/** Scores the complete prison when the hit on LastVictim fills it; the prisoners are released and LastVictim stays on the field. */
+	bool TryCompletePrisonWithHit(APawn* LastVictim, AORAPlayerState* Finisher);
+	/** Sends the ball back the way it came, at the same speed (last hit of a complete prison). */
+	void BounceBallBack(AActor* BallActor);
 	void UpdateBallCampRules(const TArray<AActor*>& Balls);
 	bool AwardPointToTeam(EORATeam ScoringTeam, AActor* BallActor, const TCHAR* Reason, int32 Points = 1);
 	void RelaunchBallRandomly(AActor* BallActor);

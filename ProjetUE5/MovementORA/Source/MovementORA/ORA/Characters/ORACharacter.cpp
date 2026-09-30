@@ -1205,50 +1205,75 @@ void AORACharacter::UpdateSplineFollow(float DeltaSeconds)
 
 		// La physique reprend exactement au dernier point de spline : aucun recul
 		// ni changement de position entre le dernier tick cinematique et Chaos.
-		const FVector ReleasePoint = FinalSplinePoint;
 		const float ExitSpeed = bSplineFollowPreservesCapturedSpeed
 			? SplineFollowSpeed
 			: FMath::Max(SplineFollowSpeed, ShootBallSpeed);
-
-		if (IsValid(BallOwner))
-		{
-			BallOwner->SetActorLocation(ReleasePoint, false, nullptr, ETeleportType::TeleportPhysics);
-			BallOwner->SetActorTickEnabled(true);
-			BallOwner->SetActorEnableCollision(true);
-		}
-
-		// Garantir la continuite entre la derniere position cinematique et Chaos.
-		BallPrim->SetWorldLocation(ReleasePoint, false, nullptr, ETeleportType::TeleportPhysics);
-		BallPrim->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-		BallPrim->SetUseCCD(true);
-		BallPrim->SetSimulatePhysics(true);
-		BallPrim->SetLinearDamping(0.0f);
-		BallPrim->SetAngularDamping(0.0f);
-		if (!ExitDir.IsNearlyZero())
-		{
-			BallPrim->SetPhysicsLinearVelocity(ExitDir * ExitSpeed);
-		}
-		// Reappliquer la taille configuree au dernier point du handoff physique.
-		ApplyConfiguredBallScaleAfterShot(BallOwner);
-		const UGameplayVariablesSettings* GameplayVariables = GetDefault<UGameplayVariablesSettings>();
-		BlockStopBallRecaptureForSeconds(
-			GameplayVariables ? GameplayVariables->BallRecaptureDelayAfterShot : 0.35f);
-
-		SetOrbitAimVisible(false);
-		bSplineFollowActive  = false;
-		bSplineFollowPreservesCapturedSpeed = false;
-		bStopBallInputLocked = false;
-		SplineFollowPassTarget = nullptr;
-		SplineFollowBasePoints.Reset();
-		SetControlPasse(false);
-		ClearPassFocus();
-		if (IsValid(EnroulerDebug))
-		{
-			EnroulerDebug->SetVisibility(false);
-			EnroulerDebug->SetHiddenInGame(true);
-		}
-		return;
+		HandOffSplineBallToPhysics(BallPrim, FinalSplinePoint, ExitDir * ExitSpeed);
 	}
+}
+
+void AORACharacter::HandOffSplineBallToPhysics(UPrimitiveComponent* BallPrim, const FVector& ReleasePoint, const FVector& Velocity)
+{
+	AActor* BallOwner = BallPrim->GetOwner();
+	if (IsValid(BallOwner))
+	{
+		BallOwner->SetActorLocation(ReleasePoint, false, nullptr, ETeleportType::TeleportPhysics);
+		BallOwner->SetActorTickEnabled(true);
+		BallOwner->SetActorEnableCollision(true);
+	}
+
+	// Garantir la continuite entre la derniere position cinematique et Chaos.
+	BallPrim->SetWorldLocation(ReleasePoint, false, nullptr, ETeleportType::TeleportPhysics);
+	BallPrim->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	BallPrim->SetUseCCD(true);
+	BallPrim->SetSimulatePhysics(true);
+	BallPrim->SetLinearDamping(0.0f);
+	BallPrim->SetAngularDamping(0.0f);
+	if (!Velocity.IsNearlyZero())
+	{
+		BallPrim->SetPhysicsLinearVelocity(Velocity);
+	}
+	// Reappliquer la taille configuree au dernier point du handoff physique.
+	ApplyConfiguredBallScaleAfterShot(BallOwner);
+	const UGameplayVariablesSettings* GameplayVariables = GetDefault<UGameplayVariablesSettings>();
+	BlockStopBallRecaptureForSeconds(
+		GameplayVariables ? GameplayVariables->BallRecaptureDelayAfterShot : 0.35f);
+
+	SetOrbitAimVisible(false);
+	bSplineFollowActive  = false;
+	bSplineFollowPreservesCapturedSpeed = false;
+	bStopBallInputLocked = false;
+	SplineFollowPrimitive.Reset();
+	SplineFollowPassTarget = nullptr;
+	SplineFollowBasePoints.Reset();
+	SetControlPasse(false);
+	ClearPassFocus();
+	if (IsValid(EnroulerDebug))
+	{
+		EnroulerDebug->SetVisibility(false);
+		EnroulerDebug->SetHiddenInGame(true);
+	}
+}
+
+bool AORACharacter::ReleaseSplineFollowWithVelocity(const AActor* BallActor, const FVector& Velocity)
+{
+	UPrimitiveComponent* FollowedPrimitive = SplineFollowPrimitive.Get();
+	if (!bSplineFollowActive || !IsValid(FollowedPrimitive)
+		|| !IsValid(BallActor) || FollowedPrimitive->GetOwner() != BallActor)
+	{
+		return false;
+	}
+
+	HandOffSplineBallToPhysics(FollowedPrimitive, FollowedPrimitive->GetComponentLocation(), Velocity);
+	return true;
+}
+
+float AORACharacter::GetSplineFollowSpeedFor(const AActor* BallActor) const
+{
+	const UPrimitiveComponent* FollowedPrimitive = SplineFollowPrimitive.Get();
+	return bSplineFollowActive && IsValid(FollowedPrimitive) && FollowedPrimitive->GetOwner() == BallActor
+		? SplineFollowSpeed
+		: 0.0f;
 }
 
 void AORACharacter::UpdatePassHomingSpline()

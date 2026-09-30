@@ -25,6 +25,7 @@
 #include "Modules/ModuleManager.h"
 #include "Net/UnrealNetwork.h"
 #include "ORA/Core/ORAPlayerState.h"
+#include "ORA/Characters/ORACharacter.h"
 #include "ORA/Characters/ORACharacterBase.h"
 #include "ORA/Data/ORAAbilityData.h"
 #include "ORA/Gameplay/ORAObstacleSpawnBlueprintLibrary.h"
@@ -914,6 +915,39 @@ bool AORAGameState::TeleportPawnToBallHitTarget(APawn* Pawn, AActor* BallActor)
 		return false;
 	}
 
+	// Scoreboard: an opposing thrower gets the elimination.
+	AORAPlayerState* EliminatorPlayerState = nullptr;
+	if (PlayerState && (MatchPhase == EORAMatchPhase::InProgress || MatchPhase == EORAMatchPhase::Overtime))
+	{
+		EliminatorPlayerState = ResolveActorPlayerState(ResolveBallShooter(BallActor));
+		if (!EliminatorPlayerState
+			|| EliminatorPlayerState == PlayerState
+			|| EliminatorPlayerState->Team == EORATeam::None
+			|| EliminatorPlayerState->Team == PlayerState->Team)
+		{
+			EliminatorPlayerState = nullptr;
+		}
+	}
+
+	// The last player hit completes the prison: the score updates and the prisoners come back,
+	// while this player stays on the field (short immunity so the same ball cannot hit again).
+	if (TryCompletePrisonWithHit(Pawn, EliminatorPlayerState))
+	{
+		if (EliminatorPlayerState)
+		{
+			++EliminatorPlayerState->Eliminations;
+			EliminatorPlayerState->ForceNetUpdate();
+		}
+		BallHitImmunityEndTimes.FindOrAdd(Pawn) = GetWorld()->GetTimeSeconds() + 2.0;
+		if (AORACharacterBase* ORACharacter = Cast<AORACharacterBase>(Pawn))
+		{
+			ORACharacter->ReleaseOrbitBall(false);
+			ORACharacter->ClientPlayBallHitFeedback();
+		}
+		BounceBallBack(BallActor);
+		return true;
+	}
+
 	AActor* Target = FindBallHitTeleportTarget(Pawn);
 	if (!Target)
 	{
@@ -939,20 +973,14 @@ bool AORAGameState::TeleportPawnToBallHitTarget(APawn* Pawn, AActor* BallActor)
 	// the impact feedback window cannot eliminate the same player twice.
 	StartPrisonSentence(Pawn);
 
-	// Scoreboard: the victim goes to prison, an opposing thrower gets the elimination.
-	TWeakObjectPtr<AORAPlayerState> WeakEliminator;
+	// Scoreboard: the victim goes to prison.
 	if (PlayerState && (MatchPhase == EORAMatchPhase::InProgress || MatchPhase == EORAMatchPhase::Overtime))
 	{
 		++PlayerState->TimesImprisoned;
-		AORAPlayerState* EliminatorPlayerState = ResolveActorPlayerState(ResolveBallShooter(BallActor));
-		if (EliminatorPlayerState
-			&& EliminatorPlayerState != PlayerState
-			&& EliminatorPlayerState->Team != EORATeam::None
-			&& EliminatorPlayerState->Team != PlayerState->Team)
+		if (EliminatorPlayerState)
 		{
 			++EliminatorPlayerState->Eliminations;
 			EliminatorPlayerState->ForceNetUpdate();
-			WeakEliminator = EliminatorPlayerState;
 		}
 	}
 
@@ -968,7 +996,7 @@ bool AORAGameState::TeleportPawnToBallHitTarget(APawn* Pawn, AActor* BallActor)
 	FTimerHandle DelayedTeleportHandle;
 	GetWorldTimerManager().SetTimer(
 		DelayedTeleportHandle,
-		FTimerDelegate::CreateWeakLambda(this, [this, WeakPawn, WeakBall, WeakTarget, WeakEliminator, Destination]()
+		FTimerDelegate::CreateWeakLambda(this, [this, WeakPawn, WeakBall, WeakTarget, Destination]()
 		{
 			APawn* HitPawn = WeakPawn.Get();
 			if (!IsValid(HitPawn))
@@ -986,12 +1014,6 @@ bool AORAGameState::TeleportPawnToBallHitTarget(APawn* Pawn, AActor* BallActor)
 
 			UE_LOG(LogTemp, Display, TEXT("[BallHit] %s was touched by %s and teleported onto %s."),
 				*GetNameSafe(HitPawn), *GetNameSafe(WeakBall.Get()), *GetNameSafe(WeakTarget.Get()));
-
-			// Checked after the teleport so a complete prison never races the queued teleport.
-			if (const AORAPlayerState* HitPlayerState = HitPawn->GetPlayerState<AORAPlayerState>())
-			{
-				CheckPrisonCompletion(HitPlayerState->Team, WeakEliminator.Get());
-			}
 		}),
 		0.08f,
 		false);
@@ -1001,11 +1023,64 @@ bool AORAGameState::TeleportPawnToBallHitTarget(APawn* Pawn, AActor* BallActor)
 	return true;
 }
 
-void AORAGameState::CheckPrisonCompletion(const EORATeam ImprisonedTeam, AORAPlayerState* Finisher)
+void AORAGameState::BounceBallBack(AActor* BallActor)
 {
-	if (!HasAuthority() || ImprisonedTeam == EORATeam::None || GetWorld() == nullptr)
+	UPrimitiveComponent* BallPrimitive = FindBallContactPrimitive(BallActor);
+	if (!IsValid(BallPrimitive))
 	{
 		return;
+	}
+
+	// Back along the path it came from: the movement observed since the previous contact check
+	// also covers curved shots, whose kinematic ball has no physics velocity.
+	const FVector PhysicsVelocity = BallPrimitive->IsSimulatingPhysics()
+		? BallPrimitive->GetPhysicsLinearVelocity() : FVector::ZeroVector;
+	const FVector* PreviousCenter = PreviousBallContactLocations.Find(BallActor);
+	FVector Direction = PreviousCenter
+		? (*PreviousCenter - BallPrimitive->GetComponentLocation()).GetSafeNormal()
+		: FVector::ZeroVector;
+	if (Direction.IsNearlyZero())
+	{
+		Direction = -PhysicsVelocity.GetSafeNormal();
+	}
+	if (Direction.IsNearlyZero())
+	{
+		return;
+	}
+
+	float Speed = static_cast<float>(PhysicsVelocity.Size());
+	for (TActorIterator<AORACharacter> It(GetWorld()); It; ++It)
+	{
+		const float SplineSpeed = It->GetSplineFollowSpeedFor(BallActor);
+		if (SplineSpeed > 0.0f)
+		{
+			// Curved shot: its shooter drives the ball, hand it back to physics going the other way.
+			It->ReleaseSplineFollowWithVelocity(BallActor, Direction * FMath::Max(Speed, SplineSpeed));
+			UE_LOG(LogTemp, Display, TEXT("[BallHit] %s bounced back (curved shot of %s)."),
+				*GetNameSafe(BallActor), *GetNameSafe(*It));
+			return;
+		}
+	}
+
+	if (Speed <= 1.0f)
+	{
+		const UGameplayVariablesSettings* GameplayVariables = GetDefault<UGameplayVariablesSettings>();
+		Speed = GameplayVariables ? GameplayVariables->BasePassPower : 1600.0f;
+	}
+	BallPrimitive->SetPhysicsLinearVelocity(Direction * Speed);
+	UE_LOG(LogTemp, Display, TEXT("[BallHit] %s bounced back at %.0f cm/s."), *GetNameSafe(BallActor), Speed);
+}
+
+bool AORAGameState::TryCompletePrisonWithHit(APawn* LastVictim, AORAPlayerState* Finisher)
+{
+	const AORAPlayerState* VictimPlayerState = IsValid(LastVictim) ? LastVictim->GetPlayerState<AORAPlayerState>() : nullptr;
+	const EORATeam ImprisonedTeam = VictimPlayerState ? VictimPlayerState->Team : EORATeam::None;
+	if (!HasAuthority()
+		|| ImprisonedTeam == EORATeam::None
+		|| GetWorld() == nullptr
+		|| (MatchPhase != EORAMatchPhase::InProgress && MatchPhase != EORAMatchPhase::Overtime))
+	{
+		return false;
 	}
 
 	const UGameplayVariablesSettings* GameplayVariables = GetDefault<UGameplayVariablesSettings>();
@@ -1028,16 +1103,17 @@ void AORAGameState::CheckPrisonCompletion(const EORATeam ImprisonedTeam, AORAPla
 		}
 	}
 
-	if (Prisoners.Num() < RequiredPrisoners)
+	// The victim counts as the last prisoner without being sent to prison.
+	if (Prisoners.Num() + 1 < RequiredPrisoners)
 	{
-		return;
+		return false;
 	}
 
 	const EORATeam ScoringTeam = ImprisonedTeam == EORATeam::TeamA ? EORATeam::TeamB : EORATeam::TeamA;
 	const int32 PrisonPoints = FMath::Max(1, GameplayVariables->PrisonCompletePoints);
 	if (!AwardPointToTeam(ScoringTeam, nullptr, TEXT("complete prison"), PrisonPoints))
 	{
-		return;
+		return false;
 	}
 
 	if (IsValid(Finisher) && Finisher->Team == ScoringTeam)
@@ -1047,8 +1123,8 @@ void AORAGameState::CheckPrisonCompletion(const EORATeam ImprisonedTeam, AORAPla
 		Finisher->ForceNetUpdate();
 	}
 
-	UE_LOG(LogTemp, Display, TEXT("[Prison] Team %s prison complete (%d prisoners); releasing them."),
-		ImprisonedTeam == EORATeam::TeamA ? TEXT("A") : TEXT("B"), Prisoners.Num());
+	UE_LOG(LogTemp, Display, TEXT("[Prison] Team %s prison complete (%d prisoners + %s hit last); releasing them."),
+		ImprisonedTeam == EORATeam::TeamA ? TEXT("A") : TEXT("B"), Prisoners.Num(), *GetNameSafe(LastVictim));
 
 	PrisonCompletionPendingReleases.Append(Prisoners);
 	const auto ReleasePrisoners = [this, Prisoners]()
@@ -1061,7 +1137,7 @@ void AORAGameState::CheckPrisonCompletion(const EORATeam ImprisonedTeam, AORAPla
 			// A sentence that ended on its own during the delay is already handled.
 			if (PlayerState && PlayerState->bIsInPrison && PlayerState->PrisonSecondsRemaining >= 0)
 			{
-				ReleasePawnFromPrison(Prisoner);
+				ReleasePawnFromPrison(Prisoner, true);
 			}
 		}
 	};
@@ -1070,11 +1146,12 @@ void AORAGameState::CheckPrisonCompletion(const EORATeam ImprisonedTeam, AORAPla
 	if (ReleaseDelay <= 0.0f)
 	{
 		ReleasePrisoners();
-		return;
+		return true;
 	}
 
 	FTimerHandle ReleaseHandle;
 	GetWorldTimerManager().SetTimer(ReleaseHandle, FTimerDelegate::CreateWeakLambda(this, ReleasePrisoners), ReleaseDelay, false);
+	return true;
 }
 
 void AORAGameState::StartPrisonSentence(APawn* Pawn)
@@ -1131,7 +1208,7 @@ void AORAGameState::AdvancePrisonSentence(const TWeakObjectPtr<APawn> WeakPawn)
 	}
 }
 
-void AORAGameState::ReleasePawnFromPrison(APawn* Pawn)
+void AORAGameState::ReleasePawnFromPrison(APawn* Pawn, const bool bInstant)
 {
 	if (!HasAuthority() || !IsValid(Pawn))
 	{
@@ -1179,6 +1256,7 @@ void AORAGameState::ReleasePawnFromPrison(APawn* Pawn)
 	const FVector Destination = ReturnTransform->GetLocation() + FVector(0.0f, 0.0f, 5.0f);
 	const FQuat DestinationRotation = ReturnTransform->GetRotation();
 	const double StartTime = GetWorld()->GetTimeSeconds();
+	const float TravelSeconds = bInstant ? 0.0f : PrisonReturnTravelSeconds;
 	ACharacter* Character = Cast<ACharacter>(Pawn);
 	UCapsuleComponent* Capsule = IsValid(Character) ? Character->GetCapsuleComponent() : nullptr;
 	const ECollisionEnabled::Type OriginalCollision = IsValid(Capsule)
@@ -1209,7 +1287,7 @@ void AORAGameState::ReleasePawnFromPrison(APawn* Pawn)
 	GetWorldTimerManager().SetTimer(
 		ReturnTimer,
 		FTimerDelegate::CreateWeakLambda(this,
-			[this, WeakPawn, StartLocation, StartRotation, Destination, DestinationRotation, StartTime,
+			[this, WeakPawn, StartLocation, StartRotation, Destination, DestinationRotation, StartTime, TravelSeconds,
 			 OriginalCollision, OriginalMovementMode, OriginalCustomMovementMode]()
 			{
 				APawn* ReturningPawn = WeakPawn.Get();
@@ -1224,8 +1302,8 @@ void AORAGameState::ReleasePawnFromPrison(APawn* Pawn)
 					return;
 				}
 
-				const float Alpha = FMath::Clamp(
-					static_cast<float>((GetWorld()->GetTimeSeconds() - StartTime) / PrisonReturnTravelSeconds),
+				const float Alpha = TravelSeconds <= 0.0f ? 1.0f : FMath::Clamp(
+					static_cast<float>((GetWorld()->GetTimeSeconds() - StartTime) / TravelSeconds),
 					0.0f, 1.0f);
 				const float SmoothAlpha = Alpha * Alpha * (3.0f - 2.0f * Alpha);
 				ReturningPawn->SetActorLocationAndRotation(
@@ -1267,8 +1345,8 @@ void AORAGameState::ReleasePawnFromPrison(APawn* Pawn)
 				RecentBallHitTeleports.Remove(WeakPawn);
 				BallHitImmunityEndTimes.FindOrAdd(WeakPawn) = GetWorld()->GetTimeSeconds() + 2.0;
 				UE_LOG(LogTemp, Display,
-					TEXT("[Prison] %s smoothly returned to their camp in %.2f seconds; 2 seconds of ball immunity."),
-					*GetNameSafe(ReturningPawn), PrisonReturnTravelSeconds);
+					TEXT("[Prison] %s returned to their camp in %.2f seconds; 2 seconds of ball immunity."),
+					*GetNameSafe(ReturningPawn), TravelSeconds);
 			}),
 		PrisonReturnUpdateSeconds,
 		true);

@@ -42,14 +42,14 @@ public:
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Match|Prison", meta = (DisplayName = "Duree de prison", ClampMin = "1", ClampMax = "60", UIMin = "1", UIMax = "30", Units = "s", ToolTip = "Secondes passees en prison apres avoir ete touche par la balle, avant le retour sur le terrain."))
 	int32 PrisonDurationSeconds = 8;
 
-	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Match|Prison", meta = (DisplayName = "Prisonniers pour une prison complete", ClampMin = "1", ClampMax = "3", UIMin = "1", UIMax = "3", ToolTip = "Nombre de joueurs d'une meme equipe qui doivent etre en prison en meme temps pour donner les points de prison complete a l'adversaire. 2 en 2c2 comme en 3c3."))
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Match|Prison", meta = (DisplayName = "Prisonniers pour une prison complete", ClampMin = "1", ClampMax = "3", UIMin = "1", UIMax = "3", ToolTip = "Nombre de joueurs d'une meme equipe touches pour completer la prison et donner les points a l'adversaire. Le dernier touche ne va pas en prison : le score monte et les prisonniers sont liberes. 2 en 2c2 comme en 3c3."))
 	int32 PrisonCompletePlayerCount = 2;
 
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Match|Prison", meta = (DisplayName = "Points d'une prison complete", ClampMin = "1", UIMin = "1", ToolTip = "Points marques par l'equipe adverse quand la prison est complete."))
 	int32 PrisonCompletePoints = 2;
 
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Match|Prison", meta = (DisplayName = "Delai de liberation apres prison complete", ClampMin = "0.0", UIMin = "0.0", Units = "s", ToolTip = "Temps entre les points de prison complete et la liberation des prisonniers concernes. 0 libere immediatement."))
-	float PrisonCompleteReleaseDelaySeconds = 1.0f;
+	float PrisonCompleteReleaseDelaySeconds = 0.0f;
 
 	UPROPERTY(Config, EditAnywhere, Category = "General", meta = (DisplayName = "Début de match", ClampMin = "0", UIMin = "0", ToolTip = "Valeur initiale du compteur de match, en secondes, au lancement de Play."))
 	int32 MatchStartSeconds = 300;
