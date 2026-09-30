@@ -503,6 +503,7 @@ void AORACharacter::ApplyPlayerMovementSettings()
 	DashCooldownSeconds = FMath::Max(0.0f, GameplayVariables->DashCooldownSeconds);
 	MaxJumpCount = FMath::Max(1, GameplayVariables->MaxJumpCount);
 	JumpMaxCount = MaxJumpCount;
+	CoyoteTimeSeconds = FMath::Clamp(GameplayVariables->CoyoteTimeSeconds, 0.0f, 1.0f);
 	GroundMomentumDecay = FMath::Max(0.0f, GameplayVariables->GroundMomentumDecay);
 	AirTurnRate = FMath::Clamp(GameplayVariables->AirTurnRate, 0.0f, 3600.0f);
 	AirTurnSpeedKeep = FMath::Clamp(GameplayVariables->AirTurnSpeedKeep, 0.0f, 1.0f);

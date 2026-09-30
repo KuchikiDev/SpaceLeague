@@ -159,7 +159,7 @@ public:
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Saut", meta = (DisplayName = "Gravite a la descente", ClampMin = "0.1", ClampMax = "40.0", UIMin = "1.0", UIMax = "20.0", ToolTip = "Echelle de gravite quand le joueur retombe (hors grappin, mur et dash). La gravite de base du personnage est 8."))
 	float FallGravityScale = 9.0f;
 
-	UPROPERTY(Config, EditAnywhere, Category = "Saut", meta = (DisplayName = "Coyote time", ClampMin = "0.0", UIMin = "0.0", ToolTip = "Fenetre de coyote time pour accepter un saut juste apres avoir quitte le sol."))
+	UPROPERTY(Config, EditAnywhere, Category = "Saut", meta = (DisplayName = "Coyote time", ClampMin = "0.0", ClampMax = "1.0", UIMin = "0.0", UIMax = "0.3", Units = "s", ToolTip = "Juste apres avoir quitte le sol sans sauter (bord de plateforme), le saut compte encore comme un saut depuis le sol : le double saut reste disponible. 0 = desactive."))
 	float CoyoteTimeSeconds = 0.12f;
 
 	UPROPERTY(Config, EditAnywhere, Category = "Balle", meta = (DisplayName = "Rayon de controle", ClampMin = "0.0", UIMin = "0.0", ToolTip = "Distance a laquelle la balle peut etre detectee et attrapee plus facilement."))

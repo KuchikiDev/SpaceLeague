@@ -201,6 +201,10 @@ void AORACharacterBase::Tick(const float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 	bWallRunCameraAdjustedThisTick = false;
+	if (const UCharacterMovementComponent* MoveComp = GetCharacterMovement(); IsValid(MoveComp) && MoveComp->IsMovingOnGround())
+	{
+		LastGroundedTime = GetWorld()->GetTimeSeconds();
+	}
 	UpdateWallJumpAvailability();
 	UpdatePassFocus(DeltaSeconds);
 	UpdateStopBallInputBuffer();
@@ -492,6 +496,21 @@ void AORACharacterBase::Landed(const FHitResult& Hit)
 	CachedWallJumpNormal = FVector::ZeroVector;
 	LastWallContactTime = -BIG_NUMBER;
 	NotifyJumpStateChanged();
+}
+
+bool AORACharacterBase::CanJumpWhileFalling() const
+{
+	// Coyote time: just after walking off a ledge, the first jump counts as a ground jump
+	// (the engine would otherwise spend one jump for the fall and leave no double jump).
+	const UWorld* World = GetWorld();
+	if (JumpCurrentCount == 0
+		&& CoyoteTimeSeconds > 0.0f
+		&& IsValid(World)
+		&& World->GetTimeSeconds() - LastGroundedTime <= CoyoteTimeSeconds)
+	{
+		return true;
+	}
+	return Super::CanJumpWhileFalling();
 }
 
 void AORACharacterBase::NotifyHit(

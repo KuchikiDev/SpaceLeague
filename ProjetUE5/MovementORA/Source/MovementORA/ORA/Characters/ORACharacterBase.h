@@ -329,8 +329,15 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Jump|Config", meta = (ClampMin = "1", UIMin = "1"))
 	int32 MaxJumpCount = 2;
 
+	/** After leaving the ground without jumping, the first jump still counts as a ground jump for this long. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Jump|Config", meta = (ClampMin = "0.0", UIMin = "0.0", Units = "s"))
+	float CoyoteTimeSeconds = 0.12f;
+
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "Jump|State")
 	int32 JumpInputCount = 0;
+
+	// World time of the last tick spent on the ground (coyote time).
+	float LastGroundedTime = -BIG_NUMBER;
 
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "Jump|State")
 	bool bCanWallJump = false;
@@ -1112,6 +1119,7 @@ protected:
 	virtual void PossessedBy(AController* NewController) override;
 	virtual void OnRep_Controller() override;
 	virtual void Landed(const FHitResult& Hit) override;
+	virtual bool CanJumpWhileFalling() const override;
 	virtual void NotifyHit(
 		UPrimitiveComponent* MyComp,
 		AActor* Other,
