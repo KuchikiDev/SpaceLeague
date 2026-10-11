@@ -1,7 +1,7 @@
 ---
 type: now
 status: active
-last_review: 2026-09-30
+last_review: 2026-10-11
 owner: dylan
 audience: humans-agents
 source_of_truth: code-and-config
@@ -22,10 +22,9 @@ Etat courant du projet au 2026-09-26.
 
 ## Point de reprise (session)
 
-- P0 et P2 de la revue du 2026-09-25 traites (voir ci-dessous). Prochain chantier : **capacites Raijin/Keplar** (P1-4),
-  puis **evenements terrain** (rotation du terrain ; le deplacement automatique des buts existe deja).
-- Le score "prison complete" (P1-3) est code et compile ; il reste a le tester en PIE avec 2 joueurs humains
-  (les bots ne vont jamais en prison).
+- 2026-10-11 : grand menage. Rotation du terrain **abandonnee** (shelf CL 161 et branche Git supprimes, jamais soumise).
+  Mot de passe Perforce change. Map `FloatingIslands` renommee `Lobby_Main` (CL 162). Assets inutilises supprimes (CL 163, ~4 Go).
+- En cours : nettoyage des serveurs (Perforce, VPS, serveur dedie, backend), puis capacites Raijin/Keplar (P1-4).
 
 ## A faire en priorite (mise a jour du 2026-09-30)
 
@@ -40,9 +39,14 @@ Fait et soumis sur Perforce :
 - Prison complete testee en PIE : le dernier touche reste sur le terrain, les prisonniers reviennent tout de suite
   et la balle repart dans l'autre sens : CL 160.
 
+- Map du lobby principal renommee `FloatingIslands` -> `Levels/Lobby_Main/Lobby_Main` : CL 162.
+- Assets inutilises supprimes (DeadTree, TemplesKorean, Sci-Fi Village, maps de demo Feudal Japan, L_PlantSandbox) : CL 163.
+
 Ensuite :
-1. Rotation du terrain.
-2. Capacites Raijin/Keplar.
+1. Nettoyage des serveurs (Perforce, VPS, serveur dedie, backend `api.oragame.eu`).
+2. Debrancher l'AnimBP du Game Animation Sample de `BP_Paradoxe` / `ABP_SandboxCharacter`, puis supprimer
+   `Movment`, Paragon, Echo, UE4/UE5/UEFN_Mannequin (~1 Go, source des 9 erreurs de compilation Blueprint).
+3. Capacites Raijin/Keplar.
 
 ## Faits verifies (code/config)
 
@@ -75,11 +79,11 @@ Ensuite :
 
 | Point | Statut |
 |-------|--------|
-| P0-1 Identifiants Perforce en clair | Scripts corriges (login par ticket), `Perforce/config.txt` ignore. **A faire : changer le mot de passe P4** |
+| P0-1 Identifiants Perforce en clair | Scripts corriges (login par ticket), `Perforce/config.txt` ignore, mot de passe change le 2026-10-11 |
 | P0-2 Slots de capacites Raijin/Keplar | Corrige (EnumRedirect + DA reenregistres) |
-| P1-3 Score prison complete | Code, compile ; test PIE 2 joueurs a faire |
+| P1-3 Score prison complete | Fait et teste (CL 160) |
 | P1-4 Capacites Raijin/Keplar | A faire |
-| P1-5 Evenements terrain | Deplacement des buts deja fait ; rotation du terrain a faire |
+| P1-5 Evenements terrain | Deplacement des buts fait ; rotation du terrain abandonnee (2026-10-11) |
 | P2-6 Git / documentation | Copie du code ORA dans Git + doc a jour |
 | P2-7 Script de build | `Build_MovementORA_Safe.bat` pointe vers `MovementORA 5.8` |
 | P2-8 Gros fichiers C++ | Decoupes par domaine (build editeur, jeu et unity OK) ; logs bots dans `LogORABot` |
@@ -117,3 +121,4 @@ Ensuite :
 - 2026-09-25: Revue de reprise (P0/P1/P2). Corrections P0-1, P0-2, P1-3, P2-7.
 - 2026-09-26: P2 termines : decoupage C++, nettoyage assets, copie du code ORA dans Git, doc a jour.
 - 2026-09-28: Retours de jeu : priorites dash sur le mur et camera a l'arrivee sur un mur.
+- 2026-10-11: Menage : rotation du terrain abandonnee, mot de passe P4 change, Lobby_Main (CL 162), assets inutilises supprimes (CL 163).
