@@ -43,10 +43,11 @@ Fait et soumis sur Perforce :
 - Assets inutilises supprimes (DeadTree, TemplesKorean, Sci-Fi Village, maps de demo Feudal Japan, L_PlantSandbox) : CL 163.
 
 Ensuite :
-1. Bug serveur : erreur `[TimedObstacle] Missing terrain tiles or OBSTACLE mesh` en boucle (deja present avant le redeploiement).
-2. Debrancher l'AnimBP du Game Animation Sample de `BP_Paradoxe` / `ABP_SandboxCharacter`, puis supprimer
-   `Movment`, Paragon, Echo, UE4/UE5/UEFN_Mannequin (~1 Go, source des 9 erreurs de compilation Blueprint).
-3. Capacites Raijin/Keplar.
+- Serveur : obstacles temporises absents (mesh OBSTACLE non cooke), `/Game/Terrain` toujours cooke : CL 164, redeploye (release 20261012b).
+- Packs de personnages du Game Animation Sample supprimes (~830 Mo) : CL 165. Blueprints : 0 erreur, 0 warning.
+
+Ensuite :
+1. Capacites Raijin/Keplar.
 
 ## Faits verifies (code/config)
 
