@@ -71,16 +71,29 @@ void AORAGameState::ConfigureNetworkedBalls()
 			Ball->SetActorTickEnabled(true);
 
 			// Free ball uses the same size as a shot ball from the start of the match (orbit has its own size).
-			const UGameplayVariablesSettings* GameplayVariables = GetDefault<UGameplayVariablesSettings>();
-			const FVector FreeBallScale(FMath::Max(0.01f, GameplayVariables ? GameplayVariables->BallScaleAfterShot : 4.0f));
-			Ball->SetActorScale3D(FreeBallScale);
-			TArray<UMeshComponent*> BallMeshes;
-			Ball->GetComponents<UMeshComponent>(BallMeshes);
-			for (UMeshComponent* BallMesh : BallMeshes)
+			// This runs repeatedly until the match is prepared: never resize a ball someone is holding.
+			bool bHeldInOrbit = false;
+			for (TActorIterator<AORACharacterBase> CharacterIt(GetWorld()); CharacterIt; ++CharacterIt)
 			{
-				if (IsValid(BallMesh))
+				if (CharacterIt->IsBallInOrbit(Ball))
 				{
-					BallMesh->SetWorldScale3D(FreeBallScale);
+					bHeldInOrbit = true;
+					break;
+				}
+			}
+			const UGameplayVariablesSettings* GameplayVariables = GetDefault<UGameplayVariablesSettings>();
+			if (!bHeldInOrbit)
+			{
+				const FVector FreeBallScale(FMath::Max(0.01f, GameplayVariables ? GameplayVariables->BallScaleAfterShot : 4.0f));
+				Ball->SetActorScale3D(FreeBallScale);
+				TArray<UMeshComponent*> BallMeshes;
+				Ball->GetComponents<UMeshComponent>(BallMeshes);
+				for (UMeshComponent* BallMesh : BallMeshes)
+				{
+					if (IsValid(BallMesh))
+					{
+						BallMesh->SetWorldScale3D(FreeBallScale);
+					}
 				}
 			}
 			Ball->ForceNetUpdate();

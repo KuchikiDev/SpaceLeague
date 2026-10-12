@@ -384,23 +384,40 @@ void AORACharacterBase::UpdateOrbitBall(const float DeltaSeconds)
 	// Orbite circulaire dans le plan horizontal, en axes monde : la camera qui tourne
 	// (regard, camera de mur) ne fait plus pivoter tout le cercle d'un coup.
 	const float OrbitSpeedRadians = FMath::DegreesToRadians(StopBallOrbitSpeedDegrees);
-	OrbitBallAngleRadians = FMath::UnwindRadians(OrbitBallAngleRadians + OrbitSpeedRadians * FMath::Max(0.0f, DeltaSeconds));
-
-	const FVector OrbitXY = (FVector::ForwardVector * FMath::Cos(OrbitBallAngleRadians)
-		+ FVector::RightVector * FMath::Sin(OrbitBallAngleRadians)) * OrbitBallRadius;
+	// Pas de temps plafonne : un a-coup de frame (shaders, GC) ne fait plus sauter la balle d'un grand angle.
+	const float OrbitDeltaSeconds = FMath::Clamp(DeltaSeconds, 0.0f, 1.0f / 30.0f);
+	OrbitBallAngleRadians = FMath::UnwindRadians(OrbitBallAngleRadians + OrbitSpeedRadians * OrbitDeltaSeconds);
 
 	// Centre de l'orbite : la camera (point de vue du joueur). Sans camera, les yeux du personnage.
 	FVector OrbitCenter(GetActorLocation().X, GetActorLocation().Y, EyeLocation.Z);
-	if (const UCameraComponent* Camera = FindComponentByClass<UCameraComponent>())
+	const UCameraComponent* Camera = FindComponentByClass<UCameraComponent>();
+	if (Camera)
 	{
 		OrbitCenter = Camera->GetComponentLocation();
 	}
 
-	// Z : hauteur du centre avec un offset fixe vers le bas (indépendant des valeurs BP sérialisées).
+	// Le rayon regle vaut pour le FOV de course : quand le FOV s'elargit (sprint), on rapproche
+	// la balle pour qu'elle garde la meme taille apparente a l'ecran.
+	const UGameplayVariablesSettings* GameplayVariables = GetDefault<UGameplayVariablesSettings>();
+	float OrbitRadiusForFOV = OrbitBallRadius;
+	if (Camera && GameplayVariables)
+	{
+		const float ReferenceHalfFOVTan = FMath::Tan(FMath::DegreesToRadians(FMath::Clamp(GameplayVariables->RunFOV, 10.0f, 170.0f) * 0.5f));
+		const float CurrentHalfFOVTan = FMath::Tan(FMath::DegreesToRadians(FMath::Clamp(Camera->FieldOfView, 10.0f, 170.0f) * 0.5f));
+		// Compensation 1 = taille d'ecran constante ; au-dela, la balle se rapproche davantage.
+		const float Compensation = FMath::Max(0.0f, GameplayVariables->BallOrbitFOVCompensation);
+		OrbitRadiusForFOV = OrbitBallRadius * FMath::Pow(ReferenceHalfFOVTan / CurrentHalfFOVTan, Compensation);
+	}
+
+	const FVector OrbitXY = (FVector::ForwardVector * FMath::Cos(OrbitBallAngleRadians)
+		+ FVector::RightVector * FMath::Sin(OrbitBallAngleRadians)) * OrbitRadiusForFOV;
+
+	// Z : sous la camera (reglage GameplayVariables).
+	const float DropBelowCamera = GameplayVariables ? FMath::Max(0.0f, GameplayVariables->BallOrbitDropBelowCamera) : 30.0f;
 	const FVector TargetLocation = FVector(
 		OrbitCenter.X + OrbitXY.X,
 		OrbitCenter.Y + OrbitXY.Y,
-		OrbitCenter.Z - 30.0f);
+		OrbitCenter.Z - DropBelowCamera);
 
 	OrbitBallActor->SetActorLocation(TargetLocation, false, nullptr, ETeleportType::TeleportPhysics);
 }

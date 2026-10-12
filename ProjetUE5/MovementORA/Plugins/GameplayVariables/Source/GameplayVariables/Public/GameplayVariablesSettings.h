@@ -171,8 +171,14 @@ public:
 	UPROPERTY(Config, EditAnywhere, Category = "Balle", meta = (DisplayName = "Taille de la balle libre", ClampMin = "0.01", UIMin = "0.01", ToolTip = "Echelle visuelle uniforme de la balle libre : des le debut du match et apres chaque tir. La balle en orbite garde sa propre taille."))
 	float BallScaleAfterShot = 4.0f;
 
-	UPROPERTY(Config, EditAnywhere, Category = "Balle", meta = (DisplayName = "Rayon de l'orbite de la balle", ClampMin = "1.0", UIMin = "1.0", Units = "cm", ToolTip = "Distance entre la camera (centre de l'orbite) et la balle portee."))
-	float BallOrbitRadius = 400.0f;
+	UPROPERTY(Config, EditAnywhere, Category = "Balle", meta = (DisplayName = "Rayon de l'orbite de la balle", ClampMin = "1.0", UIMin = "1.0", Units = "cm", ToolTip = "Distance entre la camera (centre de l orbite) et la balle portee, pour le FOV de course (adaptee automatiquement au FOV)."))
+	float BallOrbitRadius = 450.0f;
+
+	UPROPERTY(Config, EditAnywhere, Category = "Balle", meta = (DisplayName = "Hauteur de l orbite sous la camera", ClampMin = "0.0", UIMin = "0.0", Units = "cm", ToolTip = "Distance sous la camera du cercle de la balle portee."))
+	float BallOrbitDropBelowCamera = 30.0f;
+
+	UPROPERTY(Config, EditAnywhere, Category = "Balle", meta = (DisplayName = "Compensation FOV de l'orbite", ClampMin = "0.0", UIMin = "0.0", UIMax = "4.0", ToolTip = "Rapproche la balle portee quand le FOV s'elargit (sprint). 0 = distance fixe, 1 = meme taille a l'ecran, plus haut = encore plus proche."))
+	float BallOrbitFOVCompensation = 2.0f;
 
 	UPROPERTY(Config, EditAnywhere, Category = "Balle", meta = (DisplayName = "Delai anti-recapture apres tir", ClampMin = "0.0", UIMin = "0.0", ToolTip = "Duree pendant laquelle une balle qui vient d'etre tiree ne peut pas etre automatiquement recapturee par le meme joueur."))
 	float BallRecaptureDelayAfterShot = 0.35f;
