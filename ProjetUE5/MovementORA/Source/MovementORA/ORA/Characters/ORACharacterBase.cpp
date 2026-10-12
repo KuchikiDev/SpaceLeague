@@ -194,6 +194,11 @@ void AORACharacterBase::BeginPlay()
 		{
 			PostMovementTickComponent->PrimaryComponentTick.AddPrerequisite(MovementComponent, MovementComponent->PrimaryComponentTick);
 		}
+		// The orbit ball is centred on the camera: place it once the spring arm has moved the camera this frame.
+		if (USpringArmComponent* SpringArm = FindComponentByClass<USpringArmComponent>())
+		{
+			PostMovementTickComponent->PrimaryComponentTick.AddPrerequisite(SpringArm, SpringArm->PrimaryComponentTick);
+		}
 	}
 }
 

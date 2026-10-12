@@ -381,24 +381,26 @@ void AORACharacterBase::UpdateOrbitBall(const float DeltaSeconds)
 	FRotator EyeRotation;
 	GetActorEyesViewPoint(EyeLocation, EyeRotation);
 
-	// Axes relatifs au joueur (yaw controller) pour que l'orbite suive la caméra.
-	const FRotator AimYaw(0.0f, GetControlRotation().Yaw, 0.0f);
-	const FMatrix AimMatrix = FRotationMatrix(AimYaw);
-	const FVector Forward = AimMatrix.GetScaledAxis(EAxis::X);
-	const FVector Right   = AimMatrix.GetScaledAxis(EAxis::Y);
-
-	// Orbite circulaire dans le plan horizontal relatif au joueur.
+	// Orbite circulaire dans le plan horizontal, en axes monde : la camera qui tourne
+	// (regard, camera de mur) ne fait plus pivoter tout le cercle d'un coup.
 	const float OrbitSpeedRadians = FMath::DegreesToRadians(StopBallOrbitSpeedDegrees);
-	OrbitBallAngleRadians += OrbitSpeedRadians * FMath::Max(0.0f, DeltaSeconds);
+	OrbitBallAngleRadians = FMath::UnwindRadians(OrbitBallAngleRadians + OrbitSpeedRadians * FMath::Max(0.0f, DeltaSeconds));
 
-	const FVector OrbitXY = (Forward * FMath::Cos(OrbitBallAngleRadians)
-		+ Right * FMath::Sin(OrbitBallAngleRadians)) * OrbitBallRadius;
+	const FVector OrbitXY = (FVector::ForwardVector * FMath::Cos(OrbitBallAngleRadians)
+		+ FVector::RightVector * FMath::Sin(OrbitBallAngleRadians)) * OrbitBallRadius;
 
-	// Z : hauteur des yeux avec un offset fixe vers le bas (indépendant des valeurs BP sérialisées).
+	// Centre de l'orbite : la camera (point de vue du joueur). Sans camera, les yeux du personnage.
+	FVector OrbitCenter(GetActorLocation().X, GetActorLocation().Y, EyeLocation.Z);
+	if (const UCameraComponent* Camera = FindComponentByClass<UCameraComponent>())
+	{
+		OrbitCenter = Camera->GetComponentLocation();
+	}
+
+	// Z : hauteur du centre avec un offset fixe vers le bas (indépendant des valeurs BP sérialisées).
 	const FVector TargetLocation = FVector(
-		GetActorLocation().X + OrbitXY.X,
-		GetActorLocation().Y + OrbitXY.Y,
-		EyeLocation.Z - 30.0f);
+		OrbitCenter.X + OrbitXY.X,
+		OrbitCenter.Y + OrbitXY.Y,
+		OrbitCenter.Z - 30.0f);
 
 	OrbitBallActor->SetActorLocation(TargetLocation, false, nullptr, ETeleportType::TeleportPhysics);
 }
