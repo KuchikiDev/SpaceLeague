@@ -168,8 +168,11 @@ public:
 	UPROPERTY(Config, EditAnywhere, Category = "Balle", meta = (DisplayName = "Marge verticale zone de touche joueur", ClampMin = "0.0", UIMin = "0.0", Units = "cm", ToolTip = "Prolonge uniquement le sommet de la capsule de detection afin que les grosses balles passant juste au-dessus du personnage le touchent aussi."))
 	float BallPlayerHitVerticalMargin = 120.0f;
 
-	UPROPERTY(Config, EditAnywhere, Category = "Balle", meta = (DisplayName = "Taille de la balle apres le tir", ClampMin = "0.01", UIMin = "0.01", ToolTip = "Echelle visuelle uniforme appliquee a la balle apres un tir. La taille temporaire pendant l'orbite reste a 1."))
+	UPROPERTY(Config, EditAnywhere, Category = "Balle", meta = (DisplayName = "Taille de la balle libre", ClampMin = "0.01", UIMin = "0.01", ToolTip = "Echelle visuelle uniforme de la balle libre : des le debut du match et apres chaque tir. La balle en orbite garde sa propre taille."))
 	float BallScaleAfterShot = 4.0f;
+
+	UPROPERTY(Config, EditAnywhere, Category = "Balle", meta = (DisplayName = "Rayon de l'orbite de la balle", ClampMin = "1.0", UIMin = "1.0", Units = "cm", ToolTip = "Distance entre la camera (centre de l'orbite) et la balle portee."))
+	float BallOrbitRadius = 400.0f;
 
 	UPROPERTY(Config, EditAnywhere, Category = "Balle", meta = (DisplayName = "Delai anti-recapture apres tir", ClampMin = "0.0", UIMin = "0.0", ToolTip = "Duree pendant laquelle une balle qui vient d'etre tiree ne peut pas etre automatiquement recapturee par le meme joueur."))
 	float BallRecaptureDelayAfterShot = 0.35f;

@@ -69,6 +69,20 @@ void AORAGameState::ConfigureNetworkedBalls()
 			Ball->SetNetUpdateFrequency(60.0f);
 			Ball->SetMinNetUpdateFrequency(30.0f);
 			Ball->SetActorTickEnabled(true);
+
+			// Free ball uses the same size as a shot ball from the start of the match (orbit has its own size).
+			const UGameplayVariablesSettings* GameplayVariables = GetDefault<UGameplayVariablesSettings>();
+			const FVector FreeBallScale(FMath::Max(0.01f, GameplayVariables ? GameplayVariables->BallScaleAfterShot : 4.0f));
+			Ball->SetActorScale3D(FreeBallScale);
+			TArray<UMeshComponent*> BallMeshes;
+			Ball->GetComponents<UMeshComponent>(BallMeshes);
+			for (UMeshComponent* BallMesh : BallMeshes)
+			{
+				if (IsValid(BallMesh))
+				{
+					BallMesh->SetWorldScale3D(FreeBallScale);
+				}
+			}
 			Ball->ForceNetUpdate();
 		}
 		else

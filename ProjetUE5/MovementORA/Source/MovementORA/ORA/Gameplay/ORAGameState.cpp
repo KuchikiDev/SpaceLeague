@@ -814,9 +814,14 @@ void AORAGameState::CheckBallPlayerContacts(const TArray<AActor*>& Balls)
 				// Do not use the swept segment to release immunity: that segment still
 				// begins inside the shooter. Release only after the current ball position
 				// has cleared the complete hit volume, and keep this frame immune too.
+				// The orbit is centred on the camera, so a shot can start behind the shooter
+				// and cross them: release only once the ball is clear AND moving away.
 				const float CurrentDistanceToCapsule = FMath::PointDistToSegment(
 					BallCenter, CapsuleStart, CapsuleEnd);
-				if (CurrentDistanceToCapsule > ContactRadius + 100.0f)
+				const float PreviousDistanceToCapsule = FMath::PointDistToSegment(
+					PreviousCenter, CapsuleStart, CapsuleEnd);
+				if (CurrentDistanceToCapsule > ContactRadius + 100.0f
+					&& CurrentDistanceToCapsule > PreviousDistanceToCapsule)
 				{
 					BallLaunchImmunePawns.Remove(Ball);
 				}

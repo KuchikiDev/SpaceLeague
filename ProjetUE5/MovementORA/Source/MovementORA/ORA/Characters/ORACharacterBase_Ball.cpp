@@ -696,9 +696,12 @@ bool AORACharacterBase::StartOrbitBall(AActor* BallActor, UPrimitiveComponent* B
 
 	const FVector OffsetToCharacter = BallActor->GetActorLocation() - GetActorLocation();
 	OrbitBallRadius = StopBallOrbitMinRadius; // rayon fixe, indépendant de la position de la balle
-	OrbitBallAngleRadians = FMath::Atan2(OffsetToCharacter.Y, OffsetToCharacter.X);
+	// Depart juste derriere la camera : la balle captee est teleportee hors du champ
+	// de vision au lieu de partir de la ou elle arrive (souvent devant la camera).
+	OrbitBallAngleRadians = FMath::UnwindRadians(FMath::DegreesToRadians(GetControlRotation().Yaw) + UE_PI);
 	OrbitBallHeightOffset = bStopBallMaintainInitialHeightOffset ? OffsetToCharacter.Z : StopBallFixedHeightOffset;
 	bOrbitBallActive = true;
+	UpdateOrbitBall(0.0f);
 
 	// A new shot preview always starts from a fresh neutral state.
 	bOrbitAimHasCurrentEnd = false;
