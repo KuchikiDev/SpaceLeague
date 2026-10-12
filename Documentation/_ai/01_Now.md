@@ -24,7 +24,7 @@ Etat courant du projet au 2026-09-26.
 
 - 2026-10-11 : grand menage. Rotation du terrain **abandonnee** (shelf CL 161 et branche Git supprimes, jamais soumise).
   Mot de passe Perforce change. Map `FloatingIslands` renommee `Lobby_Main` (CL 162). Assets inutilises supprimes (CL 163, ~4 Go).
-- En cours : nettoyage des serveurs (Perforce, VPS, serveur dedie, backend), puis capacites Raijin/Keplar (P1-4).
+- 2026-10-12 : serveurs nettoyes (Perforce, VPS : 157 -> 105 Go). Serveur dedie redeploye (release 20261012, binaire Linux compile avec le moteur source, cook avec le launcher). Prochain chantier : capacites Raijin/Keplar (P1-4).
 
 ## A faire en priorite (mise a jour du 2026-09-30)
 
@@ -43,7 +43,7 @@ Fait et soumis sur Perforce :
 - Assets inutilises supprimes (DeadTree, TemplesKorean, Sci-Fi Village, maps de demo Feudal Japan, L_PlantSandbox) : CL 163.
 
 Ensuite :
-1. Nettoyage des serveurs (Perforce, VPS, serveur dedie, backend `api.oragame.eu`).
+1. Bug serveur : erreur `[TimedObstacle] Missing terrain tiles or OBSTACLE mesh` en boucle (deja present avant le redeploiement).
 2. Debrancher l'AnimBP du Game Animation Sample de `BP_Paradoxe` / `ABP_SandboxCharacter`, puis supprimer
    `Movment`, Paragon, Echo, UE4/UE5/UEFN_Mannequin (~1 Go, source des 9 erreurs de compilation Blueprint).
 3. Capacites Raijin/Keplar.
