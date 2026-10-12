@@ -42,7 +42,6 @@ Fait et soumis sur Perforce :
 - Map du lobby principal renommee `FloatingIslands` -> `Levels/Lobby_Main/Lobby_Main` : CL 162.
 - Assets inutilises supprimes (DeadTree, TemplesKorean, Sci-Fi Village, maps de demo Feudal Japan, L_PlantSandbox) : CL 163.
 
-Ensuite :
 - Serveur : obstacles temporises absents (mesh OBSTACLE non cooke), `/Game/Terrain` toujours cooke : CL 164, redeploye (release 20261012b).
 - Packs de personnages du Game Animation Sample supprimes (~830 Mo) : CL 165. Blueprints : 0 erreur, 0 warning.
 
