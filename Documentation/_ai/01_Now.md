@@ -24,7 +24,7 @@ Etat courant du projet au 2026-09-26.
 
 - 2026-10-11 : grand menage. Rotation du terrain **abandonnee** (shelf CL 161 et branche Git supprimes, jamais soumise).
   Mot de passe Perforce change. Map `FloatingIslands` renommee `Lobby_Main` (CL 162). Assets inutilises supprimes (CL 163, ~4 Go).
-- 2026-10-12 : serveurs nettoyes (Perforce, VPS : 157 -> 105 Go). Serveur dedie redeploye (release 20261012, binaire Linux compile avec le moteur source, cook avec le launcher). Prochain chantier : capacites Raijin/Keplar (P1-4).
+- 2026-10-12 : serveurs nettoyes (Perforce, VPS : 157 -> 105 Go). Serveur dedie redeploye (release 20261012, binaire Linux compile avec le moteur source, cook avec le launcher). Prochain chantier : validation des bases du gameplay, en commencant par la balle.
 
 ## A faire en priorite (mise a jour du 2026-09-30)
 
@@ -46,7 +46,8 @@ Fait et soumis sur Perforce :
 - Packs de personnages du Game Animation Sample supprimes (~830 Mo) : CL 165. Blueprints : 0 erreur, 0 warning.
 
 Ensuite :
-1. Capacites Raijin/Keplar.
+1. Validation des bases du gameplay (le joueur teste, l agent corrige) : balle, puis deplacement, match complet, en ligne.
+2. Capacites Raijin/Keplar (reportees apres la validation du gameplay).
 
 ## Faits verifies (code/config)
 
