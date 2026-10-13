@@ -43,6 +43,7 @@
 #include "ORA/Interfaces/ORABallInterface.h"
 #include "ORA/UI/ORAInGameHudInterface.h"
 #include "Engine/StaticMesh.h"
+#include "Components/StaticMeshComponent.h"
 #include "TimerManager.h"
 #include "UObject/ConstructorHelpers.h"
 
@@ -55,8 +56,41 @@ namespace
 			return true;
 		}
 
-		// Let the straight aim pass through walkable ground/ramps, but still stop on walls and other obstacles.
-		return Hit.ImpactNormal.Z > 0.45f;
+		// Let the aim pass through walkable ground/ramps (top of floor tiles).
+		if (Hit.ImpactNormal.Z > 0.45f)
+		{
+			return true;
+		}
+
+		// Only gameplay blockers cut the preview: players, black obstacles and pillars.
+		// Arena walls, glass and decor never cut it.
+		const AActor* HitActor = Hit.GetActor();
+		if (!IsValid(HitActor))
+		{
+			return true;
+		}
+		if (HitActor->IsA<APawn>())
+		{
+			return false;
+		}
+		// Grapple obstacles and goals (meshes OBSTACLE_GRAPPIN / BUT) never cut the preview.
+		if (const UStaticMeshComponent* HitMesh = Cast<UStaticMeshComponent>(Hit.GetComponent()))
+		{
+			const UStaticMesh* Mesh = HitMesh->GetStaticMesh();
+			if (IsValid(Mesh) && (Mesh->GetName() == TEXT("OBSTACLE_GRAPPIN") || Mesh->GetName() == TEXT("BUT")))
+			{
+				return true;
+			}
+			// Black obstacles, whatever their class (timed obstacles are spawned from C++).
+			if (IsValid(Mesh) && Mesh->GetName() == TEXT("OBSTACLE"))
+			{
+				return false;
+			}
+		}
+		const FString ClassName = HitActor->GetClass()->GetName();
+		return !((ClassName.StartsWith(TEXT("BP_Obstacle")) && !ClassName.StartsWith(TEXT("BP_ObstacleGrappin")))
+			|| ClassName.StartsWith(TEXT("BP_DalleMobile"))
+			|| ClassName.StartsWith(TEXT("BP_Mur")));
 	}
 
 	ESplineMeshAxis::Type ResolveOrbitAimForwardAxis(const UStaticMesh* Mesh)
@@ -864,13 +898,14 @@ void AORACharacterBase::ConfigureOrbitAimMainMaterial(
 		return;
 	}
 
-	const FLinearColor TintColor = OrbitAimTintColor;
+	const FLinearColor TintColor = bOrbitAimHasObstacleHit ? OrbitAimBlockedTintColor : OrbitAimTintColor;
 	const float Opacity = EvaluateOrbitAimOpacityAtAlpha(AlphaValue) * FMath::Clamp(OpacityMultiplier, 0.0f, 1.0f);
 
 	static const FName VectorParamNames[] = {
 		TEXT("Color"),
 		TEXT("Tint"),
 		TEXT("BaseColor"),
+		TEXT("Base Color"),
 		TEXT("GlowColor"),
 		TEXT("EmissiveColor")
 	};
@@ -999,6 +1034,12 @@ void AORACharacterBase::ApplyOrbitAimSplineToMeshes()
 		return;
 	}
 
+	// La couleur suit l'etat bloque/libre de la courbe a chaque mise a jour.
+	if (IsValid(OrbitAimRibbonMaterial))
+	{
+		ConfigureOrbitAimMainMaterial(OrbitAimRibbonMaterial, 0.35f);
+	}
+
 	const float StartWidth = FMath::Max(0.01f, OrbitAimMeshStartWidth);
 	const float PeakWidth = FMath::Max(StartWidth, OrbitAimMeshPeakWidth);
 	const float EndWidth = FMath::Max(0.01f, OrbitAimMeshEndWidth);
@@ -1038,7 +1079,11 @@ void AORACharacterBase::ApplyOrbitAimSplineToMeshes()
 		const float VisibleStartDistance = FMath::Clamp(OrbitAimVisualStartOffset, 0.0f, SplineLength * 0.35f);
 		const float TubeRadius = VisibleWidth * TubeRadiusScale * WidthMultiplier;
 		const float VisibleEndTrimDistance = FMath::Clamp(TubeRadius * 0.25f, 0.0f, SplineLength * 0.08f);
-		const float VisibleLength = FMath::Max(KINDA_SMALL_NUMBER, SplineLength - VisibleStartDistance - VisibleEndTrimDistance);
+		// Courbe bloquee : rien n'est affiche apres l'obstacle, la partie avant garde sa forme.
+		const float VisibleEndDistance = bOrbitAimHasObstacleHit
+			? FMath::Clamp(OrbitAimObstacleHitDistance, VisibleStartDistance, SplineLength - VisibleEndTrimDistance)
+			: SplineLength - VisibleEndTrimDistance;
+		const float VisibleLength = FMath::Max(KINDA_SMALL_NUMBER, VisibleEndDistance - VisibleStartDistance);
 		FRotator ViewRotation = GetActorRotation();
 		if (const AController* Controller = GetController())
 		{

@@ -151,6 +151,7 @@ void AORACharacterBase::BeginPlay()
 		OrbitAimInitialStraightDistance = FMath::Max(0.0f, GameplayVariables->CurvedShotInitialStraightDistance);
 		OrbitAimInitialStraightDistanceRatio = FMath::Clamp(GameplayVariables->CurvedShotInitialStraightDistanceRatio, 0.0f, 1.0f);
 		StopBallOrbitMinRadius = FMath::Max(1.0f, GameplayVariables->BallOrbitRadius);
+		OrbitAimBlockedTintColor = GameplayVariables->CurvedShotBlockedColor;
 	}
 
 	OrbitAimSegmentCount = FMath::Clamp(FMath::Max(OrbitAimSegmentCount, 12), 1, 16);

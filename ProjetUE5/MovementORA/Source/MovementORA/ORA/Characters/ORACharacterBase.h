@@ -844,6 +844,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Ball|Aim|Mesh")
 	FLinearColor OrbitAimTintColor = FLinearColor(0.78f, 0.82f, 0.90f, 1.0f);
 
+	/** Tint of the shot preview when the curve is blocked by an obstacle (from GameplayVariables). */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Ball|Aim|Mesh")
+	FLinearColor OrbitAimBlockedTintColor = FLinearColor(1.0f, 0.25f, 0.1f, 1.0f);
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Ball|Aim|Aura")
 	bool bEnableOrbitAimAura = false;
 

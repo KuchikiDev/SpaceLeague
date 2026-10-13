@@ -228,6 +228,9 @@ public:
 	UPROPERTY(Config)
 	float CurvedShotPostObstacleOpacityMultiplier = 0.22f;
 
+	UPROPERTY(Config, EditAnywhere, Category = "Balle - Tir enroule", meta = (DisplayName = "Couleur de la courbe bloquee", ToolTip = "Couleur de l'apercu du tir enroule quand la courbe touche un obstacle. La partie apres l'obstacle n'est pas affichee."))
+	FLinearColor CurvedShotBlockedColor = FLinearColor(1.0f, 0.25f, 0.1f, 1.0f);
+
 	UPROPERTY(Config)
 	float CurvedShotVisualStartOffset = 70.0f;
 
