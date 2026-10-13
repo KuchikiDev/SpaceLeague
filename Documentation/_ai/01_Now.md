@@ -47,6 +47,7 @@ Fait et soumis sur Perforce :
 
 Ensuite :
 1. Validation des bases du gameplay (le joueur teste, l agent corrige) : balle, puis deplacement, match complet, en ligne.
+- A faire (apercu du tir enroule) : un cercle d'impact affiche la ou la courbe se termine (mur vise ou fin de courbe).
 2. Capacites Raijin/Keplar (reportees apres la validation du gameplay).
 
 ## Faits verifies (code/config)
