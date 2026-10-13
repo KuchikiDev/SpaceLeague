@@ -1182,6 +1182,27 @@ void AORACharacter::UpdateSplineFollow(float DeltaSeconds)
 	}
 
 	const FVector TargetPos = EnroulerDebug->GetLocationAtDistanceAlongSpline(SplineFollowDistanceTraveled, ESplineCoordinateSpace::World);
+
+	// La courbe peut passer sous le sol (l'apercu ignore le sol) : la balle ne le traverse pas,
+	// elle rebondit au point de contact et repart en physique a la meme vitesse.
+	if (GetWorld())
+	{
+		const FVector CurrentPos = BallPrim->GetComponentLocation();
+		const FVector Step = TargetPos - CurrentPos;
+		FHitResult GroundHit;
+		FCollisionQueryParams GroundQuery(SCENE_QUERY_STAT(ShotCurveGround), false, this);
+		GroundQuery.AddIgnoredActor(BallOwner);
+		const float BallRadius = FMath::Clamp(BallPrim->Bounds.SphereRadius, 10.0f, 200.0f);
+		if (Step.Z < 0.0f
+			&& GetWorld()->LineTraceSingleByChannel(GroundHit, CurrentPos, TargetPos + Step.GetSafeNormal() * BallRadius, ECC_WorldStatic, GroundQuery)
+			&& GroundHit.ImpactNormal.Z > 0.45f)
+		{
+			const FVector BounceDir = Step.GetSafeNormal().MirrorByVector(GroundHit.ImpactNormal).GetSafeNormal();
+			HandOffSplineBallToPhysics(BallPrim, GroundHit.ImpactPoint + GroundHit.ImpactNormal * BallRadius, BounceDir * SplineFollowSpeed);
+			return;
+		}
+	}
+
 	if (IsValid(BallOwner))
 	{
 		// ETeleportType::None : mouvement purement kinématique, pas d'événements physics → pas de tremblement.

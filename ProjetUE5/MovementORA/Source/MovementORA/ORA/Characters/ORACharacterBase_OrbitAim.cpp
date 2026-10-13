@@ -86,6 +86,11 @@ namespace
 			{
 				return false;
 			}
+			// Terrain tiles: only a raised column counts, never the floor plate.
+			if (IsValid(Mesh) && Mesh->GetName() == TEXT("PlaqueUnique"))
+			{
+				return true;
+			}
 		}
 		const FString ClassName = HitActor->GetClass()->GetName();
 		return !((ClassName.StartsWith(TEXT("BP_Obstacle")) && !ClassName.StartsWith(TEXT("BP_ObstacleGrappin")))
@@ -223,7 +228,8 @@ void AORACharacterBase::UpdateStopBallSplineVisual(
 
 void AORACharacterBase::UpdateOrbitAimSpline(const float DeltaSeconds)
 {
-	const bool bTraversalStateActive = bDashActive || bGroundSlideActive || bWallSlideActive;
+	// The preview stays visible against a wall (wall slide): only short dash/ground-slide moves hide it.
+	const bool bTraversalStateActive = bDashActive || bGroundSlideActive;
 	if (bTraversalStateActive)
 	{
 		if (bOrbitAimVisible)
@@ -1083,6 +1089,13 @@ void AORACharacterBase::ApplyOrbitAimSplineToMeshes()
 		const float VisibleEndDistance = bOrbitAimHasObstacleHit
 			? FMath::Clamp(OrbitAimObstacleHitDistance, VisibleStartDistance, SplineLength - VisibleEndTrimDistance)
 			: SplineLength - VisibleEndTrimDistance;
+		// Fin de courbe trop proche du joueur (obstacle tout proche, mur regarde de face) : pas de tube.
+		const FVector VisibleEndWorld = OrbitAimSplineComponent->GetLocationAtDistanceAlongSpline(VisibleEndDistance, ESplineCoordinateSpace::World);
+		if (FVector::Dist(GetActorLocation(), VisibleEndWorld) < OrbitAimMinDisplayDistance)
+		{
+			MeshComponent->ClearAllMeshSections();
+			return;
+		}
 		const float VisibleLength = FMath::Max(KINDA_SMALL_NUMBER, VisibleEndDistance - VisibleStartDistance);
 		FRotator ViewRotation = GetActorRotation();
 		if (const AController* Controller = GetController())

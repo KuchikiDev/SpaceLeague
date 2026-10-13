@@ -848,6 +848,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Ball|Aim|Mesh")
 	FLinearColor OrbitAimBlockedTintColor = FLinearColor(1.0f, 0.25f, 0.1f, 1.0f);
 
+	/** Hide the shot preview when its end is closer than this to the player (from GameplayVariables). */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Ball|Aim|Mesh")
+	float OrbitAimMinDisplayDistance = 900.0f;
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Ball|Aim|Aura")
 	bool bEnableOrbitAimAura = false;
 
