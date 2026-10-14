@@ -722,7 +722,7 @@
     groups: GROUPS,
     has: name => !!sketchFor(name),
     async loadCameras() {
-      try { cameras = await fetch('img/cameras.json').then(r => (r.ok ? r.json() : null)); } catch (e) { cameras = null; }
+      try { cameras = await fetch(`img/cameras.json?v=${window.ORA_VER || ''}`).then(r => (r.ok ? r.json() : null)); } catch (e) { cameras = null; }
     },
     // Dessine dans el : image 3D + calque si disponible (l'image n'est pas rechargee a chaque reglage), sinon croquis 2D.
     paint(el, name, values, def) {
@@ -733,7 +733,7 @@
       const svg = `<svg viewBox="0 0 ${IW} ${IH}" class="sketch s3d" role="img" aria-label="Croquis 3D : ${name}">${DEFS}${body}</svg>`;
       const cur = el.querySelector('img.bg');
       if (cur && cur.dataset.img === img) el.querySelector('svg').outerHTML = svg;
-      else el.innerHTML = `<div class="sk3d"><img class="bg" data-img="${img}" src="img/${img}.png" alt="">${svg}</div>`;
+      else el.innerHTML = `<div class="sk3d"><img class="bg" data-img="${img}" src="img/${img}.png?v=${window.ORA_VER || ''}" alt="">${svg}</div>`;
     },
     render(name, values, def) {
       const key = sketchFor(name);

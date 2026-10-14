@@ -243,6 +243,14 @@ function json(res, code, obj, headers = {}) {
   res.end(JSON.stringify(obj));
 }
 
+// Version du site : derniere modification d'un fichier servi (scripts, page, images).
+function version() {
+  const files = ['index.html', 'app.js', 'sketches.js'].map(f => path.join(__dirname, f));
+  const imgDir = path.join(__dirname, 'img');
+  if (fs.existsSync(imgDir)) for (const f of fs.readdirSync(imgDir)) files.push(path.join(imgDir, f));
+  return Math.max(...files.map(f => fs.statSync(f).mtimeMs)).toString(36);
+}
+
 const STATIC = { '/': 'index.html', '/index.html': 'index.html', '/sketches.js': 'sketches.js', '/app.js': 'app.js' };
 
 const server = http.createServer(async (req, res) => {
@@ -251,14 +259,18 @@ const server = http.createServer(async (req, res) => {
     // Images 3D des croquis (capture/capture_sketches.py).
     const img = url.match(/^\/img\/([\w-]+\.(png|json))$/);
     if (req.method === 'GET' && img && fs.existsSync(path.join(__dirname, 'img', img[1]))) {
-      res.writeHead(200, { 'Content-Type': img[2] === 'png' ? 'image/png' : 'application/json', 'Cache-Control': 'no-cache' });
+      res.writeHead(200, { 'Content-Type': img[2] === 'png' ? 'image/png' : 'application/json', 'Cache-Control': 'public, max-age=31536000, immutable' });
       return res.end(fs.readFileSync(path.join(__dirname, 'img', img[1])));
     }
 
     if (req.method === 'GET' && STATIC[url]) {
       const file = STATIC[url];
-      res.writeHead(200, { 'Content-Type': `${file.endsWith('.js') ? 'text/javascript' : 'text/html'}; charset=utf-8`, 'Cache-Control': 'no-cache' });
-      return res.end(fs.readFileSync(path.join(__dirname, file)));
+      let body = fs.readFileSync(path.join(__dirname, file));
+      // Cloudflare impose un cache navigateur de 4 h : la page n'est jamais mise en cache et
+      // les scripts/images sont appeles avec un numero de version (date de modification).
+      if (file === 'index.html') body = body.toString().replace(/(src="(?:sketches|app).js)"/g, `$1?v=${version()}"`).replace('<script src=', `<script>window.ORA_VER='${version()}'</script><script src=`);
+      res.writeHead(200, { 'Content-Type': `${file.endsWith('.js') ? 'text/javascript' : 'text/html'}; charset=utf-8`, 'Cache-Control': file === 'index.html' ? 'no-store' : 'public, max-age=31536000, immutable' });
+      return res.end(body);
     }
 
     if (url === '/api/me' && req.method === 'GET') {
