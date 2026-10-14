@@ -52,7 +52,6 @@ Ensuite :
    - En cours : grappin plus rapide et plus fluide. Valeurs d'essai dans DefaultGame.ini, NON soumises (traction max 7500, lancement 4500-7500, arrivee 85 %, fondu 0,06 s).
    - A faire : ameliorer le gameplay quand le joueur va sur les piliers.
    - A faire : moins voir les obstacles du camp ennemi.
-   - A faire : PIE 4 joueurs (toutes les fenetres controlent le meme perso ?) et bug camera/perso contre un mur en multijoueur : video a faire.
 2. Capacites Raijin/Keplar (reportees apres la validation du gameplay).
 
 ## Faits verifies (code/config)
