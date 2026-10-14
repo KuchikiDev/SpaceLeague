@@ -1091,6 +1091,17 @@ public:
 	UFUNCTION(Client, Reliable)
 	void ClientPlayBallHitFeedback();
 
+	/** Server: this player immediately captures the ball into orbit (e.g. given by the hold rule). */
+	void ForceCaptureBall(AActor* BallActor);
+
+	/** Owning client: capture the ball the server just gave to this player. */
+	UFUNCTION(Client, Reliable)
+	void ClientForceCaptureBall(AActor* BallActor);
+
+	/** Owning client: drop the orbit ball the server just took away (prison, hold rule). */
+	UFUNCTION(Client, Reliable)
+	void ClientReleaseOrbitBall();
+
 	virtual void ApplyLegendSelection_Implementation(UORALegendData* NewLegendData, UPrimaryDataAsset* NewSkin) override;
 
 protected:

@@ -25,6 +25,7 @@
 #include "Modules/ModuleManager.h"
 #include "Net/UnrealNetwork.h"
 #include "ORA/Core/ORAPlayerState.h"
+#include "ORA/AI/ORAGroundedBotCharacter.h"
 #include "ORA/Characters/ORACharacterBase.h"
 #include "ORA/Data/ORAAbilityData.h"
 #include "ORA/Gameplay/ORAObstacleSpawnBlueprintLibrary.h"
@@ -402,6 +403,8 @@ void AORAGameState::UpdateBallCampRules(const TArray<AActor*>& Balls)
 		}
 	}
 
+	UpdateBallHoldRules(Balls, MostUrgentCountdown, MostUrgentCamp);
+
 	const int32 NewCountdown = MostUrgentCountdown == MAX_int32 ? -1 : MostUrgentCountdown;
 	if (NewCountdown != BallCampCountdownRemaining || MostUrgentCamp != BallCampWarningTeam)
 	{
@@ -409,6 +412,167 @@ void AORAGameState::UpdateBallCampRules(const TArray<AActor*>& Balls)
 		BallCampWarningTeam = MostUrgentCamp;
 		ForceNetUpdate();
 	}
+}
+
+void AORAGameState::UpdateBallHoldRules(const TArray<AActor*>& Balls, int32& InOutMostUrgentCountdown, EORATeam& InOutMostUrgentTeam)
+{
+	if (MatchPhase != EORAMatchPhase::InProgress && MatchPhase != EORAMatchPhase::Overtime)
+	{
+		BallHoldStarts.Reset();
+		return;
+	}
+
+	const UGameplayVariablesSettings* GameplayVariables = GetDefault<UGameplayVariablesSettings>();
+	const float GraceSeconds = GameplayVariables ? FMath::Max(0.0f, GameplayVariables->BallHoldGraceSeconds) : 3.0f;
+	const float CountdownSeconds = GameplayVariables ? FMath::Max(0.1f, GameplayVariables->BallHoldCountdownSeconds) : 3.0f;
+	const double Now = GetWorld()->GetTimeSeconds();
+
+	for (AActor* Ball : Balls)
+	{
+		if (!IsValid(Ball) || Ball->IsActorBeingDestroyed())
+		{
+			continue;
+		}
+
+		AORACharacterBase* Carrier = nullptr;
+		for (TActorIterator<AORACharacterBase> CharacterIt(GetWorld()); CharacterIt; ++CharacterIt)
+		{
+			if (CharacterIt->IsBallInOrbit(Ball))
+			{
+				Carrier = *CharacterIt;
+				break;
+			}
+		}
+		if (!Carrier)
+		{
+			BallHoldStarts.Remove(Ball);
+			continue;
+		}
+
+		TPair<TWeakObjectPtr<APawn>, double>& Hold = BallHoldStarts.FindOrAdd(Ball);
+		if (Hold.Key.Get() != Carrier)
+		{
+			// New carrier (capture or interception): the timer restarts.
+			Hold.Key = Carrier;
+			Hold.Value = Now;
+			continue;
+		}
+
+		const double WarningStartTime = Hold.Value + GraceSeconds;
+		if (Now < WarningStartTime)
+		{
+			continue;
+		}
+
+		const AORAPlayerState* CarrierPlayerState = Carrier->GetPlayerState<AORAPlayerState>();
+		const EORATeam CarrierTeam = CarrierPlayerState && CarrierPlayerState->Team != EORATeam::None ? CarrierPlayerState->Team
+			: Carrier->ActorHasTag(TEXT("TeamA")) ? EORATeam::TeamA
+			: Carrier->ActorHasTag(TEXT("TeamB")) ? EORATeam::TeamB : EORATeam::None;
+		const double PenaltyTime = WarningStartTime + CountdownSeconds;
+		if (Now >= PenaltyTime)
+		{
+			UE_LOG(LogTemp, Display, TEXT("[BallHold] %s kept %s too long: prison."), *GetNameSafe(Carrier), *GetNameSafe(Ball));
+			BallHoldStarts.Remove(Ball);
+			Carrier->ReleaseOrbitBall(false);
+			if (!Carrier->IsLocallyControlled() && Carrier->IsPlayerControlled())
+			{
+				Carrier->ClientReleaseOrbitBall();
+			}
+			TeleportPawnToBallHitTarget(Carrier, Ball);
+			const EORATeam OpponentTeam = CarrierTeam == EORATeam::TeamA ? EORATeam::TeamB
+				: CarrierTeam == EORATeam::TeamB ? EORATeam::TeamA : EORATeam::None;
+			GiveBallToTeam(Ball, OpponentTeam, Carrier);
+			continue;
+		}
+
+		const int32 Remaining = FMath::Max(1, FMath::CeilToInt(PenaltyTime - Now));
+		if (Remaining < InOutMostUrgentCountdown)
+		{
+			InOutMostUrgentCountdown = Remaining;
+			InOutMostUrgentTeam = CarrierTeam;
+		}
+	}
+
+	for (auto It = BallHoldStarts.CreateIterator(); It; ++It)
+	{
+		if (!It.Key().IsValid())
+		{
+			It.RemoveCurrent();
+		}
+	}
+}
+
+void AORAGameState::GiveBallToTeam(AActor* BallActor, const EORATeam Team, const APawn* FromPawn)
+{
+	if (!IsValid(BallActor))
+	{
+		return;
+	}
+
+	// Nearest free player of the receiving team (any other player when teams are not set).
+	const FVector From = IsValid(FromPawn) ? FromPawn->GetActorLocation() : BallActor->GetActorLocation();
+	const APawn* Receiver = nullptr;
+	float BestDistanceSquared = TNumericLimits<float>::Max();
+	for (TActorIterator<APawn> PawnIt(GetWorld()); PawnIt; ++PawnIt)
+	{
+		const APawn* Pawn = *PawnIt;
+		if (!IsValid(Pawn) || Pawn == FromPawn)
+		{
+			continue;
+		}
+		if (!Pawn->IsA<AORACharacterBase>())
+		{
+			continue;
+		}
+		// Players carry their team in the PlayerState; grounded bots have none and use a TeamA/TeamB tag.
+		const AORAPlayerState* PlayerState = Pawn->GetPlayerState<AORAPlayerState>();
+		if (PlayerState && PlayerState->bIsInPrison)
+		{
+			continue;
+		}
+		const EORATeam PawnTeam = PlayerState && PlayerState->Team != EORATeam::None ? PlayerState->Team
+			: Pawn->ActorHasTag(TEXT("TeamA")) ? EORATeam::TeamA
+			: Pawn->ActorHasTag(TEXT("TeamB")) ? EORATeam::TeamB : EORATeam::None;
+		if (Team != EORATeam::None && PawnTeam != Team)
+		{
+			continue;
+		}
+		const float DistanceSquared = FVector::DistSquared(From, Pawn->GetActorLocation());
+		if (DistanceSquared < BestDistanceSquared)
+		{
+			BestDistanceSquared = DistanceSquared;
+			Receiver = Pawn;
+		}
+	}
+	if (!Receiver)
+	{
+		RelaunchBallRandomly(BallActor);
+		return;
+	}
+
+	// The ball is teleported onto the receiver and goes straight into their orbit.
+	AORACharacterBase* ReceiverCharacter = const_cast<AORACharacterBase*>(Cast<AORACharacterBase>(Receiver));
+	if (!ReceiverCharacter)
+	{
+		RelaunchBallRandomly(BallActor);
+		return;
+	}
+	if (AORAGroundedBotCharacter* ReceiverBot = Cast<AORAGroundedBotCharacter>(ReceiverCharacter))
+	{
+		// Bots capture through their own routine (it also starts their carry behaviour).
+		BallActor->SetActorLocation(ReceiverBot->GetActorLocation(), false, nullptr, ETeleportType::TeleportPhysics);
+		if (!ReceiverBot->TryCaptureBall(BallActor))
+		{
+			RelaunchBallRandomly(BallActor);
+			return;
+		}
+	}
+	else
+	{
+		ReceiverCharacter->ForceCaptureBall(BallActor);
+	}
+	BallActor->ForceNetUpdate();
+	UE_LOG(LogTemp, Display, TEXT("[BallHold] %s given to %s."), *GetNameSafe(BallActor), *GetNameSafe(Receiver));
 }
 
 void AORAGameState::RelaunchBallRandomly(AActor* BallActor)

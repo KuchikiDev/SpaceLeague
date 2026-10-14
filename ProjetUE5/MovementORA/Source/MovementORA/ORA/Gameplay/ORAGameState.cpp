@@ -947,6 +947,10 @@ bool AORAGameState::TeleportPawnToBallHitTarget(APawn* Pawn, AActor* BallActor)
 		if (AORACharacterBase* ORACharacter = Cast<AORACharacterBase>(Pawn))
 		{
 			ORACharacter->ReleaseOrbitBall(false);
+			if (!ORACharacter->IsLocallyControlled() && ORACharacter->IsPlayerControlled())
+			{
+				ORACharacter->ClientReleaseOrbitBall();
+			}
 			ORACharacter->ClientPlayBallHitFeedback();
 		}
 		BounceBallBack(BallActor);
@@ -992,6 +996,10 @@ bool AORAGameState::TeleportPawnToBallHitTarget(APawn* Pawn, AActor* BallActor)
 	if (AORACharacterBase* ORACharacter = Cast<AORACharacterBase>(Pawn))
 	{
 		ORACharacter->ReleaseOrbitBall(false);
+		if (!ORACharacter->IsLocallyControlled() && ORACharacter->IsPlayerControlled())
+		{
+			ORACharacter->ClientReleaseOrbitBall();
+		}
 		ORACharacter->ClientPlayBallHitFeedback();
 	}
 

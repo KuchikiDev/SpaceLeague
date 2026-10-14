@@ -192,6 +192,12 @@ public:
 	UPROPERTY(Config, EditAnywhere, Category = "Balle|Anti-stagnation", meta = (DisplayName = "Duree du compte a rebours", ClampMin = "0.1", UIMin = "0.1", ToolTip = "Temps laisse pour toucher la balle apres l'apparition de l'avertissement."))
 	float BallCampCountdownSeconds = 5.0f;
 
+	UPROPERTY(Config, EditAnywhere, Category = "Balle|Anti-stagnation", meta = (DisplayName = "Delai de possession", ClampMin = "0.0", UIMin = "0.0", ToolTip = "Temps pendant lequel un joueur peut garder la balle avant l'apparition du compte a rebours."))
+	float BallHoldGraceSeconds = 3.0f;
+
+	UPROPERTY(Config, EditAnywhere, Category = "Balle|Anti-stagnation", meta = (DisplayName = "Compte a rebours de possession", ClampMin = "0.1", UIMin = "0.1", ToolTip = "Temps laisse pour lacher la balle apres l'avertissement ; ensuite le porteur va en prison et la balle est donnee a l'adversaire."))
+	float BallHoldCountdownSeconds = 3.0f;
+
 	UPROPERTY(Config, EditAnywhere, Category = "Balle - Tir enroule", meta = (DisplayName = "Vitesse balle en orbite", ClampMin = "0.0", UIMin = "0.0", ToolTip = "Vitesse de rotation de la balle quand elle orbite autour du joueur, en degres par seconde."))
 	float CurvedShotOrbitBallSpeed = 480.0f;
 

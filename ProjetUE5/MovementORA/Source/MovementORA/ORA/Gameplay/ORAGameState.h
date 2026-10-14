@@ -257,6 +257,10 @@ protected:
 	/** Sends the ball back the way it came, at the same speed (last hit of a complete prison). */
 	void BounceBallBack(AActor* BallActor);
 	void UpdateBallCampRules(const TArray<AActor*>& Balls);
+	/** Holding the ball too long: countdown, then the carrier goes to prison and an opponent gets the ball. */
+	void UpdateBallHoldRules(const TArray<AActor*>& Balls, int32& InOutMostUrgentCountdown, EORATeam& InOutMostUrgentTeam);
+	/** Drops the ball right in front of the nearest player of the given team so they pick it up. */
+	void GiveBallToTeam(AActor* BallActor, EORATeam Team, const APawn* FromPawn);
 	bool AwardPointToTeam(EORATeam ScoringTeam, AActor* BallActor, const TCHAR* Reason, int32 Points = 1);
 	void RelaunchBallRandomly(AActor* BallActor);
 
@@ -269,6 +273,8 @@ protected:
 	bool bTimedObstaclesVisible = true;
 	TMap<TWeakObjectPtr<AActor>, double> RecentScoringBalls;
 	TMap<TWeakObjectPtr<AActor>, FORABallCampRuntimeState> BallCampRuntimeStates;
+	/** Current carrier of each held ball and when they captured it. */
+	TMap<TWeakObjectPtr<AActor>, TPair<TWeakObjectPtr<APawn>, double>> BallHoldStarts;
 	TMap<TWeakObjectPtr<APawn>, double> RecentBallHitTeleports;
 	TMap<TWeakObjectPtr<APawn>, double> BallHitImmunityEndTimes;
 	TMap<TWeakObjectPtr<AActor>, TWeakObjectPtr<APawn>> BallLaunchImmunePawns;

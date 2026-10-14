@@ -756,6 +756,90 @@ bool AORACharacterBase::StartOrbitBall(AActor* BallActor, UPrimitiveComponent* B
 	return true;
 }
 
+void AORACharacterBase::ForceCaptureBall(AActor* BallActor)
+{
+	if (!HasAuthority() || !IsValid(BallActor))
+	{
+		return;
+	}
+
+	// The ball arrives on this player first, so the capture distance checks pass everywhere.
+	BallActor->SetActorLocation(GetActorLocation(), false, nullptr, ETeleportType::TeleportPhysics);
+	StopBallRecaptureBlockedUntilTime = -BIG_NUMBER;
+	UPrimitiveComponent* BallPrimitive = nullptr;
+	TArray<UPrimitiveComponent*> BallPrimitives;
+	BallActor->GetComponents<UPrimitiveComponent>(BallPrimitives);
+	for (UPrimitiveComponent* Candidate : BallPrimitives)
+	{
+		// The visible physical body is named Ballon (same choice as the bots and the ball relaunch).
+		if (IsValid(Candidate) && Candidate->GetFName() == TEXT("Ballon"))
+		{
+			BallPrimitive = Candidate;
+			break;
+		}
+	}
+	if (!IsValid(BallPrimitive))
+	{
+		BallPrimitive = Cast<UPrimitiveComponent>(BallActor->GetRootComponent());
+	}
+	if (!IsValid(BallPrimitive))
+	{
+		BallPrimitive = BallActor->FindComponentByClass<UPrimitiveComponent>();
+	}
+
+	if (IsLocallyControlled() || !IsPlayerControlled())
+	{
+		// Host player or bot: the orbit runs here.
+		if (IsValid(BallPrimitive))
+		{
+			TryStopSpecificBall(BallActor, BallPrimitive);
+		}
+	}
+	else
+	{
+		// Remote player: the orbit runs on their machine, which then confirms the capture.
+		ClientForceCaptureBall(BallActor);
+	}
+}
+
+void AORACharacterBase::ClientForceCaptureBall_Implementation(AActor* BallActor)
+{
+	if (!IsValid(BallActor))
+	{
+		return;
+	}
+	StopBallRecaptureBlockedUntilTime = -BIG_NUMBER;
+	UPrimitiveComponent* BallPrimitive = nullptr;
+	TArray<UPrimitiveComponent*> BallPrimitives;
+	BallActor->GetComponents<UPrimitiveComponent>(BallPrimitives);
+	for (UPrimitiveComponent* Candidate : BallPrimitives)
+	{
+		// The visible physical body is named Ballon (same choice as the bots and the ball relaunch).
+		if (IsValid(Candidate) && Candidate->GetFName() == TEXT("Ballon"))
+		{
+			BallPrimitive = Candidate;
+			break;
+		}
+	}
+	if (!IsValid(BallPrimitive))
+	{
+		BallPrimitive = Cast<UPrimitiveComponent>(BallActor->GetRootComponent());
+	}
+	if (!IsValid(BallPrimitive))
+	{
+		BallPrimitive = BallActor->FindComponentByClass<UPrimitiveComponent>();
+	}
+	if (IsValid(BallPrimitive))
+	{
+		TryStopSpecificBall(BallActor, BallPrimitive);
+	}
+}
+
+void AORACharacterBase::ClientReleaseOrbitBall_Implementation()
+{
+	ReleaseOrbitBall(false);
+}
+
 void AORACharacterBase::ServerCaptureBall_Implementation(AActor* BallActor)
 {
 	if (!IsValid(BallActor) || !BallActor->GetClass()->ImplementsInterface(UORABallInterface::StaticClass())
