@@ -105,7 +105,7 @@
     const dirty = c.names.some(isDirty);
     return `<div class="card ${dirty ? 'changed' : ''} ${multi ? 'multi' : ''}" id="c-${c.id}" data-card="${c.id}">
       <div class="title"><span>${c.title}</span>${multi ? `<span class="count">${c.names.length} reglages</span>` : `<span class="rst">${resetBtn(c.id)}</span>`}</div>
-      <div class="sk">${OraSketch.render(focus, state.current, byName(focus))}</div>
+      <div class="sk"></div>
       <div class="rows">${c.names.map(n => row(byName(n), multi)).join('')}</div>
     </div>`;
   }
@@ -127,7 +127,7 @@
   function drawSketch(cardEl) {
     const id = cardEl.dataset.card;
     const focus = state.focus[id] || id;
-    cardEl.querySelector('.sk').innerHTML = OraSketch.render(focus, state.current, byName(focus));
+    OraSketch.paint(cardEl.querySelector('.sk'), focus, state.current, byName(focus));
     cardEl.querySelectorAll('.row').forEach(r => r.classList.toggle('focus', cardEl.classList.contains('multi') && r.dataset.row === focus));
   }
 
@@ -226,7 +226,7 @@
 
   async function start(user) {
     if (state.mode === 'perforce') { $('#who').textContent = user; $('#logout').hidden = false; }
-    try { await load(); render(); }
+    try { await OraSketch.loadCameras(); await load(); render(); }
     catch (e) { $('#status').textContent = 'Chargement impossible : ' + e.message; console.error(e); }
   }
 

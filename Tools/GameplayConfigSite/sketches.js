@@ -617,9 +617,124 @@
     ['Atterrissage', ['LandingDipMaxDistance', 'LandingDipFullFallSpeed']],
   ];
 
+  // --- croquis 3D : image capturee dans Unreal + dessin projete par-dessus ----------------------
+  // Les images et cameras viennent de capture/capture_sketches.py (img/*.png, img/cameras.json).
+  // Les positions du monde (cm, axes Unreal) doivent rester celles de la scene du script de capture.
+  const SCENE = {
+    wall: { y: -90, x0: -900, x1: 2100, h: 800 }, // face avant du mur
+    target: [1800, 0, 900],                        // cible du grappin
+    ball: [80, -110, 160],                         // balle en orbite
+  };
+  let cameras = null;
+  const IW = 1280, IH = 720;
+
+  // Projection perspective d'un point du monde (cm) vers les pixels de l'image capturee.
+  function project(cam, p) {
+    const r = Math.PI / 180, cp = Math.cos(cam.pitch * r), sp = Math.sin(cam.pitch * r), cy = Math.cos(cam.yaw * r), sy = Math.sin(cam.yaw * r);
+    const fwd = [cp * cy, cp * sy, sp], right = [-sy, cy, 0], up = [-sp * cy, -sp * sy, cp];
+    const d = [p[0] - cam.loc[0], p[1] - cam.loc[1], p[2] - cam.loc[2]];
+    const dot = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+    const z = dot(d, fwd), focal = (cam.w / 2) / Math.tan(cam.fov * r / 2);
+    if (z < 20) return null; // derriere la camera
+    return [cam.w / 2 + dot(d, right) * focal / z, cam.h / 2 - dot(d, up) * focal / z];
+  }
+  // Trace coupe la ou il passe derriere la camera.
+  const P3 = (cam, pts, c = 'hi fat', extra = '') => {
+    let d = '', pen = false;
+    for (const p of pts) {
+      const q = project(cam, p);
+      if (!q) { pen = false; continue; }
+      d += `${pen ? 'L' : 'M'}${f(q[0], 1)},${f(q[1], 1)} `;
+      pen = true;
+    }
+    return d ? pathD(d.trim(), c, extra) : '';
+  };
+  const A3 = (cam, a, b, c = 'hi fat') => { const p = project(cam, a), q = project(cam, b); return p && q ? arrow(p[0], p[1], q[0], q[1], c) : ''; };
+  const T3 = (cam, p, s, c = 'lbl hi', anchor = 'middle', dy = 0) => { const q = project(cam, p); return q ? text(q[0], q[1] + dy, s, c, anchor) : ''; };
+  const ring = (c, rad, z, n = 72) => Array.from({ length: n + 1 }, (_, i) => [c[0] + Math.cos(i / n * 2 * Math.PI) * rad, c[1] + Math.sin(i / n * 2 * Math.PI) * rad, z]);
+  const tag = (x, y, s) => rect(x - 6, y - 64, s.length * 34 + 36, 86, "tag") + text(x + 12, y, s, "lbl hi", "start");
+
+  const S3 = {};
+
+  // Saut : vraie trajectoire calculee (vitesse de saut, gravites, sauts en l'air), vue de profil.
+  S3.jump = (V, name, cam) => {
+    const vx = n(V, 'BaseWalkSpeed', 2800), v0 = n(V, 'JumpVelocity', 4800);
+    const gr = 980 * Math.max(n(V, 'JumpRiseGravityScale', 12), 0.01), gf = 980 * Math.max(n(V, 'FallGravityScale', 9), 0.01);
+    const count = clamp(Math.round(n(V, 'MaxJumpCount', 2)), 1, 5);
+    const tUp = v0 / gr, h = v0 * v0 / (2 * gr);
+    let out = '', x = 0, z = 0, peak = null, pts = [[0, 0, 0]];
+    for (let k = 0; k < count; k++) {
+      const last = k === count - 1;
+      // Saut suivant declenche a mi-descente du precedent.
+      const tDown = last ? Math.sqrt(2 * (z + h) / gf) : Math.sqrt(h / gf);
+      for (let i = 1; i <= 40; i++) {
+        const t = (tUp + tDown) * i / 40;
+        const zz = t <= tUp ? z + v0 * t - 0.5 * gr * t * t : z + h - 0.5 * gf * (t - tUp) ** 2;
+        pts.push([x + vx * t, 0, Math.max(zz, 0)]);
+      }
+      if (!peak || z + h > peak[2]) peak = [x + vx * tUp, 0, z + h];
+      x += vx * (tUp + tDown); z = last ? 0 : z + h / 2;
+    }
+    out += P3(cam, pts, 'hi fat dash');
+    const mid = project(cam, [peak[0], 0, peak[2] / 2]) || [0, 0];
+    out += P3(cam, [[peak[0], 0, 0], peak], 'acc') + text(mid[0] + 16, mid[1], `${f(peak[2] / 100, 1)} m`, 'lbl acc', 'start');
+    const msg = { JumpRiseGravityScale: `montee en ${f(tUp, 2)} s`, FallGravityScale: `descente rapide x${f(n(V, 'FallGravityScale'), 1)}`, MaxJumpCount: `${count} saut${count > 1 ? 's' : ''}` }[name] || `hauteur ${f(h / 100, 1)} m`;
+    return out + tag(40, 80, msg);
+  };
+
+  // Mur : trajectoire d'arrivee puis course le long du mur (1 seconde de course).
+  S3.wall = (V, name, cam) => {
+    const keep = clamp(n(V, 'WallRunEntrySpeedKeep', 0.9), 0, 1), speed = n(V, 'WallRunSpeed', 5500);
+    const y = SCENE.wall.y + 50, z = 110;
+    const L = clamp(speed * 0.35, 200, 2400);
+    const entry = [];
+    for (let i = 0; i <= 20; i++) { const t = i / 20; entry.push([-700 + 700 * t, 500 * (1 - t) ** 2 + y * (1 - (1 - t) ** 2), z]); }
+    let out = P3(cam, entry, name === 'WallRunEntrySpeedKeep' ? 'hi fat' : 'ink fat') + A3(cam, [0, y, z], [L, y, z], name === 'WallRunEntrySpeedKeep' ? 'ink fat' : 'hi fat');
+    const msg = { WallRunEntrySpeedKeep: `garde ${f(keep * 100)} % de l'elan`, WallRunMomentumDecay: `l'elan en trop fond de ${f(n(V, name) / 100, 1)} m/s par s` }[name] || `${f(speed / 100, 1)} m/s le long du mur`;
+    return out + T3(cam, [L * 0.6, y, z + 120], '0,35 s de course', 'small', 'middle') + tag(40, 80, msg);
+  };
+
+  // Grappin : portee au sol, distance mini, corde vers la cible.
+  S3.grapple = (V, name, cam) => {
+    const range = n(V, 'GrappleRange', 2200), min = n(V, 'GrappleMinTargetDistance', 425);
+    const tgt = SCENE.target, dist = Math.hypot(tgt[0], tgt[1], tgt[2] - 150), inRange = dist <= range;
+    let out = P3(cam, ring([0, 0], range, 2), name === 'GrappleRange' ? 'hi fat dash' : 'ink dash') + P3(cam, ring([0, 0], min, 2, 48), name === 'GrappleMinTargetDistance' ? 'hi fat' : 'acc');
+    out += P3(cam, [[20, 0, 150], tgt], inRange ? 'acc fat' : 'soft dash');
+    const msg = name === 'GrappleMinTargetDistance' ? `cibles ignorees a moins de ${f(min / 100, 1)} m` : `portee ${f(range / 100, 1)} m : cible ${inRange ? 'atteignable' : 'trop loin'} (${f(dist / 100, 1)} m)`;
+    return out + tag(40, 80, msg);
+  };
+
+  // Balle : rayon de controle au sol + orbite de la balle autour du joueur.
+  S3.ball = (V, name, cam) => {
+    const ctrl = n(V, 'BallControlRadius', 520), orb = n(V, 'BallOrbitRadius', 450), drop = n(V, 'BallOrbitDropBelowCamera', 30);
+    const zOrb = 160 - drop * 0.5;
+    let out = P3(cam, ring([0, 0], ctrl, 2), name === 'BallControlRadius' ? 'hi fat dash' : 'soft dash');
+    out += P3(cam, ring([0, 0], Math.min(orb, 600) * 0.3, zOrb), name.startsWith('BallOrbit') ? 'hi fat' : 'ink');
+    const msg = { BallControlRadius: `balle attrapee a moins de ${f(ctrl / 100, 1)} m` , BallOrbitRadius: `orbite a ${f(orb / 100, 1)} m (a l'ecran)`, BallOrbitDropBelowCamera: `${f(drop)} cm sous la camera`, BallOrbitFOVCompensation: `compensation FOV ${f(n(V, name), 2)}` }[name] || '';
+    return out + tag(40, 80, msg);
+  };
+
+  // Variables qui utilisent un croquis 3D (cle de croquis 2D -> image).
+  const IMAGE_FOR = { jump: 'jump', wallRun: 'wall', grappleRange: 'grapple', ballRadius: 'ball', orbit: 'ball' };
+  const image3d = name => { const k = sketchFor(name); const img = IMAGE_FOR[k]; return img && cameras && cameras[img] ? img : null; };
+
   window.OraSketch = {
     groups: GROUPS,
     has: name => !!sketchFor(name),
+    async loadCameras() {
+      try { cameras = await fetch('img/cameras.json').then(r => (r.ok ? r.json() : null)); } catch (e) { cameras = null; }
+    },
+    // Dessine dans el : image 3D + calque si disponible (l'image n'est pas rechargee a chaque reglage), sinon croquis 2D.
+    paint(el, name, values, def) {
+      const img = image3d(name);
+      if (!img) { el.innerHTML = this.render(name, values, def); return; }
+      let body;
+      try { body = S3[img](values, name, cameras[img]); } catch (e) { body = ''; console.error(e); }
+      const svg = `<svg viewBox="0 0 ${IW} ${IH}" class="sketch s3d" role="img" aria-label="Croquis 3D : ${name}">${DEFS}${body}</svg>`;
+      const cur = el.querySelector('img.bg');
+      if (cur && cur.dataset.img === img) el.querySelector('svg').outerHTML = svg;
+      else el.innerHTML = `<div class="sk3d"><img class="bg" data-img="${img}" src="img/${img}.png" alt="">${svg}</div>`;
+    },
     render(name, values, def) {
       const key = sketchFor(name);
       let body;

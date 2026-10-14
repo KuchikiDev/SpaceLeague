@@ -248,6 +248,13 @@ const STATIC = { '/': 'index.html', '/index.html': 'index.html', '/sketches.js':
 const server = http.createServer(async (req, res) => {
   const url = req.url.split('?')[0];
   try {
+    // Images 3D des croquis (capture/capture_sketches.py).
+    const img = url.match(/^\/img\/([\w-]+\.(png|json))$/);
+    if (req.method === 'GET' && img && fs.existsSync(path.join(__dirname, 'img', img[1]))) {
+      res.writeHead(200, { 'Content-Type': img[2] === 'png' ? 'image/png' : 'application/json', 'Cache-Control': 'no-cache' });
+      return res.end(fs.readFileSync(path.join(__dirname, 'img', img[1])));
+    }
+
     if (req.method === 'GET' && STATIC[url]) {
       const file = STATIC[url];
       res.writeHead(200, { 'Content-Type': `${file.endsWith('.js') ? 'text/javascript' : 'text/html'}; charset=utf-8`, 'Cache-Control': 'no-cache' });
