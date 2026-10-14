@@ -15,8 +15,9 @@
   }
 
   async function load() {
-    const res = await fetch('/api/variables');
-    if (!res.ok) throw new Error(await res.text());
+    const res = await fetch('api/variables');
+    if (res.status === 401) { showLogin('Session expiree, se reconnecter.'); throw new Error('connexion requise'); }
+    if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error || res.statusText);
     const data = await res.json();
     state.vars = data.variables.filter(v => v.type !== 'other');
     state.saved = {};
@@ -145,14 +146,47 @@
   $('#discard').onclick = () => { state.current = { ...state.saved }; render(); };
   $('#save').onclick = async () => {
     const changes = Object.fromEntries(dirtyNames().map(n => [n, state.current[n]]));
-    const res = await fetch('/api/save', { method: 'POST', body: JSON.stringify(changes) });
+    if (state.mode === 'perforce' && !confirm(`Soumettre ${Object.keys(changes).length} modification(s) dans Perforce (//SpaceLeague/main) ?`)) return;
+    $('#save').disabled = true;
+    updateStatus('Envoi…');
+    const res = await fetch('api/save', { method: 'POST', body: JSON.stringify(changes) });
     const out = await res.json();
-    if (!out.ok) return updateStatus('Erreur : ' + out.error);
+    if (res.status === 401) return showLogin('Session expiree, se reconnecter.');
+    if (!out.ok) { updateStatus('Erreur : ' + out.error); $('#save').disabled = false; return; }
     await load(); render();
-    updateStatus('Enregistre dans DefaultGame.ini — relancer le PIE pour appliquer');
+    updateStatus(out.change ? `Soumis dans Perforce : changelist ${out.change} — faire un sync puis relancer le PIE`
+      : 'Enregistre dans DefaultGame.ini — relancer le PIE pour appliquer');
   };
   window.addEventListener('beforeunload', e => { if (dirtyNames().length) e.preventDefault(); });
 
-  try { await load(); render(); }
-  catch (e) { $('#status').textContent = 'Serveur introuvable : lancer Tools/GameplayConfigSite/Lancer.bat'; console.error(e); }
+  // Connexion Perforce (mode serveur).
+  function showLogin(msg) {
+    $('#login').hidden = false;
+    $('#login-msg').textContent = msg || '';
+    $('#login-user').focus();
+  }
+  $('#login-form').onsubmit = async e => {
+    e.preventDefault();
+    $('#login-msg').textContent = 'Connexion…';
+    const res = await fetch('api/login', { method: 'POST', body: JSON.stringify({ user: $('#login-user').value.trim(), password: $('#login-pass').value }) });
+    const out = await res.json();
+    $('#login-pass').value = '';
+    if (!out.ok) return ($('#login-msg').textContent = out.error);
+    $('#login').hidden = true;
+    start(out.user);
+  };
+  $('#logout').onclick = async () => { await fetch('api/logout', { method: 'POST' }); location.reload(); };
+
+  async function start(user) {
+    if (state.mode === 'perforce') { $('#who').textContent = user; $('#logout').hidden = false; }
+    try { await load(); render(); }
+    catch (e) { $('#status').textContent = 'Chargement impossible : ' + e.message; console.error(e); }
+  }
+
+  try {
+    const me = await fetch('api/me').then(r => r.json());
+    state.mode = me.mode;
+    if (me.mode === 'perforce' && !me.user) showLogin();
+    else start(me.user);
+  } catch (e) { $('#status').textContent = 'Serveur introuvable : lancer Tools/GameplayConfigSite/Lancer.bat'; console.error(e); }
 })();

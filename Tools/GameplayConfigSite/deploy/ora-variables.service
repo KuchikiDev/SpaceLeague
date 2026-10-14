@@ -1,0 +1,22 @@
+[Unit]
+Description=ORA site des variables de gameplay
+After=network.target helix-p4d.service
+
+[Service]
+Type=simple
+DynamicUser=yes
+StateDirectory=ora-variables
+WorkingDirectory=/opt/ora/variables-site
+ExecStart=/usr/bin/node /opt/ora/variables-site/server.js
+Environment=ORA_P4PORT=127.0.0.1:1666
+Environment=HOST=127.0.0.1
+Environment=PORT=5178
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+
+[Install]
+WantedBy=multi-user.target

@@ -69,6 +69,15 @@
   .sketch g.hi * { stroke: var(--hi); }
   .sketch g.soft * { stroke: var(--soft); }
 
+  .who { color: var(--muted); font-size: 13px; }
+  [hidden] { display: none !important; }
+  .login { position: fixed; inset: 0; z-index: 10; display: grid; place-items: center; background: color-mix(in srgb, var(--bg) 85%, transparent); backdrop-filter: blur(4px); padding: 16px; }
+  .login form { width: min(380px, 100%); background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 22px; display: flex; flex-direction: column; gap: 10px; }
+  .login h2 { margin: 0; font-size: 19px; }
+  .login p { margin: 0 0 6px; color: var(--muted); font-size: 13px; }
+  .login input { padding: 9px 11px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--ink); font: inherit; }
+  #login-msg { color: var(--hi); font-size: 13px; min-height: 1em; }
+
   @media (max-width: 760px) {
     .layout { grid-template-columns: 1fr; }
     nav { position: static; height: auto; display: flex; flex-wrap: wrap; gap: 4px; border-right: 0; border-bottom: 1px solid var(--line); }
@@ -85,7 +94,19 @@
   <span id="status">Chargement…</span>
   <button id="discard" disabled>Annuler</button>
   <button id="save" class="primary" disabled>Enregistrer</button>
+  <span id="who" class="who"></span>
+  <button id="logout" hidden>Deconnexion</button>
 </header>
+<div id="login" class="login" hidden>
+  <form id="login-form">
+    <h2>Variables de gameplay ORA</h2>
+    <p>Connexion avec ton compte Perforce. Chaque enregistrement est soumis dans <code>//SpaceLeague/main</code> a ton nom.</p>
+    <input id="login-user" autocomplete="username" placeholder="Utilisateur Perforce" required>
+    <input id="login-pass" type="password" autocomplete="current-password" placeholder="Mot de passe" required>
+    <button class="primary" type="submit">Se connecter</button>
+    <div id="login-msg"></div>
+  </form>
+</div>
 <div class="layout">
   <nav id="menu"></nav>
   <main id="content"></main>
