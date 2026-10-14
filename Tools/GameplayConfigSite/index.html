@@ -7,10 +7,10 @@
 <style>
   :root {
     --bg: #f6f3ec; --panel: #fffdf8; --ink: #2b2a27; --muted: #7b776d; --line: #e3ddcf;
-    --hi: #e2531f; --acc: #2f7fb8; --ball: #f2b234; --soft: #b9b2a2; --ok: #2e8b57;
+    --hi: #e2531f; --hi-text: #b23c0c; --acc: #2f7fb8; --ball: #f2b234; --soft: #b9b2a2; --ok: #2e8b57;
   }
   @media (prefers-color-scheme: dark) {
-    :root { --bg: #1b1a18; --panel: #24221f; --ink: #ece7dc; --muted: #a49e90; --line: #3a3732; --hi: #ff7a45; --acc: #6fb3e6; --soft: #6c675d; }
+    :root { --bg: #1b1a18; --panel: #24221f; --ink: #ece7dc; --muted: #a49e90; --line: #3a3732; --hi: #ff7a45; --hi-text: #ffa77f; --acc: #6fb3e6; --soft: #6c675d; }
   }
   * { box-sizing: border-box; }
   body { margin: 0; background: var(--bg); color: var(--ink); font: 14px/1.4 system-ui, "Segoe UI", sans-serif; }
@@ -63,9 +63,11 @@
   .sketch .mk { fill: var(--ink); stroke: none; }
   .sketch .mk.hi { fill: var(--hi); }
   .sketch .mk.acc { fill: var(--acc); }
-  .sketch text { fill: var(--muted); stroke: none; font: 11px "Comic Sans MS", "Segoe Print", system-ui, sans-serif; }
-  .sketch text.lbl { font-size: 13px; font-weight: 700; }
-  .sketch text.hi { fill: var(--hi); }
+  /* Textes : police simple, contour de la couleur du fond pour rester lisible sur les traits. */
+  .sketch text { fill: var(--ink); opacity: .8; font: 500 11.5px system-ui, "Segoe UI", Arial, sans-serif;
+    stroke: var(--bg); stroke-width: 4px; stroke-linejoin: round; paint-order: stroke; }
+  .sketch text.lbl { font-size: 13px; font-weight: 600; opacity: 1; }
+  .sketch text.hi { fill: var(--hi-text); stroke: var(--bg); stroke-width: 4px; }
   .sketch g.hi * { stroke: var(--hi); }
   .sketch g.soft * { stroke: var(--soft); }
 
