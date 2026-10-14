@@ -319,7 +319,7 @@ bool AORACharacterBase::TryStartGroundCornerWallRun(
 	const FVector& DesiredMoveWorld,
 	const FHitResult& WallHit)
 {
-	if (!bEnableGroundCornerWallRunAttach || !bSprintInputActive || bWallSlideActive || bDashActive || bWallSlideTimedOutUntilGrounded)
+	if (!bEnableGroundCornerWallRunAttach || !IsSprintInputActive() || bWallSlideActive || bDashActive || bWallSlideTimedOutUntilGrounded)
 	{
 		return false;
 	}
@@ -607,7 +607,7 @@ bool AORACharacterBase::TryFindGroundWallLookBlockNormal(FVector& OutWallNormal)
 	FlatVelocity.Z = 0.0f;
 	const float HorizontalSpeed = FlatVelocity.Size();
 	const float RequiredSpeedWithoutSprint = FMath::Max(250.0f, WallRunAutoAttachMinSpeed * 0.35f);
-	if (!bSprintInputActive && HorizontalSpeed < RequiredSpeedWithoutSprint)
+	if (!IsSprintInputActive() && HorizontalSpeed < RequiredSpeedWithoutSprint)
 	{
 		return false;
 	}
@@ -1279,7 +1279,7 @@ void AORACharacterBase::TryAutoEnterWallRunFromGround()
 	else
 	{
 		bFoundWallByTransition =
-			bSprintInputActive &&
+			IsSprintInputActive() &&
 			bFloorIsTransitionCandidate &&
 			TryFindWallTransitionSurface(MoveInput, WallHit) &&
 			IsValidWallSurfaceHit(WallHit);

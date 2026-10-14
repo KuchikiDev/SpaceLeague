@@ -138,6 +138,9 @@ public:
 	UPROPERTY(Config, EditAnywhere, Category = "Dash", meta = (DisplayName = "Impulsion du dash", ClampMin = "0.0", UIMin = "0.0", ToolTip = "Force principale appliquee lors d'un dash."))
 	float DashImpulse = 8000.0f;
 
+	UPROPERTY(Config, EditAnywhere, Category = "Dash", meta = (DisplayName = "Impulsion du dash en l air", ClampMin = "0.0", UIMin = "0.0", ToolTip = "Force du dash quand le joueur est en l air (le dash au sol utilise Impulsion du dash)."))
+	float DashAirImpulse = 10000.0f;
+
 	UPROPERTY(Config, EditAnywhere, Category = "Dash", meta = (DisplayName = "Duree du dash", ClampMin = "0.01", UIMin = "0.01", ToolTip = "Duree pendant laquelle le dash reste actif."))
 	float DashDurationSeconds = 0.2f;
 

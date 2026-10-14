@@ -918,7 +918,8 @@ public:
 	float GetCharacterMoveSpeed() const;
 
 	UFUNCTION(BlueprintPure, Category = "Movement")
-	bool IsSprintInputActive() const { return bSprintInputActive; }
+	/** Always at full speed: there is no separate run/sprint any more, so sprint effects follow the actual speed. */
+	bool IsSprintInputActive() const { return true; }
 
 	UFUNCTION(BlueprintPure, Category = "WallSlide")
 	bool IsWallSlideActive() const { return bWallSlideActive; }

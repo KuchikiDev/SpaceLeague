@@ -498,7 +498,7 @@ void AORACharacter::ApplyPlayerMovementSettings()
 	WallRunCameraTurnStrength = FMath::Clamp(GameplayVariables->WallRunCameraTurnStrength, 0.0f, 1.0f);
 	WallSlideMaxDuration = FMath::Clamp(GameplayVariables->WallSlideMaxDuration, 0.0f, 30.0f);
 	DashGroundPower = FMath::Max(0.0f, GameplayVariables->DashImpulse);
-	DashAirPower = DashGroundPower;
+	DashAirPower = FMath::Max(0.0f, GameplayVariables->DashAirImpulse);
 	DashDurationSeconds = FMath::Max(0.01f, GameplayVariables->DashDurationSeconds);
 	DashCooldownSeconds = FMath::Max(0.0f, GameplayVariables->DashCooldownSeconds);
 	MaxJumpCount = FMath::Max(1, GameplayVariables->MaxJumpCount);
