@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Variables ORA</title>
+<style>
+  :root {
+    --bg: #f6f3ec; --panel: #fffdf8; --ink: #2b2a27; --muted: #7b776d; --line: #e3ddcf;
+    --hi: #e2531f; --acc: #2f7fb8; --ball: #f2b234; --soft: #b9b2a2; --ok: #2e8b57;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #1b1a18; --panel: #24221f; --ink: #ece7dc; --muted: #a49e90; --line: #3a3732; --hi: #ff7a45; --acc: #6fb3e6; --soft: #6c675d; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 14px/1.4 system-ui, "Segoe UI", sans-serif; }
+  header { position: sticky; top: 0; z-index: 5; display: flex; gap: 12px; align-items: center; padding: 10px 16px; background: var(--panel); border-bottom: 1px solid var(--line); }
+  header h1 { font-size: 17px; margin: 0 12px 0 0; letter-spacing: .5px; }
+  header input[type=search] { flex: 1; max-width: 360px; padding: 7px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--ink); }
+  .spacer { flex: 1; }
+  button { font: inherit; border: 1px solid var(--line); background: var(--bg); color: var(--ink); border-radius: 8px; padding: 7px 12px; cursor: pointer; }
+  button.primary { background: var(--hi); border-color: var(--hi); color: #fff; font-weight: 600; }
+  button:disabled { opacity: .45; cursor: default; }
+  #status { color: var(--muted); font-size: 13px; }
+  .layout { display: grid; grid-template-columns: 220px 1fr; min-height: calc(100vh - 56px); }
+  nav { border-right: 1px solid var(--line); padding: 12px 8px; position: sticky; top: 56px; height: calc(100vh - 56px); overflow: auto; }
+  nav a { display: flex; justify-content: space-between; padding: 7px 10px; border-radius: 8px; color: inherit; text-decoration: none; }
+  nav a:hover { background: var(--line); }
+  nav a.active { background: var(--hi); color: #fff; }
+  nav a .count { opacity: .7; font-size: 12px; }
+  nav a .dirty { color: var(--hi); font-weight: 700; }
+  nav a.active .dirty { color: #fff; }
+  main { padding: 16px 20px 80px; }
+  main h2 { margin: 4px 0 2px; font-size: 22px; }
+  main h3 { margin: 26px 0 10px; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); border-bottom: 1px solid var(--line); padding-bottom: 4px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); gap: 14px; }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+  .card.changed { border-color: var(--hi); box-shadow: 0 0 0 1px var(--hi) inset; }
+  .card .title { font-weight: 600; display: flex; justify-content: space-between; gap: 8px; }
+  .card .code { color: var(--muted); font: 11px ui-monospace, Consolas, monospace; }
+  .card .tip { color: var(--muted); font-size: 12.5px; }
+  .control { display: flex; gap: 8px; align-items: center; }
+  .control input[type=range] { flex: 1; accent-color: var(--hi); }
+  .control input[type=number], .control input[type=text] { width: 110px; padding: 5px 7px; border: 1px solid var(--line); border-radius: 6px; background: var(--bg); color: var(--ink); }
+  .unit { color: var(--muted); font-size: 12px; min-width: 22px; }
+  .reset { padding: 3px 8px; font-size: 12px; }
+  .switch { display: flex; gap: 8px; align-items: center; cursor: pointer; }
+  .switch input { width: 18px; height: 18px; accent-color: var(--hi); }
+
+  .sketch { width: 100%; height: auto; background: var(--bg); border-radius: 8px; }
+  .sketch * { fill: none; stroke: var(--ink); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+  .sketch .soft { stroke: var(--soft); }
+  .sketch .thin { stroke-width: 1; }
+  .sketch .fat { stroke-width: 3; }
+  .sketch .dash { stroke-dasharray: 5 4; }
+  .sketch .hi { stroke: var(--hi); }
+  .sketch .acc { stroke: var(--acc); }
+  .sketch .fill.hi { fill: color-mix(in srgb, var(--hi) 30%, transparent); }
+  .sketch .fill.soft, .sketch rect.soft.fill { fill: color-mix(in srgb, var(--soft) 30%, transparent); }
+  .sketch .dashfill { fill: color-mix(in srgb, var(--hi) 12%, transparent); stroke-dasharray: 5 4; }
+  .sketch .ball { fill: var(--ball); stroke: var(--ink); }
+  .sketch circle.acc { fill: var(--acc); }
+  .sketch .mk { fill: var(--ink); stroke: none; }
+  .sketch .mk.hi { fill: var(--hi); }
+  .sketch .mk.acc { fill: var(--acc); }
+  .sketch text { fill: var(--muted); stroke: none; font: 11px "Comic Sans MS", "Segoe Print", system-ui, sans-serif; }
+  .sketch text.lbl { font-size: 13px; font-weight: 700; }
+  .sketch text.hi { fill: var(--hi); }
+  .sketch g.hi * { stroke: var(--hi); }
+  .sketch g.soft * { stroke: var(--soft); }
+
+  @media (max-width: 760px) {
+    .layout { grid-template-columns: 1fr; }
+    nav { position: static; height: auto; display: flex; flex-wrap: wrap; gap: 4px; border-right: 0; border-bottom: 1px solid var(--line); }
+    header { flex-wrap: wrap; }
+    .grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>ORA · Variables de gameplay</h1>
+  <input type="search" id="search" placeholder="Rechercher une variable…">
+  <span class="spacer"></span>
+  <span id="status">Chargement…</span>
+  <button id="discard" disabled>Annuler</button>
+  <button id="save" class="primary" disabled>Enregistrer</button>
+</header>
+<div class="layout">
+  <nav id="menu"></nav>
+  <main id="content"></main>
+</div>
+<script src="sketches.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
