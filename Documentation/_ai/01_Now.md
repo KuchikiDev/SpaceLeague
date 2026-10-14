@@ -47,8 +47,12 @@ Fait et soumis sur Perforce :
 
 Ensuite :
 1. Validation des bases du gameplay (le joueur teste, l agent corrige) : balle, puis deplacement, match complet, en ligne.
-- A faire (apercu du tir enroule) : un cercle d'impact affiche la ou la courbe se termine (mur vise ou fin de courbe).
-- Fait (2026-10-13/14) : orbite (CL 166-168), apercu du tir enroule (CL 169), verrouillage du but adverse (CL 170), regle de possession (CL 171), vitesse max permanente et dash aerien (CL 172).   - En cours : grappin plus rapide et plus fluide. Valeurs d'essai dans DefaultGame.ini, NON soumises (traction max 7500, lancement 4500-7500, arrivee 85 %, fondu 0,06 s).   - A faire : ameliorer le gameplay quand le joueur va sur les piliers.   - A faire : moins voir les obstacles du camp ennemi.
+   - A faire (apercu du tir enroule) : un cercle d'impact affiche la ou la courbe se termine (mur vise ou fin de courbe).
+   - Fait (2026-10-13/14) : orbite (CL 166-168), apercu du tir enroule (CL 169), verrouillage du but adverse (CL 170), regle de possession (CL 171), vitesse max permanente et dash aerien (CL 172).
+   - En cours : grappin plus rapide et plus fluide. Valeurs d'essai dans DefaultGame.ini, NON soumises (traction max 7500, lancement 4500-7500, arrivee 85 %, fondu 0,06 s).
+   - A faire : ameliorer le gameplay quand le joueur va sur les piliers.
+   - A faire : moins voir les obstacles du camp ennemi.
+   - A faire : PIE 4 joueurs (toutes les fenetres controlent le meme perso ?) et bug camera/perso contre un mur en multijoueur : video a faire.
 2. Capacites Raijin/Keplar (reportees apres la validation du gameplay).
 
 ## Faits verifies (code/config)
