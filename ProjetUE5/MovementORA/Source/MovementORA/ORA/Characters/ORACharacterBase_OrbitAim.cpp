@@ -537,6 +537,58 @@ bool AORACharacterBase::ComputeOrbitAimTargetEnd(FVector& OutTargetEnd, bool* bO
 			TraceDirection = EyeRotation.Vector().GetSafeNormal();
 		}
 
+		// Viser un but verrouille la cible sur son centre (le but ne bloque pas la trace : sans ca,
+		// la courbe visait derriere lui).
+		static const TSoftClassPtr<AActor> GoalClassPtr(FSoftObjectPath(TEXT("/Game/Terrain/Blueprints/BP_Goal.BP_Goal_C")));
+		if (const UClass* GoalClass = GoalClassPtr.LoadSynchronous())
+		{
+			// Portee longue : le but adverse est souvent au-dela de la portee de visee normale.
+			const FVector RayEnd = EyeLocation + TraceDirection * 100000.0f;
+			float BestDistanceSquared = TNumericLimits<float>::Max();
+			const AActor* BestGoal = nullptr;
+			// Seul le but adverse verrouille : un but tague TerrainGoalA est defendu par l'equipe A.
+			const AORAPlayerState* MyPlayerState = GetPlayerState<AORAPlayerState>();
+			const EORATeam MyTeam = MyPlayerState ? MyPlayerState->Team : EORATeam::None;
+			const FName OwnGoalTag = MyTeam == EORATeam::TeamA ? FName(TEXT("TerrainGoalA"))
+				: MyTeam == EORATeam::TeamB ? FName(TEXT("TerrainGoalB")) : NAME_None;
+			for (TActorIterator<AActor> GoalIt(GetWorld(), const_cast<UClass*>(GoalClass)); GoalIt; ++GoalIt)
+			{
+				if (OwnGoalTag != NAME_None && GoalIt->ActorHasTag(OwnGoalTag))
+				{
+					continue;
+				}
+				FVector GoalOrigin;
+				FVector GoalExtent;
+				GoalIt->GetActorBounds(true, GoalOrigin, GoalExtent);
+				const UGameplayVariablesSettings* GoalAimSettings = GetDefault<UGameplayVariablesSettings>();
+				const FVector GoalAimMargin(GoalAimSettings ? FMath::Max(0.0f, GoalAimSettings->CurvedShotGoalLockMargin) : 150.0f);
+				const FBox GoalBox(GoalOrigin - GoalExtent - GoalAimMargin, GoalOrigin + GoalExtent + GoalAimMargin);
+				const float DistanceSquared = FVector::DistSquared(EyeLocation, GoalOrigin);
+				if (DistanceSquared < BestDistanceSquared
+					&& FMath::LineBoxIntersection(GoalBox, EyeLocation, RayEnd, RayEnd - EyeLocation))
+				{
+					BestDistanceSquared = DistanceSquared;
+					BestGoal = *GoalIt;
+				}
+			}
+			if (BestGoal)
+			{
+				FVector GoalOrigin;
+				FVector GoalExtent;
+				BestGoal->GetActorBounds(true, GoalOrigin, GoalExtent);
+				OutTargetEnd = GoalOrigin;
+				if (bOutBlockingHit)
+				{
+					*bOutBlockingHit = false;
+				}
+				if (OutTraceDirection)
+				{
+					*OutTraceDirection = (GoalOrigin - EyeLocation).GetSafeNormal();
+				}
+				return true;
+			}
+		}
+
 		FHitResult ScreenHit;
 		FCollisionQueryParams ScreenParams(SCENE_QUERY_STAT(OrbitAimScreenTrace), false, this);
 		if (IsValid(OrbitBallActor))

@@ -234,6 +234,9 @@ public:
 	UPROPERTY(Config, EditAnywhere, Category = "Balle - Tir enroule", meta = (DisplayName = "Distance minimale d'affichage de la courbe", ClampMin = "0.0", UIMin = "0.0", Units = "cm", ToolTip = "L'apercu du tir enroule est masque quand sa fin (point vise ou obstacle) est plus proche que cette distance du joueur."))
 	float CurvedShotMinDisplayDistance = 900.0f;
 
+	UPROPERTY(Config, EditAnywhere, Category = "Balle - Tir enroule", meta = (DisplayName = "Marge de verrouillage du but", ClampMin = "0.0", UIMin = "0.0", Units = "cm", ToolTip = "Marge ajoutee autour du but adverse : viser dans cette zone verrouille le tir sur le centre du but."))
+	float CurvedShotGoalLockMargin = 150.0f;
+
 	UPROPERTY(Config)
 	float CurvedShotVisualStartOffset = 70.0f;
 
