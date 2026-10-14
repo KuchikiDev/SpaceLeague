@@ -575,7 +575,50 @@
     return null;
   }
 
+  // Variables reglees ensemble : une seule carte, un seul croquis (min/max, debut/fin, etc.).
+  const GROUPS = [
+    ['Debut de match', ['bEnablePreMatchIntro', 'PreMatchIntroDurationSeconds', 'PreMatchCountdownSeconds']],
+    ['Prison', ['PrisonDurationSeconds', 'PrisonCompletePlayerCount', 'PrisonCompletePoints', 'PrisonCompleteReleaseDelaySeconds']],
+    ['Hauteur de spawn', ['ObstacleMaxSpawnHeight', 'PillarMaxSpawnHeight']],
+    ['Obstacle temporaire : cycle', ['TimedObstacleStateDurationSeconds', 'TimedObstacleHiddenDurationSeconds']],
+    ['Vitesses au sol', ['BaseWalkSpeed', 'SprintWalkSpeed']],
+    ['Acceleration et freinage', ['MaxAcceleration', 'BrakingDeceleration']],
+    ['Demi-tour en l\'air', ['AirTurnRate', 'AirTurnSpeedKeep']],
+    ['Course sur le mur', ['WallRunSpeed', 'WallRunEntrySpeedKeep', 'WallRunMomentumDecay']],
+    ['Le mur dans le temps', ['WallSlideMaxDuration', 'WallLeaveGraceSeconds', 'WallReattachSameWallSeconds']],
+    ['Dash pour quitter le mur', ['WallDashMinSpeed', 'WallDashSpeedBoost']],
+    ['Camera vers la course', ['WallRunCameraTurnSpeed', 'WallRunCameraTurnStrength']],
+    ['Dash', ['DashImpulse', 'DashDurationSeconds', 'DashCooldownSeconds']],
+    ['Saut', ['JumpVelocity', 'MaxJumpCount', 'JumpRiseGravityScale', 'FallGravityScale']],
+    ['Zone de touche joueur', ['BallPlayerHitMargin', 'BallPlayerHitVerticalMargin']],
+    ['Orbite de la balle', ['BallOrbitRadius', 'BallOrbitDropBelowCamera', 'BallOrbitFOVCompensation']],
+    ['Anti-stagnation', ['BallHoldGraceSeconds', 'BallHoldCountdownSeconds']],
+    ['Forme de la courbe', ['CurvedShotHorizontalDistance', 'CurvedShotVerticalDistance']],
+    ['Vitesse sur la courbe (min / max)', ['CurvedShotSplineSpeed', 'CurvedShotMaxSplineSpeed', 'CurvedShotCapturedSpeedMultiplier']],
+    ['Depart en ligne droite', ['CurvedShotInitialStraightDistance', 'CurvedShotInitialStraightDistanceRatio']],
+    ['Portee (min / max)', ['GrappleRange', 'GrappleMinTargetDistance']],
+    ['Le grappin dans le temps', ['GrapplePullBlendTime', 'GrappleDurationSeconds', 'GrappleReleaseDelay', 'GrappleRestartDelay']],
+    ['Grappin simple : forces', ['GrappleSimpleHorizontalForce', 'GrappleSimpleHeightForce', 'GrappleSimpleDistancePower', 'GrappleSimpleHeightDifferencePower', 'GrappleSimpleHorizontalDifferencePower']],
+    ['Vitesse du grappin (min / max)', ['GrappleVelocityMin', 'GrappleVelocityMax', 'GrappleSwingMaxSpeed']],
+    ['Vitesse de lancement selon la distance', ['GrappleLaunchMinSpeed', 'GrappleLaunchMaxSpeed', 'GrappleLaunchDistanceStart', 'GrappleLaunchDistanceRange', 'GrappleLaunchDistanceExponent']],
+    ['Boost vertical (cible loin)', ['GrappleFarUpBoostStart', 'GrappleFarUpBoostRange', 'GrappleFarLaunchExtraUpSpeed']],
+    ['Elan garde', ['GrappleLaunchCarryBoost', 'GrappleReleaseVelocityBoost', 'GrappleArrivalSpeedKeep', 'GrappleArrivalUpBoost']],
+    ['Coupure automatique', ['GrappleAutoReleaseDistance', 'GrappleAutoDetachBuffer', 'GrappleEarlyDetachLeadTime']],
+    ['Visee', ['GrappleAimHitboxExpansion', 'GrappleSurfaceAimDeadZone', 'GrappleSurfaceAimLaunchSpeed', 'GrappleTraceStartOffset']],
+    ['Balancier', ['GrappleSwingSagRatio', 'GrappleSwingMaxSag', 'GrappleSwingSpeedBoost', 'GrappleSwingMaxHeightBelowTarget']],
+    ['Point de visee', ['bShowAimDot', 'AimDotSize']],
+    ['Corde', ['GrappleMinCableLength', 'GrappleRopeDisplayDuration', 'GrappleCableSlack']],
+    ['Obstacle grappine', ['GrappleConsumedFadeDuration', 'GrappleObstacleRespawnDelay']],
+    ['Champ de vision', ['RunFOV', 'SprintFOV', 'FOVInterpSpeed']],
+    ['Secousses', ['CameraBobAmplitude', 'CameraRollDegrees']],
+    ['Effets de vitesse (debut / max)', ['SpeedEffectsStartSpeed', 'SpeedEffectsFullSpeed', 'SpeedEffectsInterpSpeed']],
+    ['FOV a tres grande vitesse', ['SpeedFOVOverSpeedBoost', 'SpeedFOVOverSpeedMaxSpeed']],
+    ['Trainees de vent', ['bShowSpeedLines', 'SpeedLinesIntensity']],
+    ['Atterrissage', ['LandingDipMaxDistance', 'LandingDipFullFallSpeed']],
+  ];
+
   window.OraSketch = {
+    groups: GROUPS,
     has: name => !!sketchFor(name),
     render(name, values, def) {
       const key = sketchFor(name);

@@ -71,6 +71,16 @@
   .sketch g.hi * { stroke: var(--hi); }
   .sketch g.soft * { stroke: var(--soft); }
 
+  .card.multi { grid-column: 1 / -1; display: grid; grid-template-columns: minmax(280px, 440px) 1fr; column-gap: 16px; align-items: start; }
+  .card.multi .title { grid-column: 1 / -1; }
+  .rows { display: flex; flex-direction: column; gap: 4px; }
+  .card .title .count { color: var(--muted); font-weight: 400; font-size: 12px; }
+  .card.multi .sk { position: sticky; top: 70px; }
+  .row { display: flex; flex-direction: column; gap: 4px; }
+  .card.multi .row { padding: 8px 10px; border-radius: 8px; border-left: 3px solid transparent; }
+  .card.multi .row.focus { background: var(--bg); border-left-color: var(--hi); }
+  .card.multi .row.changed .rlabel span:first-child::after { content: " ●"; color: var(--hi); }
+  .rlabel { display: flex; justify-content: space-between; gap: 8px; font-weight: 600; font-size: 13.5px; }
   .who { color: var(--muted); font-size: 13px; }
   [hidden] { display: none !important; }
   .login { position: fixed; inset: 0; z-index: 10; display: grid; place-items: center; background: color-mix(in srgb, var(--bg) 85%, transparent); backdrop-filter: blur(4px); padding: 16px; }
@@ -85,6 +95,8 @@
     nav { position: static; height: auto; display: flex; flex-wrap: wrap; gap: 4px; border-right: 0; border-bottom: 1px solid var(--line); }
     header { flex-wrap: wrap; }
     .grid { grid-template-columns: 1fr; }
+    .card.multi { grid-column: auto; display: flex; }
+    .card.multi .sk { position: static; }
   }
 </style>
 </head>
